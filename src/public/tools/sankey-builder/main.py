@@ -125,20 +125,20 @@ def build_sankey(event=None):
         target_idx = node_index[flow['target']]
         sankey_flows.append([source_idx, target_idx, flow['value']])
 
-    # Create labels
-    labels = nodes
-
-    # Create Sankey diagram with default parameters
+    # Create Sankey diagram without labels first
     sankey = Sankey(
         flows=sankey_flows,
-        labels=labels,
-        flow_labels=None,
         headangle=180,
         margin=0.25,
-        width=0.2,
+        scale=0.01,
     )
 
     sankey.finish()
+
+    # Now manually set the labels for each node
+    labels = nodes
+    for text, label in zip(sankey.texts, labels):
+        text.set_text(label)
 
     ax.set_title(f'{title}\n(Cash Flow Sankey Diagram)', fontsize=14, fontweight='bold')
     ax.axis('off')  # Turn off axis
