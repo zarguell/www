@@ -242,12 +242,32 @@ src/
 <button py-click="calculate">Calculate</button>
 ```
 
-**2. Clear charts before displaying new ones**:
+**2. Configure responsive charts and clear before displaying**:
 ```python
-chart_element = document.querySelector("#chart")
-chart_element.innerHTML = ""
-fig, ax = plt.subplots(figsize=(12, 6))
-display(fig, target="#chart")
+# At module level, configure matplotlib for responsive output
+plt.rcParams['figure.figsize'] = [10, 6]
+plt.rcParams['figure.autolayout'] = True
+
+def display_chart():
+    chart_element = document.querySelector("#chart")
+    chart_element.innerHTML = ""  # Clear previous chart
+    fig, ax = plt.subplots()  # Uses rcParams from above
+    # ... chart setup ...
+    display(fig, target="#chart")
+```
+
+CSS (in `.astro` file):
+```css
+:global(#chart img) {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+```
+
+Viewport meta tag (required in layout):
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 ```
 
 **3. Don't auto-run if user needs to input values first**:
@@ -264,6 +284,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pyscript import display, document, HTML
 
+# Configure matplotlib for responsive output
+plt.rcParams['figure.figsize'] = [10, 6]
+plt.rcParams['figure.autolayout'] = True
+
 def run_projection(event=None):
     # Read inputs
     current_age = int(document.getElementById("currentAge").value)
@@ -278,13 +302,12 @@ def run_projection(event=None):
     chart_element = document.querySelector("#chart")
     chart_element.innerHTML = ""
 
-    # Create chart
-    fig, ax = plt.subplots(figsize=(12, 6))
+    # Create chart (uses rcParams set at module level)
+    fig, ax = plt.subplots()
     ax.plot(years, values)
     ax.set_title("Growth Over Time", fontsize=14)
     ax.set_xlabel("Age", fontsize=12)
     ax.set_ylabel("Balance ($)", fontsize=12)
-    fig.tight_layout()
     display(fig, target="#chart")
 
     # Display summary
@@ -319,9 +342,16 @@ import Window from '../../components/Window.astro';
 </PythonToolLayout>
 
 <style>
-	:global(#chart canvas) {
-		max-width: 100%;
+	/* PyScript renders matplotlib as <img> - target for responsiveness */
+	:global(#chart img) {
+		max-width: 100% !important;
 		height: auto !important;
+		display: block !important;
+	}
+
+	#chart-container {
+		width: 100%;
+		overflow-x: hidden;
 	}
 </style>
 ```
@@ -339,7 +369,7 @@ import Window from '../../components/Window.astro';
 2. **Chart accumulation**: Always `innerHTML = ""` the chart container before displaying a new chart
 3. **Auto-running**: If you want user input first, remove the function call at the bottom of the Python file
 4. **Timing issues**: `py-click` is preferred over `addEventListener` (avoids DOM-not-ready errors)
-5. **Responsive charts**: Use `figsize=(12, 6)` and CSS `height: auto !important`
+5. **Responsive charts**: PyScript renders matplotlib as `<img>` tag. Use `plt.rcParams` at module level and target `#chart img` in CSS with `max-width: 100% !important; height: auto !important`
 
 ### When to Use PyScript vs JavaScript
 
@@ -348,7 +378,156 @@ import Window from '../../components/Window.astro';
 
 Note: PyScript adds 2-5 seconds to page load for Python runtime initialization.
 
+### Adding Click-to-Zoom to PyScript Charts
+
+For matplotlib charts that users need to view in fullscreen, add click-to-zoom functionality using the CSS checkbox hack.
+
+#### Option 1: Use the ZoomableImage Component (Static Images)
+
+For static images or when you can pre-generate the chart:
+
+```astro
+---
+import ZoomableImage from '../../components/ZoomableImage.astro';
+---
+
+<ZoomableImage
+  id="my-chart"
+  src="/path/to/chart.png"
+  alt="My Chart"
+  hint="🔍 Click to view fullscreen"
+/>
+```
+
+#### Option 2: Dynamic PyScript Charts with Click-to-Zoom
+
+For charts generated dynamically by PyScript:
+
+**Python code** - Export high-DPI PNG:
+```python
+from io import BytesIO
+import base64
+
+# Create figure with high DPI
+fig, ax = plt.subplots(dpi=200)
+
+# ... your plotting code ...
+
+# Save to base64 data URI
+buf = BytesIO()
+fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
+buf.seek(0)
+img_data = base64.b64encode(buf.read()).decode()
+
+# Display as image
+img_html = f'''
+<img id="chartImg"
+     src="data:image/png;base64,{img_data}"
+     alt="Chart"
+     style="max-width: 100%; height: auto; display: block;">
+'''
+display(HTML(img_html), target="#chart")
+```
+
+**Astro template** - Add click-to-zoom with MutationObserver:
+```astro
+<div id="chart"></div>
+
+<script define:vars={{}}>
+  const initZoomableChart = () => {
+    const chartImg = document.getElementById('chartImg');
+    if (chartImg && !chartImg.dataset.zoomInitialized) {
+      chartImg.dataset.zoomInitialized = 'true';
+
+      // Wrap in click-zoom structure
+      const clickZoom = document.createElement('div');
+      clickZoom.className = 'click-zoom';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = 'zoom-checkbox-chart';
+      checkbox.className = 'zoom-checkbox';
+
+      const label = document.createElement('label');
+      label.htmlFor = 'zoom-checkbox-chart';
+      label.className = 'zoom-label';
+
+      // Move image into label
+      chartImg.parentNode.insertBefore(clickZoom, chartImg);
+      clickZoom.appendChild(checkbox);
+      clickZoom.appendChild(label);
+      label.appendChild(chartImg);
+
+      // Add hint
+      const hint = document.createElement('div');
+      hint.className = 'zoom-hint';
+      hint.textContent = '🔍 Click image to view fullscreen';
+      clickZoom.parentNode.insertBefore(hint, clickZoom);
+    }
+  };
+
+  // Watch for dynamic chart generation
+  const observer = new MutationObserver(() => {
+    if (document.getElementById('chartImg')) {
+      initZoomableChart();
+    }
+  });
+  observer.observe(document.getElementById('chart'), { childList: true });
+</script>
+```
+
+**CSS** - Add to your component styles:
+```css
+.zoom-hint {
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  color: var(--color-text);
+  opacity: 0.7;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.click-zoom input[type="checkbox"] {
+  display: none;
+}
+
+.zoom-label {
+  cursor: zoom-in;
+  display: block;
+}
+
+.click-zoom input:checked + .zoom-label {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: zoom-out;
+  padding: 2rem;
+}
+
+.click-zoom input:checked + .zoom-label #chartImg {
+  max-width: 100%;
+  max-height: 95vh;
+  object-fit: contain;
+  cursor: zoom-out;
+}
+```
+
+#### Key Points:
+
+1. **High DPI**: Always use `dpi=200` when saving figures for crisp zoom
+2. **Base64 encoding**: Use `fig.savefig(buf, format='png')` + base64 for embedding
+3. **CSS checkbox hack**: Click-to-zoom fullscreen modal without JavaScript modal logic
+4. **MutationObserver**: Required for detecting when PyScript generates content
+5. **No JavaScript modal**: The entire fullscreen functionality is CSS-only
+
+See [roth-calculator.astro](src/pages/tools/roth-calculator.astro) for complete working example.
+
 ### Additional Resources
 
 - [PyScript Documentation](https://pyscript.net/)
-- [roth-calculator.astro](src/pages/tools/roth-calculator.astro) - Complete working example
+- [ZoomableImage Component](src/components/ZoomableImage.astro) - Reusable zoom component
+- [roth-calculator.astro](src/pages/tools/roth-calculator.astro) - Complete PyScript + zoom example

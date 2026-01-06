@@ -1,6 +1,7 @@
 ---
 import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
 import Window from '../../components/Window.astro';
+import ZoomableImage from '../../components/ZoomableImage.astro';
 ---
 
 <PythonToolLayout title="Roth Compounding Calculator - Retro.SITE">
@@ -50,6 +51,55 @@ import Window from '../../components/Window.astro';
 	<div id="chart-container" style="margin-top: 2rem;">
 		<Window title="Growth Chart" badgeText="VISUALIZATION">
 			<div id="chart"></div>
+			<!-- Click-to-zoom will be initialized here after chart is generated -->
+			<script define:vars={{}}>
+				// Initialize click-to-zoom when chart is generated
+				const initZoomableChart = () => {
+					const chartImg = document.getElementById('chartImg');
+					if (chartImg && !chartImg.dataset.zoomInitialized) {
+						chartImg.dataset.zoomInitialized = 'true';
+
+						// Wrap in click-zoom structure
+						const clickZoom = document.createElement('div');
+						clickZoom.className = 'click-zoom';
+
+						const checkbox = document.createElement('input');
+						checkbox.type = 'checkbox';
+						checkbox.id = 'zoom-checkbox-chart';
+						checkbox.className = 'zoom-checkbox';
+
+						const label = document.createElement('label');
+						label.htmlFor = 'zoom-checkbox-chart';
+						label.className = 'zoom-label';
+
+						// Move image into label
+						chartImg.parentNode.insertBefore(clickZoom, chartImg);
+						clickZoom.appendChild(checkbox);
+						clickZoom.appendChild(label);
+						label.appendChild(chartImg);
+
+						// Add zoom hint
+						const hint = document.createElement('div');
+						hint.className = 'zoom-hint';
+						hint.textContent = '🔍 Click image to view fullscreen';
+						clickZoom.parentNode.insertBefore(hint, clickZoom);
+					}
+				};
+
+				// Watch for chart generation
+				const observer = new MutationObserver((mutations) => {
+					mutations.forEach((mutation) => {
+						if (mutation.addedNodes.length) {
+							const chartImg = document.getElementById('chartImg');
+							if (chartImg) {
+								initZoomableChart();
+							}
+						}
+					});
+				});
+
+				observer.observe(document.getElementById('chart'), { childList: true });
+			</script>
 		</Window>
 	</div>
 
@@ -73,9 +123,29 @@ import Window from '../../components/Window.astro';
 		min-height: 100px;
 	}
 
-	:global(#chart canvas) {
-		max-width: 100%;
-		height: auto;
+	/* Chart container - prevents overflow */
+	#chart-container,
+	#summary-container {
+		width: 100%;
+		overflow-x: hidden;
+	}
+
+	:global(#chart) {
+		width: 100%;
+		overflow: hidden;
+	}
+
+	/* PyScript renders matplotlib as an <img> tag - target it for responsiveness */
+	:global(#chart img) {
+		max-width: 100% !important;
+		height: auto !important;
+		display: block !important;
+	}
+
+	:global(#chart figure) {
+		width: 100% !important;
+		max-width: 100% !important;
+		margin: 0 !important;
 	}
 
 	:global(#summary) {
@@ -132,5 +202,58 @@ import Window from '../../components/Window.astro';
 	.retro-button:active {
 		transform: translate(4px, 4px);
 		box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Mobile-specific adjustments */
+	@media (max-width: 768px) {
+		:global(#chart figure) {
+			font-size: 0.75rem !important;
+		}
+	}
+
+	/* Click-to-zoom styles */
+	:global(.zoom-hint) {
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		color: var(--color-text);
+		opacity: 0.7;
+		margin-bottom: 0.5rem;
+		text-align: center;
+	}
+
+	:global(.click-zoom input[type="checkbox"]) {
+		display: none;
+	}
+
+	:global(.zoom-label) {
+		cursor: zoom-in;
+		display: block;
+	}
+
+	:global(.click-zoom input:checked + .zoom-label) {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.95);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+		cursor: zoom-out;
+		padding: 2rem;
+	}
+
+	:global(.click-zoom input:checked + .zoom-label #chartImg) {
+		max-width: 100%;
+		max-height: 95vh;
+		object-fit: contain;
+		cursor: zoom-out;
+	}
+
+	:global(#chartImg) {
+		max-width: 100%;
+		height: auto;
+		display: block;
+		transition: transform 0.25s ease;
+		cursor: zoom-in;
 	}
 </style>

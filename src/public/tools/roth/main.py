@@ -1,6 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pyscript import display, document, HTML
+from io import BytesIO
+import base64
+
+# Configure matplotlib for responsive output
+plt.rcParams['figure.figsize'] = [10, 6]
+plt.rcParams['figure.autolayout'] = True
 
 def calculate(current_age, retirement_age, backdoor_annual, mega_annual, r):
     years = list(range(current_age, retirement_age + 1))
@@ -38,8 +44,9 @@ def run_projection(event=None):
     chart_element = document.querySelector("#chart")
     chart_element.innerHTML = ""
 
-    # Create new chart with responsive size
-    fig, ax = plt.subplots(figsize=(12, 6))
+    # Create new chart with high DPI for zoom functionality
+    fig, ax = plt.subplots(dpi=200)
+
     ax.plot(years, back, label="Backdoor Roth", linewidth=2)
     ax.plot(years, mega, label="Mega Backdoor Roth", linewidth=2)
     ax.plot(years, total, label="Total", linewidth=2, linestyle="--")
@@ -48,9 +55,23 @@ def run_projection(event=None):
     ax.set_ylabel("Balance ($)", fontsize=12)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=10)
-    fig.tight_layout()
 
-    display(fig, target="#chart")
+    # Save to high-DPI PNG and convert to base64
+    buf = BytesIO()
+    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
+    buf.seek(0)
+    img_data = base64.b64encode(buf.read()).decode()
+
+    # Create image element with ZoomableImage component
+    img_html = f'''
+    <div id="chart-wrapper" style="width: 100%;">
+        <img id="chartImg"
+             src="data:image/png;base64,{img_data}"
+             alt="Roth Growth Chart"
+             style="max-width: 100%; height: auto; display: block;">
+    </div>
+    '''
+    display(HTML(img_html), target="#chart")
 
     n = len(years)
     total_contrib = (backdoor_annual + mega_annual) * n
