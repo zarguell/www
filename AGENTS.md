@@ -56,7 +56,8 @@ npm run astro    # Run Astro CLI commands
 
 ### Layouts
 - Location: `./src/src/layouts/`
-- Base layout: `BaseLayout.astro` (includes global head, header, footer)
+- Base layout: `BaseLayout.astro` (includes global head, header, footer - no PyScript)
+- Python tool layout: `PythonToolLayout.astro` (includes PyScript for Python tools)
 - Post layout: `BlogPost.astro` (or `PostLayout.astro`)
 
 ### Content Collections
@@ -79,6 +80,15 @@ npm run astro    # Run Astro CLI commands
 - Location: `./src/src/scripts/`
 - Client-side TypeScript/JavaScript
 - Import in components with `<script>` tags
+
+### Python Tools (PyScript)
+- Location: `./src/public/tools/<tool-name>/`
+- Structure:
+  - `main.py` - Python logic
+  - `config.json` - PyScript package dependencies
+- Use `PythonToolLayout.astro` (NOT `BaseLayout.astro`)
+- Astro page: `./src/src/pages/tools/<tool-name>.astro`
+- See [TOOL-DEV-GUIDE.md](../TOOL-DEV-GUIDE.md) for detailed PyScript patterns
 
 ## Coding Conventions
 
@@ -136,10 +146,22 @@ draft: false
 4. Post automatically appears in blog index (if draft: false)
 
 ### Add a Tool
+
+#### For JavaScript-based tools:
 1. Create page in `./src/src/pages/tools/` (e.g., `my-tool.astro`)
-2. Add interactive form using `RetroButton` and `Window` components
-3. Add client-side script with `<script>` tag for logic
-4. Add entry to tools index (`./src/src/pages/tools/index.astro`)
+2. Use `BaseLayout` (NOT `PythonToolLayout`)
+3. Add interactive form using `RetroButton` and `Window` components
+4. Add client-side script with `<script>` tag for logic
+5. Add entry to tools index (`./src/src/pages/tools/index.astro`)
+
+#### For Python-based tools (PyScript):
+1. Create `./src/public/tools/<tool>/main.py` - Python logic
+2. Create `./src/public/tools/<tool>/config.json` - Package dependencies (e.g., numpy, matplotlib)
+3. Create page in `./src/src/pages/tools/<tool>.astro`
+4. Use `PythonToolLayout` (NOT `BaseLayout`)
+5. Include PyScript script tag: `<script type="py" src="/tools/<tool>/main.py" config="/tools/<tool>/config.json"></script>`
+6. See [TOOL-DEV-GUIDE.md](../TOOL-DEV-GUIDE.md) for detailed PyScript patterns
+7. Add entry to tools index if needed
 
 ### Modify Theme Tokens
 1. Edit `./src/src/styles/global.css`
@@ -172,6 +194,9 @@ draft: false
 - Use VT323 font globally (via Google Fonts embed)
 - Make all interactive elements keyboard accessible
 - Persist theme choice in localStorage
+- Use `PythonToolLayout` ONLY for Python/PyScript tools
+- Keep PyScript isolated to tool pages (never add to BaseLayout)
+- **Add new tools to `./src/src/pages/tools/index.astro` so they're discoverable**
 
 ### Project Constraints
 - Static output only (deployable to Netlify or any static host)
@@ -184,6 +209,16 @@ draft: false
 
 *This section tracks mistakes encountered during development and their solutions. Keep it slim and actionable.*
 
+### [2025-01-06] PyScript Integration - Roth Calculator
+- **Issue**: Chart accumulation, auto-run on load, timing errors with addEventListener
+- **Solution**: Use `py-click` attribute, clear chart container, remove auto-run call
+- **Agent**: Claude (Sonnet 4.5)
+- **Key Lessons**:
+  - Use `py-click="function_name"` (no parentheses) - `py-click="function()"` fails
+  - Always `chart_element.innerHTML = ""` before displaying new chart (prevents accumulation)
+  - Remove function call at bottom of `.py` file if you want user input first
+  - Use `figsize=(12, 6)` and CSS `height: auto !important` for responsive charts
+
 ### [2025-01-06] Initial Development - Build Success
 - **Issue**: None encountered during phases 1-10
 - **Solution**: N/A
@@ -195,7 +230,9 @@ draft: false
 ## Additional Documentation
 
 - **README.md** - Human-friendly project overview
-- **TOOL-DEV-GUIDE.md** - Guide for building interactive tools with JavaScript (calculators, forms, etc.)
+- **TOOL-DEV-GUIDE.md** - Guide for building interactive tools (JavaScript + PyScript)
+  - JavaScript patterns for simple tools
+  - PyScript integration for Python tools (numpy, matplotlib, etc.)
 - **docs/THEME.md** - Theme tokens and styling guidelines
 - **docs/CONTENT.md** - Content structure and writing guidelines
 - **PRD.md** - Original product requirements document

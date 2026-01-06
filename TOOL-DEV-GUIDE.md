@@ -215,8 +215,140 @@ When using custom components like `RetroButton`:
 | Multiple event handlers | Separate `addEventListener` for each |
 | Initial calculation on load | Call function at end of `DOMContentLoaded` |
 
+## Python Tools with PyScript
+
+For tools requiring Python libraries (numpy, matplotlib, pandas), use PyScript to run Python in the browser.
+
+### Architecture
+
+```
+src/
+├── layouts/
+│   └── PythonToolLayout.astro    # Includes PyScript (not BaseLayout)
+├── pages/tools/
+│   └── my-tool.astro             # Uses PythonToolLayout
+└── public/tools/
+    └── my-tool/
+        ├── main.py               # Python logic
+        └── config.json           # Package dependencies
+```
+
+**Critical**: Use `PythonToolLayout` for Python tools, `BaseLayout` for everything else. Keep PyScript isolated.
+
+### Quick Reference
+
+**1. Button handler (use `py-click` without parentheses)**:
+```astro
+<button py-click="calculate">Calculate</button>
+```
+
+**2. Clear charts before displaying new ones**:
+```python
+chart_element = document.querySelector("#chart")
+chart_element.innerHTML = ""
+fig, ax = plt.subplots(figsize=(12, 6))
+display(fig, target="#chart")
+```
+
+**3. Don't auto-run if user needs to input values first**:
+```python
+# Remove this line from bottom of file to wait for button click:
+# calculate()
+```
+
+### Working Example
+
+**`public/tools/roth/main.py`**:
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from pyscript import display, document, HTML
+
+def run_projection(event=None):
+    # Read inputs
+    current_age = int(document.getElementById("currentAge").value)
+    retirement_age = int(document.getElementById("retirementAge").value)
+    r = float(document.getElementById("returnRate").value) / 100.0
+
+    # Your calculation logic
+    years = list(range(current_age, retirement_age + 1))
+    values = [1000 * (1 + r) ** i for i in range(len(years))]
+
+    # Clear previous chart
+    chart_element = document.querySelector("#chart")
+    chart_element.innerHTML = ""
+
+    # Create chart
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(years, values)
+    ax.set_title("Growth Over Time", fontsize=14)
+    ax.set_xlabel("Age", fontsize=12)
+    ax.set_ylabel("Balance ($)", fontsize=12)
+    fig.tight_layout()
+    display(fig, target="#chart")
+
+    # Display summary
+    summary_html = f"<strong>Final: ${values[-1]:,.0f}</strong>"
+    display(HTML(summary_html), target="#summary")
+
+# No auto-run - user clicks button first
+```
+
+**`src/pages/tools/roth-calculator.astro`**:
+```astro
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<PythonToolLayout title="Roth Calculator">
+	<Window title="Inputs" badgeText="PYTHON">
+		<input type="number" id="currentAge" value="30" />
+		<input type="number" id="retirementAge" value="58" />
+		<input type="number" id="returnRate" value="7" />
+		<button py-click="run_projection">Calculate</button>
+	</Window>
+
+	<Window title="Chart">
+		<div id="chart"></div>
+	</Window>
+
+	<div id="summary"></div>
+
+	<script type="py" src="/tools/roth/main.py" config="/tools/roth/config.json"></script>
+</PythonToolLayout>
+
+<style>
+	:global(#chart canvas) {
+		max-width: 100%;
+		height: auto !important;
+	}
+</style>
+```
+
+**`public/tools/roth/config.json`**:
+```json
+{
+  "packages": ["numpy", "matplotlib"]
+}
+```
+
+### Common Gotchas
+
+1. **`py-click` syntax**: Use `py-click="function_name"` (no parentheses), not `py-click="function_name()"`
+2. **Chart accumulation**: Always `innerHTML = ""` the chart container before displaying a new chart
+3. **Auto-running**: If you want user input first, remove the function call at the bottom of the Python file
+4. **Timing issues**: `py-click` is preferred over `addEventListener` (avoids DOM-not-ready errors)
+5. **Responsive charts**: Use `figsize=(12, 6)` and CSS `height: auto !important`
+
+### When to Use PyScript vs JavaScript
+
+**Use PyScript for**: numpy/matplotlib tools, scientific computing, complex math
+**Use JavaScript for**: Simple forms, instant loading, UI interactions
+
+Note: PyScript adds 2-5 seconds to page load for Python runtime initialization.
+
 ### Additional Resources
 
-- [Astro Scripts Documentation](https://docs.astro.build/en/guides/client-side-scripts/)
-- [MDN Web Docs - DOM Manipulation](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model)
-- Project's `AGENTS.md` - Overall development guidelines
+- [PyScript Documentation](https://pyscript.net/)
+- [roth-calculator.astro](src/pages/tools/roth-calculator.astro) - Complete working example

@@ -1,0 +1,136 @@
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<PythonToolLayout title="Roth Compounding Calculator - Retro.SITE">
+	<div class="calculator-hero">
+		<h1>Backdoor & Mega Backdoor Roth Calculator</h1>
+		<p class="calculator-subtitle">Projection with Compounding (PyScript Powered)</p>
+	</div>
+
+	<Window title="Roth Calculator" badgeText="PYTHON">
+		<div class="calculator-form">
+			<div class="form-group">
+				<label for="currentAge">Current Age</label>
+				<input type="number" id="currentAge" value="30" />
+			</div>
+
+			<div class="form-group">
+				<label for="retirementAge">Retirement Age</label>
+				<input type="number" id="retirementAge" value="58" />
+			</div>
+
+			<div class="form-group">
+				<label for="returnRate">Expected Return (% per year)</label>
+				<input type="number" id="returnRate" step="0.1" value="7" />
+			</div>
+
+			<div class="form-group">
+				<label for="backdoorAnnual">Backdoor Roth Contribution ($/year)</label>
+				<input type="number" id="backdoorAnnual" value="7000" />
+			</div>
+
+			<div class="form-group">
+				<label for="megaAnnual">Mega Backdoor Contribution ($/year)</label>
+				<input type="number" id="megaAnnual" value="46500" />
+			</div>
+
+			<div class="button-group">
+				<button
+					id="runBtn"
+					class="retro-button retro-button--primary"
+					py-click="run_projection">
+					Run Projection
+				</button>
+			</div>
+		</div>
+	</Window>
+
+	<div id="chart-container" style="margin-top: 2rem;">
+		<Window title="Growth Chart" badgeText="VISUALIZATION">
+			<div id="chart"></div>
+		</Window>
+	</div>
+
+	<div id="summary-container" style="margin-top: 2rem;">
+		<Window title="Summary" badgeText="RESULTS">
+			<div id="summary"></div>
+		</Window>
+	</div>
+
+	<!-- PyScript integration -->
+	<script
+		type="py"
+		src="/tools/roth/main.py"
+		config="/tools/roth/config.json"
+	></script>
+</PythonToolLayout>
+
+<style>
+	#chart,
+	#summary {
+		min-height: 100px;
+	}
+
+	:global(#chart canvas) {
+		max-width: 100%;
+		height: auto;
+	}
+
+	:global(#summary) {
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		line-height: 1.6;
+	}
+
+	:global(.inputs) {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	:global(input[type="number"]) {
+		width: 100%;
+		padding: 0.5rem;
+		margin-top: 0.25rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		border: 2px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+	}
+
+	.button-group {
+		margin-top: 1rem;
+	}
+
+	.retro-button {
+		font-family: 'VT323', monospace;
+		font-size: 1.25rem;
+		padding: 0.75rem 1.5rem;
+		border: 3px solid;
+		cursor: pointer;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+		transition: all 0.1s ease;
+	}
+
+	.retro-button--primary {
+		background: var(--color-primary);
+		border-color: var(--color-primary-dark);
+		color: var(--color-primary-text);
+	}
+
+	.retro-button:hover {
+		transform: translate(2px, 2px);
+		box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+	}
+
+	.retro-button:active {
+		transform: translate(4px, 4px);
+		box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.3);
+	}
+</style>
