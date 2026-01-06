@@ -1,0 +1,57 @@
+---
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = 'Jean Paul Gaultier Retro Website',
+	description = 'A 90s retro aesthetic personal website',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-theme="neon-night">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="canonical" href={canonicalURL} />
+
+		<!-- VT323 Font Embed -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+		<title>{title}</title>
+	</head>
+	<body>
+		<SiteHeader />
+		<main>
+			<slot />
+		</main>
+		<SiteFooter />
+	</body>
+</html>
+
+<style>
+	body {
+		margin: 0;
+		padding: 0;
+		min-height: 100vh;
+	}
+
+	main {
+		padding: 2rem;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+</style>
