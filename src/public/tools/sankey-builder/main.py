@@ -139,7 +139,7 @@ def build_sankey(event=None):
     fig.update_layout(
         title_text=f'{title}<br><sub>Cash Flow Sankey Diagram</sub>',
         font_size=12,
-        height=600,
+        autosize=True,
     )
 
     # Render using Plotly.react() with proper JSON serialization
@@ -148,10 +148,11 @@ def build_sankey(event=None):
     spec_json = json.dumps(spec)  # Convert to JSON string
     spec_js = JSON.parse(spec_json)  # Parse in JS to get plain JS objects
 
-    # Plotly configuration for fullscreen and toolbar
+    # Plotly configuration for toolbar and responsive behavior
     config = {
         'displayModeBar': True,
         'displaylogo': False,
+        'responsive': True,
         'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
         'toImageButtonOptions': {
             'format': 'png',

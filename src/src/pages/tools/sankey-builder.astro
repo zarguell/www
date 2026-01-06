@@ -72,6 +72,7 @@ Take Home Pay [26425] Other Expenses"></textarea>
 	.retro-button-primary { background: var(--accent); color: var(--bg); box-shadow: 4px 4px 0 var(--shadow); }
 	.retro-button-primary:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow); }
 	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel-bg); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); }
+	:global(#chart) { min-height: 500px; height: 60vh; }
 	:global(#chart img) { max-width: 100% !important; height: auto !important; display: block !important; }
 	:global(#summary) { margin-top: 2rem; }
 
@@ -79,6 +80,9 @@ Take Home Pay [26425] Other Expenses"></textarea>
 		.tool-header h1 { font-size: 2rem; }
 		.tool-subtitle { font-size: 1rem; }
 		.button-group { flex-direction: column; }
+
+		/* Taller chart on mobile for better visibility */
+		:global(#chart) { min-height: 400px; height: 75vh; }
 
 		/* Plotly mobile optimizations */
 		:global(.plotly) { touch-action: manipulation; }
