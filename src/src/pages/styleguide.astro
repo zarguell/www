@@ -1,0 +1,548 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Window from '../components/Window.astro';
+import RetroButton from '../components/RetroButton.astro';
+import Badge from '../components/Badge.astro';
+import Sticker from '../components/Sticker.astro';
+import Tag from '../components/Tag.astro';
+---
+
+<BaseLayout title="Styleguide - Retro.SITE">
+	<div class="styleguide-hero">
+		<h1>Styleguide</h1>
+		<p class="styleguide-subtitle">Design system reference for Retro.SITE</p>
+	</div>
+
+	<!-- Typography -->
+	<Window title="Typography">
+		<div class="styleguide-section">
+			<h2>Headings</h2>
+			<div class="demo-box">
+				<h1>Heading 1 - Main Title</h1>
+				<h2>Heading 2 - Section Title</h2>
+				<h3>Heading 3 - Subsection Title</h3>
+				<h4>Heading 4 - Component Title</h4>
+			</div>
+
+			<h2>Body Text</h2>
+			<div class="demo-box">
+				<p>This is a paragraph of body text. It uses the VT323 font at a readable size for extended reading.</p>
+				<p><small>This is small text, useful for footnotes and metadata.</small></p>
+			</div>
+
+			<h2>Inline Elements</h2>
+			<div class="demo-box">
+				<p>This is <strong>bold text</strong> for emphasis.</p>
+				<p>This is <em>italic text</em> for subtle emphasis.</p>
+				<p>This is <a href="#">a link</a> in its default state.</p>
+				<p>This is <code>inline code</code> for technical references.</p>
+			</div>
+
+			<h2>Link States</h2>
+			<div class="demo-box">
+				<p>
+					<a href="#">Default link</a> ·
+					<a href="#" class="visited-link">Visited link (simulated)</a> ·
+					<a href="#" class="focus-link">Focused link (simulated)</a>
+				</p>
+			</div>
+		</div>
+	</Window>
+
+	<!-- Components -->
+	<Window title="Components" badgeText="CORE">
+		<div class="styleguide-section">
+			<h2>Window Component</h2>
+			<div class="demo-box">
+				<Window title="Basic Window">
+					<p>This is a basic window component with a title bar.</p>
+				</Window>
+			</div>
+
+			<div class="demo-box">
+				<Window title="Window with Badge" badgeText="NEW">
+					<p>This window has a badge in the title bar.</p>
+				</Window>
+			</div>
+
+			<h2>RetroButton Component</h2>
+			<div class="demo-box">
+				<div class="button-row">
+					<RetroButton variant="primary">Primary Button</RetroButton>
+					<RetroButton variant="secondary">Secondary Button</RetroButton>
+					<RetroButton variant="danger">Danger Button</RetroButton>
+				</div>
+			</div>
+
+			<div class="demo-box">
+				<div class="button-row">
+					<RetroButton variant="primary" disabled>Disabled Primary</RetroButton>
+					<RetroButton variant="secondary" disabled>Disabled Secondary</RetroButton>
+				</div>
+			</div>
+
+			<div class="demo-box">
+				<div class="button-row">
+					<RetroButton href="#" variant="primary">Link Button</RetroButton>
+					<RetroButton href="#" variant="secondary">Link Secondary</RetroButton>
+				</div>
+			</div>
+
+			<h2>Badge Component</h2>
+			<div class="demo-box">
+				<div class="badge-row">
+					<Badge text="NEW" />
+					<Badge text="HOT" />
+					<Badge text="WIP" />
+					<Badge text="ACTIVE" />
+					<Badge text="BETA" />
+				</div>
+			</div>
+
+			<h2>Sticker Component</h2>
+			<div class="demo-box">
+				<div class="sticker-row">
+					<Sticker text="FEATURED" />
+					<Sticker text="POPULAR" />
+					<Sticker text="TRENDING" />
+				</div>
+			</div>
+
+			<h2>Tag Component</h2>
+			<div class="demo-box">
+				<div class="tag-row">
+					<Tag tag="design" />
+					<Tag tag="retro" />
+					<Tag tag="fashion" />
+					<Tag tag="web" />
+					<Tag tag="90s" />
+				</div>
+			</div>
+		</div>
+	</Window>
+
+	<!-- Theme Tokens -->
+	<Window title="Theme Tokens" badgeText="COLORS">
+		<div class="styleguide-section">
+			<h2>Current Theme Colors</h2>
+			<p class="theme-note">Toggle the theme in the header to see token values change:</p>
+
+			<div class="tokens-grid">
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--bg);"></div>
+					<div class="token-info">
+						<code>--bg</code>
+						<span class="token-value">Background</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--bg2);"></div>
+					<div class="token-info">
+						<code>--bg2</code>
+						<span class="token-value">Background 2</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--panel);"></div>
+					<div class="token-info">
+						<code>--panel</code>
+						<span class="token-value">Panel</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--text);"></div>
+					<div class="token-info">
+						<code>--text</code>
+						<span class="token-value">Text</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--muted);"></div>
+					<div class="token-info">
+						<code>--muted</code>
+						<span class="token-value">Muted</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--accent);"></div>
+					<div class="token-info">
+						<code>--accent</code>
+						<span class="token-value">Accent</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--accent2);"></div>
+					<div class="token-info">
+						<code>--accent2</code>
+						<span class="token-value">Accent 2</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--border); border: 1px solid var(--border);"></div>
+					<div class="token-info">
+						<code>--border</code>
+						<span class="token-value">Border</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--shadow);"></div>
+					<div class="token-info">
+						<code>--shadow</code>
+						<span class="token-value">Shadow</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--link);"></div>
+					<div class="token-info">
+						<code>--link</code>
+						<span class="token-value">Link</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--visited);"></div>
+					<div class="token-info">
+						<code>--visited</code>
+						<span class="token-value">Visited</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--focus); border: 1px solid var(--focus);"></div>
+					<div class="token-info">
+						<code>--focus</code>
+						<span class="token-value">Focus</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--sticker-bg);"></div>
+					<div class="token-info">
+						<code>--sticker-bg</code>
+						<span class="token-value">Sticker BG</span>
+					</div>
+				</div>
+
+				<div class="token-item">
+					<div class="token-swatch" style="background: var(--sticker-text);"></div>
+					<div class="token-info">
+						<code>--sticker-text</code>
+						<span class="token-value">Sticker Text</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</Window>
+
+	<!-- Accessibility -->
+	<Window title="Accessibility" badgeText="A11Y">
+		<div class="styleguide-section">
+			<h2>Focus States</h2>
+			<p class="accessibility-note">All interactive elements must have visible focus states. Tab through the buttons below:</p>
+			<div class="demo-box">
+				<div class="button-row">
+					<RetroButton variant="primary">Focus Test 1</RetroButton>
+					<RetroButton variant="secondary">Focus Test 2</RetroButton>
+					<a href="#" class="focus-test-link">Focus Test Link</a>
+				</div>
+			</div>
+
+			<h2>Reduced Motion</h2>
+			<p class="accessibility-note">This site respects <code>prefers-reduced-motion</code>. All animations are disabled when this preference is set in your OS.</p>
+			<div class="demo-box">
+				<p>Animations that respect reduced motion:</p>
+				<ul>
+					<li>Blink cursor animations</li>
+					<li>Smooth scroll behavior</li>
+					<li>Hover transitions</li>
+					<li>Focus ring animations</li>
+				</ul>
+			</div>
+
+			<h2>Color Contrast</h2>
+			<p class="accessibility-note">All text meets WCAG AA standards for contrast ratio in both themes (neon-night and mall-pastel).</p>
+
+			<h2>Keyboard Navigation</h2>
+			<p class="accessibility-note">All interactive elements are accessible via keyboard:</p>
+			<ul>
+				<li><kbd>Tab</kbd> - Navigate between elements</li>
+				<li><kbd>Shift</kbd> + <kbd>Tab</kbd> - Navigate backwards</li>
+				<li><kbd>Enter</kbd> - Activate buttons and links</li>
+				<li><kbd>Space</kbd> - Toggle buttons and checkboxes</li>
+			</ul>
+		</div>
+	</Window>
+
+	<!-- Theme Demo -->
+	<Window title="Theme Switching Demo" badgeText="INTERACTIVE">
+		<div class="styleguide-section">
+			<h2>Toggle Your Theme</h2>
+			<p>Click the theme toggle button in the header to switch between themes. Your preference is saved in localStorage.</p>
+
+			<div class="theme-demo-grid">
+				<div class="theme-card">
+					<h3>Neon Night</h3>
+					<p>Dark theme with vibrant cyan and magenta accents. Inspired by 90s cyberpunk aesthetics.</p>
+					<div class="theme-preview" data-theme-preview="neon-night">
+						<div class="preview-band preview-bg"></div>
+						<div class="preview-band preview-accent"></div>
+						<div class="preview-band preview-accent2"></div>
+					</div>
+				</div>
+
+				<div class="theme-card">
+					<h3>Mall Pastel</h3>
+					<p>Light theme with soft pinks and mint greens. Inspired by 90s mall fashion and pop culture.</p>
+					<div class="theme-preview" data-theme-preview="mall-pastel">
+						<div class="preview-band preview-bg"></div>
+						<div class="preview-band preview-accent"></div>
+						<div class="preview-band preview-accent2"></div>
+					</div>
+				</div>
+			</div>
+
+			<p class="theme-persistence-note"><strong>Theme Persistence:</strong> Your choice is saved and will persist across page loads and sessions.</p>
+		</div>
+	</Window>
+</BaseLayout>
+
+<style>
+	.styleguide-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.styleguide-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.styleguide-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.styleguide-section {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.styleguide-section h2 {
+		font-size: 1.8rem;
+		margin: 0 0 0.5rem 0;
+		border-bottom: 2px solid var(--border);
+		padding-bottom: 0.5rem;
+	}
+
+	.demo-box {
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		padding: 1.5rem;
+		border-radius: 4px;
+	}
+
+	.button-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.badge-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.sticker-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.5rem;
+		align-items: center;
+	}
+
+	.tag-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.tokens-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 1rem;
+	}
+
+	.token-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 1rem;
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		border-radius: 4px;
+	}
+
+	.token-swatch {
+		height: 60px;
+		border-radius: 4px;
+		border: 1px solid var(--border);
+	}
+
+	.token-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.token-info code {
+		font-size: 1rem;
+		color: var(--accent);
+	}
+
+	.token-value {
+		font-size: 0.9rem;
+		color: var(--muted);
+	}
+
+	.theme-note {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0 0 1rem 0;
+	}
+
+	.accessibility-note {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0 0 1rem 0;
+	}
+
+	.accessibility-note code {
+		background: var(--bg2);
+		padding: 0.2rem 0.4rem;
+		border-radius: 3px;
+		border: 1px solid var(--border);
+	}
+
+	.focus-test-link {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		text-decoration: none;
+		color: var(--link);
+	}
+
+	.theme-demo-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+		margin: 1rem 0;
+	}
+
+	.theme-card {
+		padding: 1.5rem;
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		border-radius: 4px;
+	}
+
+	.theme-card h3 {
+		margin: 0 0 0.5rem 0;
+	}
+
+	.theme-card p {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0 0 1rem 0;
+		line-height: 1.5;
+	}
+
+	.theme-preview {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.preview-band {
+		height: 30px;
+		border-radius: 4px;
+		border: 1px solid var(--border);
+	}
+
+	.theme-preview[data-theme-preview='neon-night'] .preview-bg {
+		background: #0a0e1a;
+	}
+
+	.theme-preview[data-theme-preview='neon-night'] .preview-accent {
+		background: #00ffff;
+	}
+
+	.theme-preview[data-theme-preview='neon-night'] .preview-accent2 {
+		background: #ff00ff;
+	}
+
+	.theme-preview[data-theme-preview='mall-pastel'] .preview-bg {
+		background: #fef6f6;
+	}
+
+	.theme-preview[data-theme-preview='mall-pastel'] .preview-accent {
+		background: #ffb6d9;
+	}
+
+	.theme-preview[data-theme-preview='mall-pastel'] .preview-accent2 {
+		background: #b6f9d8;
+	}
+
+	.theme-persistence-note {
+		margin-top: 1rem;
+		padding: 1rem;
+		background: var(--bg2);
+		border: 2px solid var(--accent);
+		border-radius: 4px;
+		font-size: 1rem;
+		color: var(--text);
+	}
+
+	.visited-link {
+		color: var(--visited);
+	}
+
+	.focus-link {
+		outline: 2px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 768px) {
+		.styleguide-hero h1 {
+			font-size: 2.5rem;
+		}
+
+		.tokens-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.theme-demo-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.button-row {
+			flex-direction: column;
+			align-items: stretch;
+		}
+	}
+</style>
