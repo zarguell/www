@@ -5,9 +5,13 @@ Demonstrates the long-term cost of high expense ratios.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import json
 from pyscript import display, document, HTML
 from io import BytesIO
 import base64
+from js import Plotly, JSON
 
 plt.rcParams['figure.figsize'] = [10, 8]
 plt.rcParams['figure.autolayout'] = True
@@ -129,6 +133,120 @@ def calculate_impact(event=None):
          style="max-width: 100%; height: auto; display: block;">
     '''
     display(HTML(img_html), target="#chart")
+
+    # Create interactive Plotly charts
+    # Line chart: Portfolio growth over time
+    fig_line = go.Figure()
+
+    fig_line.add_trace(go.Scatter(
+        x=years.tolist(),
+        y=(balance_a / 1000).tolist(),
+        mode='lines',
+        name=f'Fund A ({fund_a_er*100:.2f}%)',
+        line=dict(color='green', width=2),
+        hovertemplate='Year %{x}<br>Fund A: $%{y:,.0f}k<extra></extra>'
+    ))
+
+    fig_line.add_trace(go.Scatter(
+        x=years.tolist(),
+        y=(balance_b / 1000).tolist(),
+        mode='lines',
+        name=f'Fund B ({fund_b_er*100:.2f}%)',
+        line=dict(color='red', width=2, dash='dash'),
+        hovertemplate='Year %{x}<br>Fund B: $%{y:,.0f}k<extra></extra>'
+    ))
+
+    fig_line.update_layout(
+        title='Portfolio Growth: Low vs High Expense Ratio',
+        xaxis_title='Year',
+        yaxis_title='Portfolio Value ($k)',
+        hovermode='x unified',
+        height=400,
+        autosize=True
+    )
+
+    # Bar chart: Cumulative fees
+    fig_bar = go.Figure()
+
+    fig_bar.add_trace(go.Bar(
+        x=['Fund A\n(Low Cost)', 'Fund B\n(High Cost)'],
+        y=[float(total_fees_a), float(total_fees_b)],
+        name='Total Fees',
+        marker_color=['green', 'red'],
+        opacity=0.7,
+        text=[f'${total_fees_a:,.0f}', f'${total_fees_b:,.0f}'],
+        textposition='outside',
+        hovertemplate='%{x}<br>Fees: $%{y:,.0f}<extra></extra>'
+    ))
+
+    fig_bar.update_layout(
+        title=f'Total Fees Over {time_horizon} Years',
+        yaxis_title='Cumulative Fees Paid ($)',
+        height=400,
+        autosize=True,
+        annotations=[dict(
+            text=f'Fund B costs ${extra_fees:,.0f} more<br>You lose {percent_lost:.1f}% of wealth',
+            xref='paper', yref='paper',
+            x=0.5, y=0.95,
+            showarrow=False,
+            font=dict(size=12),
+            bgcolor='rgba(255, 255, 224, 0.8)',
+            bordercolor='gray',
+            borderwidth=1
+        )]
+    )
+
+    # Combine using subplots
+    fig_combined = make_subplots(
+        rows=2, cols=1,
+        subplot_titles=('Portfolio Growth Comparison', 'Total Fees Paid'),
+        vertical_spacing=0.15,
+        row_heights=[0.5, 0.5]
+    )
+
+    # Add traces to combined figure
+    for trace in fig_line.data:
+        fig_combined.add_trace(trace, row=1, col=1)
+
+    for trace in fig_bar.data:
+        fig_combined.add_trace(trace, row=2, col=1)
+
+    # Keep the annotation from fig_bar
+    fig_combined.update_layout(
+        height=900,
+        autosize=True,
+        hovermode='x unified'
+    )
+
+    fig_combined.update_xaxes(title_text='Year', row=1)
+    fig_combined.update_yaxes(title_text='Portfolio Value ($)', row=1)
+    fig_combined.update_yaxes(title_text='Cumulative Fees ($)', row=2)
+
+    # Render Plotly chart
+    plotly_element = document.querySelector("#plotlyChart")
+    plotly_element.innerHTML = ""
+
+    spec = fig_combined.to_plotly_json()
+    spec_json = json.dumps(spec)
+    spec_js = JSON.parse(spec_json)
+
+    config = {
+        'displayModeBar': True,
+        'displaylogo': False,
+        'responsive': True,
+        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': 'expense-ratio-impact',
+            'height': 1200,
+            'width': 1600,
+            'scale': 2
+        }
+    }
+    config_json = json.dumps(config)
+    config_js = JSON.parse(config_json)
+
+    Plotly.react(plotly_element, spec_js.data, spec_js.layout, config_js)
 
     # Summary
     summary_html = f'''

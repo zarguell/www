@@ -61,7 +61,13 @@ import Window from '../../components/Window.astro';
 		</form>
 
 		<div id="chart-container" class="chart-container">
+			<h3>Static Image (Click to Zoom)</h3>
 			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="plotly-container" class="chart-container">
+			<h3>Interactive Chart (Hover for Exact Values)</h3>
+			<div id="plotlyChart"></div>
 		</div>
 
 		<div id="summary"></div>
@@ -111,8 +117,10 @@ import Window from '../../components/Window.astro';
 	.retro-button { flex: 1; padding: 1rem 2rem; font-family: 'VT323', monospace; font-size: 1.2rem; border: 3px solid var(--border); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-weight: bold; }
 	.retro-button-primary { background: var(--accent); color: var(--bg); box-shadow: 4px 4px 0 var(--shadow); }
 	.retro-button-primary:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow); }
-	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel-bg); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); }
+	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel-bg); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); margin-bottom: 1.5rem; }
+	.chart-container h3 { margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--accent); }
 	:global(#chart img) { max-width: 100% !important; height: auto !important; display: block !important; }
+	:global(#plotlyChart) { min-height: 500px; height: 60vh; }
 	:global(.click-zoom input[type="checkbox"]) { display: none; }
 	:global(.click-zoom input:checked + .zoom-label) { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; cursor: zoom-out; display: flex; align-items: center; justify-content: center; padding: 2rem; }
 	:global(.click-zoom input:checked + .zoom-label img) { max-width: 95vw !important; max-height: 95vh !important; object-fit: contain; }

@@ -5,9 +5,12 @@ Compares after-tax outcomes across different future tax rates.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import json
 from pyscript import display, document, HTML
 from io import BytesIO
 import base64
+from js import Plotly, JSON
 
 plt.rcParams['figure.figsize'] = [10, 6]
 plt.rcParams['figure.autolayout'] = True
@@ -94,6 +97,106 @@ def run_analysis(event=None):
     # Display
     img_html = f'<img id="chartImg" src="data:image/png;base64,{img_data}" alt="Trad vs Roth" style="max-width: 100%; height: auto; display: block;">'
     display(HTML(img_html), target="#chart")
+
+    # Create interactive Plotly chart
+    fig_plotly = go.Figure()
+
+    # Add line traces
+    fig_plotly.add_trace(go.Scatter(
+        x=(retirement_rates * 100).tolist(),
+        y=(trad_values / 1000).tolist(),
+        mode='lines',
+        name='Traditional IRA',
+        line=dict(color='blue', width=2),
+        hovertemplate='%{x:.1f}%<br>Traditional: $%{y:,.0f}k<extra></extra>'
+    ))
+
+    fig_plotly.add_trace(go.Scatter(
+        x=(retirement_rates * 100).tolist(),
+        y=(roth_values / 1000).tolist(),
+        mode='lines',
+        name='Roth IRA',
+        line=dict(color='green', width=2, dash='dash'),
+        hovertemplate='%{x:.1f}%<br>Roth: $%{y:,.0f}k<extra></extra>'
+    ))
+
+    # Add expected rate line
+    fig_plotly.add_vline(
+        x=expected_retirement_rate * 100,
+        line_dash='dot',
+        line_color='orange',
+        line_width=2,
+        annotation_text=f'Expected Rate ({expected_retirement_rate*100:.0f}%)'
+    )
+
+    # Add shaded regions for win areas
+    fig_plotly.add_trace(go.Scatter(
+        x=(retirement_rates * 100).tolist(),
+        y=(trad_values / 1000).tolist(),
+        fill=None,
+        mode='none',
+        showlegend=False,
+        hoverinfo='skip'
+    ))
+
+    # Create fill between effect
+    fig_plotly.add_trace(go.Scatter(
+        x=(retirement_rates * 100).tolist(),
+        y=np.maximum(trad_values, roth_values) / 1000,
+        mode='lines',
+        line_color='blue',
+        fill='tonexty',
+        fillcolor='rgba(0, 0, 255, 0.2)',
+        name='Traditional Wins',
+        hoverinfo='skip'
+    ))
+
+    fig_plotly.add_trace(go.Scatter(
+        x=(retirement_rates * 100).tolist(),
+        y=np.minimum(trad_values, roth_values) / 1000,
+        mode='lines',
+        line_color='rgba(0,100,0,0)',
+        fill='tonexty',
+        fillcolor='rgba(0, 128, 0, 0.2)',
+        name='Roth Wins',
+        hoverinfo='skip'
+    ))
+
+    fig_plotly.update_layout(
+        title='Traditional vs Roth: Tax Rate Sensitivity Analysis',
+        xaxis_title='Retirement Tax Rate (%)',
+        yaxis_title='After-Tax Value ($k)',
+        hovermode='x unified',
+        height=500,
+        autosize=True,
+        legend=dict(x=0.02, y=0.98)
+    )
+
+    # Render Plotly chart
+    plotly_element = document.querySelector("#plotlyChart")
+    plotly_element.innerHTML = ""
+
+    spec = fig_plotly.to_plotly_json()
+    spec_json = json.dumps(spec)
+    spec_js = JSON.parse(spec_json)
+
+    config = {
+        'displayModeBar': True,
+        'displaylogo': False,
+        'responsive': True,
+        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': 'trad-vs-roth-analysis',
+            'height': 1200,
+            'width': 1600,
+            'scale': 2
+        }
+    }
+    config_json = json.dumps(config)
+    config_js = JSON.parse(config_json)
+
+    Plotly.react(plotly_element, spec_js.data, spec_js.layout, config_js)
 
     # Summary
     winner = "Traditional" if trad_at_expected > roth_at_expected else "Roth"
