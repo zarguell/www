@@ -114,7 +114,7 @@ def build_sankey(event=None):
     chart_element.innerHTML = ""
 
     # Create Sankey diagram
-    fig = plt.figure(figsize=(14, 10), dpi=200)
+    fig = plt.figure(figsize=(14, 8), dpi=200)
     ax = fig.add_subplot(111)
 
     # Prepare flows for matplotlib.sankey
@@ -128,26 +128,14 @@ def build_sankey(event=None):
     # Create labels
     labels = nodes
 
-    # Get colors for each flow
-    colors = []
-    for flow in aggregated:
-        colors.append(get_color(flow['source']))
-
-    # Add alpha for transparency
-    from matplotlib.colors import to_rgba
-    flow_colors = [to_rgba(c, alpha=0.6) for c in colors]
-
-    # Create Sankey diagram
+    # Create Sankey diagram with default parameters
     sankey = Sankey(
         flows=sankey_flows,
         labels=labels,
-        flow_labels=None,  # Don't show values on flows
-        orientations=[0] * len(nodes),  # All horizontal
-        edgecolor='black',
-        facecolors=flow_colors,
+        flow_labels=None,
         headangle=180,
-        margin=0.2,
-        scale=1.0 / max([sum([f[2] for f in sankey_flows if f[0] == i]) for i in range(len(nodes))]) if sankey_flows else 1.0
+        margin=0.25,
+        width=0.2,
     )
 
     sankey.finish()
