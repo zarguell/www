@@ -1,86 +1,129 @@
 ---
-import { Image } from 'astro:assets';
+import BaseLayout from './BaseLayout.astro';
+import Tag from '../components/Tag.astro';
+import Badge from '../components/Badge.astro';
 import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import Header from '../components/Header.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, tags, heroImage } = Astro.props;
+
+// Format date for display
+const formatDate = (date: Date) => {
+	return new Date(date).toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	});
+};
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
-	</head>
-
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
+<BaseLayout title={title}>
+	<article class="blog-post">
+		<header class="blog-post__header">
+			<h1 class="blog-post__title">{title}</h1>
+			<div class="blog-post__meta">
+				<time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+				{tags && tags.length > 0 && (
+					<div class="blog-post__tags">
+						{tags.map((tag) => (
+							<Tag tag={tag} href={`/blog/?tag=${tag}`} />
+						))}
 					</div>
-					<slot />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+				)}
+			</div>
+			{description && <p class="blog-post__description">{description}</p>}
+		</header>
+
+		<div class="blog-post__content prose">
+			<slot />
+		</div>
+
+		<footer class="blog-post__footer">
+			<a href="/blog/" class="back-link">← Back to Blog</a>
+		</footer>
+	</article>
+</BaseLayout>
+
+<style>
+	.blog-post {
+		max-width: 65ch;
+		margin: 0 auto;
+	}
+
+	.blog-post__header {
+		text-align: center;
+		padding: 2rem 0;
+		border-bottom: 3px dashed var(--border);
+		margin-bottom: 2rem;
+	}
+
+	.blog-post__title {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+		line-height: 1.2;
+	}
+
+	.blog-post__meta {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.blog-post__meta time {
+		color: var(--muted);
+		font-size: 1.1rem;
+	}
+
+	.blog-post__tags {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	.blog-post__description {
+		font-size: 1.3rem;
+		color: var(--muted);
+		font-style: italic;
+	}
+
+	.blog-post__content {
+		margin-bottom: 3rem;
+	}
+
+	.blog-post__footer {
+		border-top: 3px dashed var(--border);
+		padding-top: 2rem;
+		text-align: center;
+	}
+
+	.back-link {
+		display: inline-block;
+		padding: 0.6em 1.2em;
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		color: var(--text);
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.back-link:hover {
+		background: var(--accent);
+		color: var(--sticker-text);
+		border-color: var(--accent);
+	}
+
+	@media (max-width: 768px) {
+		.blog-post__title {
+			font-size: 2.5rem;
+		}
+
+		.blog-post__description {
+			font-size: 1.1rem;
+		}
+	}
+</style>
