@@ -13,16 +13,18 @@ import Badge from '../../components/Badge.astro';
 
 	<!-- Category Navigation -->
 	<nav class="category-nav">
-		<a href="#existing" class="category-link">Existing Tools</a>
 		<a href="#retirement" class="category-link">Retirement Planning</a>
 		<a href="#investment" class="category-link">Investment Analysis</a>
 		<a href="#tax" class="category-link">Tax & Strategy</a>
 		<a href="#visualization" class="category-link">Visualization</a>
+		<a href="#gaming" class="category-link">Video Games</a>
 	</nav>
 
-	<!-- Existing Tools Section -->
-	<section id="existing" class="tool-category">
-		<h2 class="category-title">Existing Tools</h2>
+	<!-- Retirement Planning Section -->
+	<section id="retirement" class="tool-category">
+		<h2 class="category-title">Retirement Planning</h2>
+		<p class="category-description">Plan your financial independence with sophisticated projections and withdrawal strategies.</p>
+
 		<div class="tools-grid">
 			<Window title="401(k) Calculator" badgeText="RETIREMENT">
 				<div class="tool-card">
@@ -41,49 +43,6 @@ import Badge from '../../components/Badge.astro';
 				</div>
 			</Window>
 
-			<Window title="Roth vs Taxable Calculator" badgeText="RETIREMENT">
-				<div class="tool-card">
-					<p class="tool-description">
-						Compare Backdoor Roth, Taxable Brokerage, and Cash side-by-side with realistic tax modeling. See which strategy delivers the most spendable wealth at retirement, with Python-powered calculations running directly in your browser.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Three-scenario comparison (Roth/Taxable/Cash)</li>
-						<li>✓ Tax drag + capital gains modeling</li>
-						<li>✓ Pro-rata rule warnings</li>
-						<li>✓ Dual charts: balances & taxes paid</li>
-						<li>✓ Auto-generated insights</li>
-					</ul>
-					<RetroButton href="/tools/roth-calculator" variant="primary">
-						Compare Strategies
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Rune Calculator" badgeText="GAMING">
-				<div class="tool-card">
-					<p class="tool-description">
-						Elden Ring golden runes are super helpful for quickly leveling your character up, especially when you only need a few more runes to get to the next level. I got tired of doing the mental math in my head, calculating how many runes I needed, etc. So I made this quick and dirty calculator by asking chatGPT to make it for me.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Current to target level</li>
-						<li>✓ Optimize number of golden runes</li>
-						<li>✓ Planning made easy</li>
-						<li>✓ No spoilers included</li>
-					</ul>
-					<RetroButton href="/tools/rune-calculator" variant="primary">
-						Calculate Runes
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
-
-	<!-- Retirement Planning Section -->
-	<section id="retirement" class="tool-category">
-		<h2 class="category-title">Retirement Planning</h2>
-		<p class="category-description">Plan your financial independence with sophisticated projections and withdrawal strategies.</p>
-
-		<div class="tools-grid">
 			<Window title="Monte Carlo Retirement Lab" badgeText="PYTHON">
 				<div class="tool-card">
 					<p class="tool-description">
@@ -172,6 +131,24 @@ import Badge from '../../components/Badge.astro';
 		<p class="category-description">Optimize your tax-advantaged accounts and find your path to financial independence.</p>
 
 		<div class="tools-grid">
+			<Window title="Roth vs Taxable Calculator" badgeText="RETIREMENT">
+				<div class="tool-card">
+					<p class="tool-description">
+						Compare Backdoor Roth, Taxable Brokerage, and Cash side-by-side with realistic tax modeling. See which strategy delivers the most spendable wealth at retirement, with Python-powered calculations running directly in your browser.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Three-scenario comparison (Roth/Taxable/Cash)</li>
+						<li>✓ Tax drag + capital gains modeling</li>
+						<li>✓ Pro-rata rule warnings</li>
+						<li>✓ Dual charts: balances & taxes paid</li>
+						<li>✓ Auto-generated insights</li>
+					</ul>
+					<RetroButton href="/tools/roth-calculator" variant="primary">
+						Compare Strategies
+					</RetroButton>
+				</div>
+			</Window>
+
 			<Window title="Traditional vs Roth Analyzer" badgeText="PYTHON">
 				<div class="tool-card">
 					<p class="tool-description">
@@ -230,6 +207,31 @@ import Badge from '../../components/Badge.astro';
 					</ul>
 					<RetroButton href="/tools/sankey-builder" variant="primary">
 						Build Diagram
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Video Games Section -->
+	<section id="gaming" class="tool-category">
+		<h2 class="category-title">Video Games</h2>
+		<p class="category-description">Game utilities and calculators to enhance your gameplay experience.</p>
+
+		<div class="tools-grid">
+			<Window title="Rune Calculator" badgeText="GAMING">
+				<div class="tool-card">
+					<p class="tool-description">
+						Elden Ring golden runes are super helpful for quickly leveling your character up, especially when you only need a few more runes to get to the next level. I got tired of doing the mental math in my head, calculating how many runes I needed, etc. So I made this quick and dirty calculator by asking chatGPT to make it for me.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Current to target level</li>
+						<li>✓ Optimize number of golden runes</li>
+						<li>✓ Planning made easy</li>
+						<li>✓ No spoilers included</li>
+					</ul>
+					<RetroButton href="/tools/rune-calculator" variant="primary">
+						Calculate Runes
 					</RetroButton>
 				</div>
 			</Window>
