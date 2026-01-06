@@ -1,21 +1,18 @@
 """
 Cash Flow Sankey Diagram Builder
-Creates Sankey diagrams from simple text input.
+Creates interactive Sankey diagrams from simple text input using Plotly.
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.sankey import Sankey
+import plotly.graph_objects as go
+import json
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
-import re
-
-plt.rcParams['figure.figsize'] = [12, 8]
-plt.rcParams['figure.autolayout'] = True
+from js import Plotly, JSON
 
 def parse_sankey_text(text):
     """Parse SankeyMatic-style text format into flows."""
+    import re
+
     flows = []
     for line in text.strip().split('\n'):
         line = line.strip()
@@ -57,7 +54,7 @@ def get_color(label):
         return '#845ef7'  # Purple for other
 
 def build_sankey(event=None):
-    """Build Sankey diagram from text input."""
+    """Build interactive Sankey diagram from text input using Plotly."""
 
     try:
         sankey_text = document.getElementById("sankeyText").value
@@ -113,47 +110,48 @@ def build_sankey(event=None):
     chart_element = document.querySelector("#chart")
     chart_element.innerHTML = ""
 
-    # Create Sankey diagram
-    fig = plt.figure(figsize=(14, 8), dpi=200)
-    ax = fig.add_subplot(111)
+    # Build Plotly Sankey diagram
+    # Convert aggregated flows to Plotly format (ensure native Python types)
+    sources = [int(node_index[f['source']]) for f in aggregated]
+    targets = [int(node_index[f['target']]) for f in aggregated]
+    values = [float(f['value']) for f in aggregated]
 
-    # Prepare flows for matplotlib.sankey
-    # Format: [source, target, value]
-    sankey_flows = []
-    for flow in aggregated:
-        source_idx = node_index[flow['source']]
-        target_idx = node_index[flow['target']]
-        sankey_flows.append([source_idx, target_idx, flow['value']])
+    # Get node colors
+    node_colors = [get_color(node) for node in nodes]
 
-    # Create Sankey diagram without labels first
-    sankey = Sankey(
-        flows=sankey_flows,
-        headangle=180,
-        margin=0.25,
-        scale=0.01,
+    # Create Plotly Sankey figure
+    fig = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=18,
+            line=dict(color='rgba(0,0,0,0.3)', width=0.5),
+            label=nodes,
+            color=node_colors,
+        ),
+        link=dict(
+            source=sources,
+            target=targets,
+            value=values,
+        ),
+        arrangement='snap',
+    )])
+
+    fig.update_layout(
+        title_text=f'{title}<br><sub>Cash Flow Sankey Diagram</sub>',
+        font_size=12,
+        height=600,
     )
 
-    sankey.finish()
+    # Render using Plotly.react() with proper JSON serialization
+    # This avoids Pyodide proxy objects and ensures clean JS types
+    spec = fig.to_plotly_json()
+    spec_json = json.dumps(spec)  # Convert to JSON string
+    spec_js = JSON.parse(spec_json)  # Parse in JS to get plain JS objects
 
-    # Now manually set the labels for each node
-    labels = nodes
-    for text, label in zip(sankey.texts, labels):
-        text.set_text(label)
+    # Access properties via attributes (not subscript) on JsProxy
+    Plotly.react(chart_element, spec_js.data, spec_js.layout)
 
-    ax.set_title(f'{title}\n(Cash Flow Sankey Diagram)', fontsize=14, fontweight='bold')
-    ax.axis('off')  # Turn off axis
-
-    # Export
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
-    # Display
-    img_html = f'<img id="chartImg" src="data:image/png;base64,{img_data}" alt="Cash Flow Diagram" style="max-width: 100%; height: auto; display: block;">'
-    display(HTML(img_html), target="#chart")
-
-    # Summary
+    # Summary statistics
     total_income = sum([inflows.get(node, 0) for node in nodes if outflows.get(node, 0) == 0 or inflows.get(node, 0) > outflows.get(node, 0)])
     total_savings = sum([outflows.get(node, 0) for node in nodes if 'savings' in node.lower() or 'investment' in node.lower() or '401k' in node.lower() or 'ira' in node.lower() or 'roth' in node.lower()])
     savings_rate = (total_savings / total_income * 100) if total_income > 0 else 0

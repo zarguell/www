@@ -526,6 +526,97 @@ display(HTML(img_html), target="#chart")
 
 See [roth-calculator.astro](src/pages/tools/roth-calculator.astro) for complete working example.
 
+### Working with Plotly in PyScript
+
+When using Plotly for interactive charts in PyScript, you must avoid injecting `<script>` tags via `innerHTML` (browsers don't execute scripts inserted this way). Instead, use the Plotly.js API directly from Python.
+
+#### Step 1: Load Plotly.js in Your Layout
+
+Add Plotly.js CDN to your Python tool layout (or individual page):
+
+```astro
+<!-- In PythonToolLayout.astro or your tool page -->
+<head>
+  <!-- PyScript Core CSS/JS -->
+  <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.2/core.css" />
+  <script is:inline type="module" src="https://pyscript.net/releases/2024.5.2/core.js"></script>
+
+  <!-- Plotly.js for interactive charts -->
+  <script is:inline src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+```
+
+#### Step 2: Use Plotly.react() from Python
+
+In your Python code, import the `js` module and call Plotly's JavaScript API:
+
+```python
+import plotly.graph_objects as go
+from pyscript import display, document, HTML
+from js import Plotly  # Import Plotly from js module
+
+def build_chart(event=None):
+    # ... your data preparation ...
+
+    # Create Plotly figure
+    fig = go.Figure(data=[go.Sankey(
+        node=dict(
+            label=nodes,
+            color=node_colors,
+        ),
+        link=dict(
+            source=sources,
+            target=targets,
+            value=values,
+        ),
+    )])
+
+    fig.update_layout(title_text="My Chart", height=600)
+
+    # Clear previous chart
+    chart_element = document.querySelector("#chart")
+    chart_element.innerHTML = ""
+
+    # Render using Plotly.react() with proper JSON serialization
+    spec = fig.to_plotly_json()
+    spec_json = json.dumps(spec)  # Convert to JSON string
+    spec_js = JSON.parse(spec_json)  # Parse in JS to get plain JS objects
+
+    # Access properties via attributes (not subscript) on JsProxy
+    Plotly.react(chart_element, spec_js.data, spec_js.layout)
+```
+
+#### Why This Approach?
+
+1. **Avoids innerHTML script issue**: Browsers ignore `<script>` tags inserted via `innerHTML`
+2. **No HTML injection**: `to_plotly_json()` returns pure JSON, not HTML with script tags
+3. **Direct JS API**: `Plotly.react()` updates the chart in-place (great for repeated clicks)
+4. **Reliable**: Works consistently across browsers without timing issues
+
+#### Wrong Way (Don't Do This):
+
+```python
+# ❌ This won't work - script tags won't execute
+chart_element.innerHTML = fig.to_html(full_html=False, include_plotlyjs="cdn")
+```
+
+#### Right Way:
+
+```python
+# ✅ Correct - use Plotly.js API from Python with proper JSON handling
+import json
+from js import Plotly, JSON
+
+spec = fig.to_plotly_json()
+spec_json = json.dumps(spec)
+spec_js = JSON.parse(spec_json)
+Plotly.react(chart_element, spec_js.data, spec_js.layout)  # Use .data/.layout, not ["data"]/["layout"]
+```
+
+**Important**: After `JSON.parse()`, you get a Pyodide `JsProxy` object. Use attribute access (`.data`, `.layout`) not subscript (`["data"]`, `["layout"]`), as JsProxy objects don't support `getitem`.
+
+See [sankey-builder.astro](src/pages/tools/sankey-builder.astro) and [main.py](src/public/tools/sankey-builder/main.py) for a complete working example.
+
 ### Additional Resources
 
 - [PyScript Documentation](https://pyscript.net/)
