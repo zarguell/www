@@ -20,37 +20,39 @@ import Sticker from '../components/Sticker.astro';
 
 	<div class="intro">
 		<p>
-			This is a <strong>90s inspired retro website</strong> built with
-			Astro. It's loud, nostalgic, and unapologetically maximalist — just like the
-			internet used to be.
+			This is a <strong>90s inspired retro website</strong>. It's loud, nostalgic, 
+			and unapologetically maximalist. Built with Astro and Claude Code, with the goal that even 
+			AI-assisted code doesn't have to look like every other generic Tailwind template.
 		</p>
 		<p>
-			Explore the blog, play with some tiny tools, or check out the links. Everything
-			is static, lightweight, and built with <Badge text="LOVE" variant="accent" />.
+			Explore the blog, play with some tiny tools, or check out the links. 
+			Everything is designed to be static first (with some 
+			Cloudflare worker serverless compute if necessary).
 		</p>
 	</div>
 
+
 	<div class="features">
 		<Window title="Blog" badgeText="NEW">
-			<p>Read my thoughts on fashion, coding, and the intersection of both.</p>
+			<p>Read my thoughts on whatever I feel like writing about.</p>
 			<RetroButton href="/blog/">Read Posts</RetroButton>
 		</Window>
 
 		<Window title="Tools" badgeText="HOT">
 			<p>
-				Tiny calculators and utilities that feel like toys. Because productivity
-				should be fun.
+				Tiny calculators and utilities that feel like toys. Really just a mix of
+				random stuff I've built over time.
 			</p>
 			<RetroButton href="/tools/">Explore Tools</RetroButton>
 		</Window>
 
 		<Window title="Links">
-			<p>Curated links to interesting corners of the internet. No algorithm required.</p>
+			<p>Quick links to my socials, or other links I want to share./p>
 			<RetroButton href="/links/">Browse Links</RetroButton>
 		</Window>
 
 		<Window title="About">
-			<p>Learn more about me, my style influences, and how this site was built.</p>
+			<p>Learn more about me.</p>
 			<RetroButton href="/about/">About Me</RetroButton>
 		</Window>
 	</div>
