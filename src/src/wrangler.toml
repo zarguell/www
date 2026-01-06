@@ -1,0 +1,5 @@
+name = "www"
+compatibility_date = "2025-01-06"
+
+# Serve your built Astro site as static assets
+assets = { directory = "./dist" }
