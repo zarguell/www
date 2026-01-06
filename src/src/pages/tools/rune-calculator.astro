@@ -4,77 +4,97 @@ import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 ---
 
-<BaseLayout title="Rune Calculator - Retro.SITE">
+<BaseLayout title="Golden Rune Calculator - Retro.SITE">
 	<div class="calculator-hero">
-		<h1>Rune Calculator</h1>
-		<p class="calculator-subtitle">Plan your leveling in Elden Ring</p>
+		<h1>Golden Rune Calculator</h1>
+		<p class="calculator-subtitle">Calculate Golden Runes needed in Elden Ring</p>
 	</div>
 
 	<Window title="Calculator" badgeText="ACTIVE">
 		<form id="rune-form" class="calculator-form">
-			<div class="form-group">
-				<label for="current-level">Current Level</label>
-				<input
-					type="number"
-					id="current-level"
-					name="current-level"
-					required
-					min="1"
-					max="713"
-					step="1"
-					value="1"
-					placeholder="e.g., 1"
-				/>
+			<div class="form-row">
+				<div class="form-group">
+					<label for="runes-needed">Runes needed:</label>
+					<input type="number" id="runes-needed" min="0" required>
+				</div>
+				<div class="form-group">
+					<label for="runes-have">Current Runes:</label>
+					<input type="number" id="runes-have" min="0" required>
+				</div>
 			</div>
 
-			<div class="form-group">
-				<label for="target-level">Target Level</label>
-				<input
-					type="number"
-					id="target-level"
-					name="target-level"
-					required
-					min="1"
-					max="713"
-					step="1"
-					value="50"
-					placeholder="e.g., 50"
-				/>
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-1"># Golden Rune 1:</label>
+					<input type="number" id="rune-1" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-2"># Golden Rune 2:</label>
+					<input type="number" id="rune-2" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-3"># Golden Rune 3:</label>
+					<input type="number" id="rune-3" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-4"># Golden Rune 4:</label>
+					<input type="number" id="rune-4" min="0">
+				</div>
 			</div>
 
-			<RetroButton type="submit" variant="primary">
-				Calculate Runes
-			</RetroButton>
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-5"># Golden Rune 5:</label>
+					<input type="number" id="rune-5" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-6"># Golden Rune 6:</label>
+					<input type="number" id="rune-6" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-7"># Golden Rune 7:</label>
+					<input type="number" id="rune-7" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-8"># Golden Rune 8:</label>
+					<input type="number" id="rune-8" min="0">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-9"># Golden Rune 9:</label>
+					<input type="number" id="rune-9" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-10"># Golden Rune 10:</label>
+					<input type="number" id="rune-10" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-11"># Golden Rune 11:</label>
+					<input type="number" id="rune-11" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-12"># Golden Rune 12:</label>
+					<input type="number" id="rune-12" min="0">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-13"># Golden Rune 13:</label>
+					<input type="number" id="rune-13" min="0">
+				</div>
+				<div class="form-group button-group">
+					<RetroButton type="submit" variant="primary">
+						Calculate
+					</RetroButton>
+				</div>
+			</div>
 		</form>
 	</Window>
 
-	<div id="results" class="results-section" style="display: none;">
-		<Window title="Results" badgeText="CALCULATED">
-			<div class="results-content">
-				<div class="result-item result-highlight">
-					<span class="result-label">Runes Needed:</span>
-					<span class="result-value result-value-large" id="runes-needed"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Levels to Gain:</span>
-					<span class="result-value" id="levels-gain"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Current Level Cost:</span>
-					<span class="result-value" id="current-cost"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Target Level Cost:</span>
-					<span class="result-value" id="target-cost"></span>
-				</div>
-				<div class="result-info">
-					<p class="info-text">
-						<strong>Note:</strong> This calculator shows the total runes needed to go from your current level to your target level.
-					</p>
-				</div>
-			</div>
-		</Window>
-	</div>
+	<div id="result" class="results-section"></div>
 </BaseLayout>
 
 <style>
@@ -100,14 +120,24 @@ import RetroButton from '../../components/RetroButton.astro';
 		gap: 1.5rem;
 	}
 
+	.form-row {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1rem;
+	}
+
 	.form-group {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
 	}
 
+	.form-group.button-group {
+		justify-content: flex-end;
+	}
+
 	.form-group label {
-		font-size: 1.1rem;
+		font-size: 1rem;
 		font-weight: bold;
 		color: var(--text);
 	}
@@ -132,55 +162,36 @@ import RetroButton from '../../components/RetroButton.astro';
 		margin-top: 2rem;
 	}
 
-	.results-content {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
+	.results-section table {
+		width: 100%;
+		margin: 0 auto;
+		border-collapse: collapse;
+		background: var(--bg2);
+		border: 3px solid var(--border);
 	}
 
-	.result-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.5rem 0;
+	.results-section thead {
+		background: var(--accent);
 	}
 
-	.result-label {
+	.results-section th {
+		padding: 1rem;
+		text-align: center;
 		font-size: 1.1rem;
-		color: var(--muted);
+		color: var(--bg);
+		font-weight: bold;
 	}
 
-	.result-value {
-		font-size: 1.2rem;
-		font-weight: bold;
+	.results-section td {
+		padding: 0.75rem;
+		text-align: center;
+		border: 1px solid var(--border);
+		font-size: 1.1rem;
 		color: var(--text);
 	}
 
-	.result-value-large {
-		font-size: 1.5rem;
-		color: var(--accent);
-	}
-
-	.result-highlight {
-		background: var(--bg2);
-		padding: 1rem;
-		border-radius: 4px;
-		border: 2px solid var(--accent);
-	}
-
-	.result-info {
-		margin-top: 0.5rem;
-		padding: 1rem;
-		background: var(--bg2);
-		border-radius: 4px;
-		border: 2px solid var(--border);
-	}
-
-	.info-text {
-		margin: 0;
-		font-size: 1rem;
-		color: var(--muted);
-		line-height: 1.5;
+	.results-section tbody tr:nth-child(even) {
+		background: var(--bg3);
 	}
 
 	@media (max-width: 768px) {
@@ -188,86 +199,131 @@ import RetroButton from '../../components/RetroButton.astro';
 			font-size: 2.5rem;
 		}
 
-		.result-item {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.25rem;
+		.form-row {
+			grid-template-columns: repeat(2, 1fr);
 		}
+	}
 
-		.result-value-large {
-			font-size: 1.3rem;
+	@media (max-width: 480px) {
+		.form-row {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
 
 <script>
-	// Elden Ring rune cost formula (simplified approximation)
-	// Based on the actual game formula: cost = 0.02 * level^3 + 3.06 * level^2 + 105.6 * level - 895
-	function getRuneCost(level: number): number {
-		if (level <= 0) return 0;
-		const cost = Math.floor(0.02 * Math.pow(level, 3) + 3.06 * Math.pow(level, 2) + 105.6 * level - 895);
-		return Math.max(cost, level === 1 ? 0 : cost);
-	}
+	function calculateRunes(runesNeeded: number, runesHave: number, availableRunes: number[]) {
+		// Subtract the number of runes you already have from the number of runes needed
+		runesNeeded -= runesHave;
 
-	// Calculate total runes from level 1 to target level
-	function getTotalRunes(targetLevel: number): number {
-		let total = 0;
-		for (let i = 1; i < targetLevel; i++) {
-			total += getRuneCost(i + 1);
+		// Initialize the array to store the number of each type of golden runes needed
+		const numGoldenRunes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+		// Calculate the number of each type of golden runes needed
+		while (runesNeeded > 0) {
+			if (runesNeeded >= 5000 && availableRunes[10] > 0) {
+				numGoldenRunes[10]++;
+				runesNeeded -= 5000;
+				availableRunes[10]--;
+			} else if (runesNeeded >= 3800 && availableRunes[9] > 0) {
+				numGoldenRunes[9]++;
+				runesNeeded -= 3800;
+				availableRunes[9]--;
+			} else if (runesNeeded >= 3000 && availableRunes[8] > 0) {
+				numGoldenRunes[8]++;
+				runesNeeded -= 3000;
+				availableRunes[8]--;
+			} else if (runesNeeded >= 2500 && availableRunes[7] > 0) {
+				numGoldenRunes[7]++;
+				runesNeeded -= 2500;
+				availableRunes[7]--;
+			} else if (runesNeeded >= 2000 && availableRunes[6] > 0) {
+				numGoldenRunes[6]++;
+				runesNeeded -= 2000;
+				availableRunes[6]--;
+			} else if (runesNeeded >= 1600 && availableRunes[5] > 0) {
+				numGoldenRunes[5]++;
+				runesNeeded -= 1600;
+				availableRunes[5]--;
+			} else if (runesNeeded >= 1200 && availableRunes[4] > 0) {
+				numGoldenRunes[4]++;
+				runesNeeded -= 1200;
+				availableRunes[4]--;
+			} else if (runesNeeded >= 800 && availableRunes[3] > 0) {
+				numGoldenRunes[3]++;
+				runesNeeded -= 800;
+				availableRunes[3]--;
+			} else if (runesNeeded >= 400 && availableRunes[2] > 0) {
+				numGoldenRunes[2]++;
+				runesNeeded -= 400;
+				availableRunes[2]--;
+			} else if (runesNeeded >= 200 && availableRunes[1] > 0) {
+				numGoldenRunes[1]++;
+				runesNeeded -= 200;
+				availableRunes[1]--;
+			} else if (availableRunes[0] > 0) {
+				numGoldenRunes[0]++;
+				runesNeeded -= 100;
+				availableRunes[0]--;
+			} else {
+				// Return an empty array if there are not enough runes available
+				return [];
+			}
 		}
-		return total;
-	}
 
-	function calculateRunes(e: Event) {
-		e.preventDefault();
-
-		const form = e.target as HTMLFormElement;
-		const currentLevel = parseInt((form.elements.namedItem('current-level') as HTMLInputElement).value);
-		const targetLevel = parseInt((form.elements.namedItem('target-level') as HTMLInputElement).value);
-
-		// Validate input
-		if (targetLevel <= currentLevel) {
-			alert('Target level must be higher than current level!');
-			return;
-		}
-
-		if (currentLevel < 1 || currentLevel > 713 || targetLevel < 1 || targetLevel > 713) {
-			alert('Levels must be between 1 and 713!');
-			return;
-		}
-
-		// Calculate runes
-		const totalRunesTarget = getTotalRunes(targetLevel);
-		const totalRunesCurrent = getTotalRunes(currentLevel);
-		const runesNeeded = totalRunesTarget - totalRunesCurrent;
-		const levelsGain = targetLevel - currentLevel;
-		const currentCost = getRuneCost(currentLevel + 1);
-		const targetCost = getRuneCost(targetLevel);
-
-		// Update UI
-		(
-			document.getElementById('runes-needed') as HTMLElement
-		).textContent = runesNeeded.toLocaleString('en-US');
-		(document.getElementById('levels-gain') as HTMLElement).textContent = levelsGain.toString();
-		(
-			document.getElementById('current-cost') as HTMLElement
-		).textContent = currentCost.toLocaleString('en-US');
-		(
-			document.getElementById('target-cost') as HTMLElement
-		).textContent = targetCost.toLocaleString('en-US');
-
-		// Show results
-		(document.getElementById('results') as HTMLElement).style.display = 'block';
-
-		// Scroll to results
-		(document.getElementById('results') as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+		return numGoldenRunes;
 	}
 
 	// Add event listener when DOM is ready
 	document.addEventListener('DOMContentLoaded', () => {
 		const form = document.getElementById('rune-form');
-		if (form) {
-			form.addEventListener('submit', calculateRunes);
+		const resultDiv = document.getElementById('result');
+
+		if (form && resultDiv) {
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+
+				const runesNeededInput = document.getElementById('runes-needed') as HTMLInputElement;
+				const runesHaveInput = document.getElementById('runes-have') as HTMLInputElement;
+
+				const runesNeeded = parseInt(runesNeededInput.value) || 0;
+				const runesHave = parseInt(runesHaveInput.value) || 0;
+
+				// Initialize the array to store the # of each type of golden runes
+				const availableRunes: number[] = [];
+
+				// Get the # of each type of golden runes
+				for (let i = 0; i < 13; i++) {
+					const inputField = document.getElementById(`rune-${i + 1}`) as HTMLInputElement;
+					availableRunes.push(parseInt(inputField?.value) || 0);
+				}
+
+				const numGoldenRunes = calculateRunes(runesNeeded, runesHave, availableRunes);
+
+				const table = document.createElement('table');
+				table.innerHTML = `
+					<thead>
+						<tr>
+							<th>Golden Rune</th>
+							<th>Quantity Needed</th>
+						</tr>
+					</thead>
+					<tbody>
+						${numGoldenRunes.map((quantity, index) => `
+							<tr>
+								<td style="text-align: center;">${index + 1}</td>
+								<td style="text-align: center">${quantity}</td>
+							</tr>
+						`).join('')}
+					</tbody>
+				`;
+
+				resultDiv.innerHTML = '';
+				resultDiv.appendChild(table);
+
+				// Scroll to results
+				resultDiv.scrollIntoView({ behavior: 'smooth' });
+			});
 		}
 	});
 </script>
