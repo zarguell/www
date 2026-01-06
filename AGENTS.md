@@ -2,6 +2,8 @@
 
 Single source of truth for AI agents working on this codebase.
 
+**🚨 READ THIS FIRST**: Check for `CONTINUE.md` in the repo root. If it exists, read it for current project status before starting work. CONTINUE.md has up-to-date information about what's been completed and what remains.
+
 ## Project Structure
 
 **IMPORTANT**: The Astro application is located in `./src` (not at the repository root).
@@ -60,7 +62,8 @@ npm run astro    # Run Astro CLI commands
 ### Content Collections
 - Config: `./src/src/content.config.ts`
 - Blog posts: `./src/src/content/blog/`
-- Collection name: `blog` (not "posts" - this is intentional)
+- **⚠️ COLLECTION NAME IS "blog"** (not "posts" - this is intentional historical naming)
+- When using `getCollection('blog')` - use 'blog' not 'posts'
 - File format: `.md` or `.mdx`
 
 ### Styles
