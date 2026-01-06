@@ -126,15 +126,15 @@ def build_sankey(event=None):
     for node in nodes:
         total_in = inflows.get(node, 0)
         total_out = outflows.get(node, 0)
-        node_data.append({'node': node, 'in': total_in, 'out': total_out, 'color': get_color(node)})
+        node_data.append({'node': node, 'inflow': total_in, 'outflow': total_out, 'color': get_color(node)})
 
     # Sort by total flow
-    node_data.sort(key=lambda x: max(x['in'], x['out']), reverse=True)
+    node_data.sort(key=lambda x: max(x['inflow'], x['outflow']), reverse=True)
 
     # Create bar chart instead (more reliable than Sankey)
     y_pos = np.arange(len(node_data))
-    inflow_vals = [d['in'] for d in node_data]
-    outflow_vals = [d['out'] for d in node_data]
+    inflow_vals = [d['inflow'] for d in node_data]
+    outflow_vals = [d['outflow'] for d in node_data]
     colors = [d['color'] for d in node_data]
     labels = [d['node'] for d in node_data]
 
