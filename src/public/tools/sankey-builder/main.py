@@ -113,56 +113,35 @@ def build_sankey(event=None):
     chart_element = document.querySelector("#chart")
     chart_element.innerHTML = ""
 
-    # Create a simpler flow visualization using stacked bar chart
-    # This is more reliable than matplotlib.sankey for arbitrary flows
-    fig, ax = plt.subplots(figsize=(14, 8), dpi=200)
+    # Create Sankey diagram
+    fig = plt.figure(figsize=(14, 8), dpi=200)
+    ax = fig.add_subplot(111)
 
-    # Group flows by source
-    sources = {}
+    # Prepare flows for matplotlib.sankey
+    # Format: [source, target, value]
+    sankey_flows = []
     for flow in aggregated:
-        source = flow['source']
-        if source not in sources:
-            sources[source] = []
-        sources[source].append({'target': flow['target'], 'value': flow['value']})
+        source_idx = node_index[flow['source']]
+        target_idx = node_index[flow['target']]
+        sankey_flows.append([source_idx, target_idx, flow['value']])
 
-    # Sort sources by total flow
-    source_totals = {s: sum([f['value'] for f in flows]) for s, flows in sources.items()}
-    sorted_sources = sorted(source_totals.keys(), key=lambda x: source_totals[x], reverse=True)
+    # Create labels
+    labels = nodes
 
-    # Get all unique targets
-    all_targets = sorted(list(set([flow['target'] for flow in aggregated])))
+    # Create Sankey diagram with default parameters
+    sankey = Sankey(
+        flows=sankey_flows,
+        labels=labels,
+        flow_labels=None,
+        headangle=180,
+        margin=0.25,
+        width=0.2,
+    )
 
-    # Create stacked bar chart
-    y_pos = np.arange(len(sorted_sources))
-    bottom = np.zeros(len(sorted_sources))
+    sankey.finish()
 
-    # Color mapping
-    target_colors = {target: get_color(target) for target in all_targets}
-
-    # Plot each target as a stacked segment
-    for target in all_targets:
-        values = []
-        for source in sorted_sources:
-            # Find flow from this source to target
-            matching = [f['value'] for f in sources.get(source, []) if f['target'] == target]
-            values.append(sum(matching) if matching else 0)
-
-        if sum(values) > 0:  # Only plot if there's data
-            ax.barh(y_pos, values, left=bottom, label=target, color=target_colors[target], alpha=0.7, edgecolor='black')
-            bottom += values
-
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(sorted_sources)
-    ax.invert_yaxis()
-    ax.set_xlabel('Flow Amount ($)', fontsize=11, fontweight='bold')
-    ax.set_title(f'{title}\n(Cash Flow Stacked Bar Chart)', fontsize=14, fontweight='bold')
-    ax.legend(loc='lower right', fontsize=9)
-    ax.grid(True, alpha=0.3, axis='x')
-
-    # Format x-axis as currency
-    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}k' if x >= 1000 else f'${int(x)}'))
-
-    plt.tight_layout()
+    ax.set_title(f'{title}\n(Cash Flow Sankey Diagram)', fontsize=14, fontweight='bold')
+    ax.axis('off')  # Turn off axis
 
     # Export
     buf = BytesIO()
