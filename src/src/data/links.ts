@@ -28,6 +28,31 @@ export const linksData: LinkCategory[] = [
 				url: "https://www.linkedin.com/in/zarguell/",
 				description: "Professional networking",
 			},
+			{
+				title: "eBird",
+				url: "https://ebird.org/profile/MjYxNjc3NA",
+				description: "Birdwatching observations and data",
+			},
+		],
+	},
+	{
+		name: "Projects",
+		links: [
+			{
+				title: "Audio Birdle",
+				url: "https://audio-birdle.sechostlab.com",
+				description: "(Beta) My experimental bird song guessing game",
+			},
+			{
+				title: "Secret Santa",
+				url: "https://secret-santa.useast01.workers.dev/",
+				description: "Secret Santa, but in Cloudflare Workers",
+			},
+			{
+				title: "Tia N List",
+				url: "https://zarguell.github.io/tia-n-list/",
+				description: "My AI/LLM assisted Threat Intel Analyst",
+			},
 		],
 	},
 ];

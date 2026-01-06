@@ -129,7 +129,7 @@ import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 ---
 
-<BaseLayout title="My Tool - Retro.SITE">
+<BaseLayout title="My Tool - ARGUELLES.ME">
 	<Window title="My Tool">
 		<!-- Your tool interface here -->
 	</Window>
@@ -170,7 +170,7 @@ See `docs/THEME.md` for the complete token list and usage guidelines.
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Page Title - Retro.SITE">
+<BaseLayout title="Page Title - ARGUELLES.ME">
 	<div class="prose">
 		<h1>Page Title</h1>
 		<p>Your content here...</p>
