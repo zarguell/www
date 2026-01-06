@@ -113,46 +113,47 @@ def build_sankey(event=None):
     chart_element = document.querySelector("#chart")
     chart_element.innerHTML = ""
 
-    # Create figure
-    fig = plt.figure(figsize=(12, 8), dpi=200)
+    # Create Sankey diagram
+    fig = plt.figure(figsize=(14, 10), dpi=200)
     ax = fig.add_subplot(111)
 
-    # Build Sankey
-    # Note: matplotlib.sankey requires flows in order, skip for now and use simple bar chart instead
-    # Fall back to bar chart visualization for stability
+    # Prepare flows for matplotlib.sankey
+    # Format: [source, target, value]
+    sankey_flows = []
+    for flow in aggregated:
+        source_idx = node_index[flow['source']]
+        target_idx = node_index[flow['target']]
+        sankey_flows.append([source_idx, target_idx, flow['value']])
 
-    # Calculate node totals
-    node_data = []
-    for node in nodes:
-        total_in = inflows.get(node, 0)
-        total_out = outflows.get(node, 0)
-        node_data.append({'node': node, 'inflow': total_in, 'outflow': total_out, 'color': get_color(node)})
+    # Create labels
+    labels = nodes
 
-    # Sort by total flow
-    node_data.sort(key=lambda x: max(x['inflow'], x['outflow']), reverse=True)
+    # Get colors for each flow
+    colors = []
+    for flow in aggregated:
+        colors.append(get_color(flow['source']))
 
-    # Create bar chart instead (more reliable than Sankey)
-    y_pos = np.arange(len(node_data))
-    inflow_vals = [d['inflow'] for d in node_data]
-    outflow_vals = [d['outflow'] for d in node_data]
-    colors = [d['color'] for d in node_data]
-    labels = [d['node'] for d in node_data]
+    # Add alpha for transparency
+    from matplotlib.colors import to_rgba
+    flow_colors = [to_rgba(c, alpha=0.6) for c in colors]
 
-    ax.barh(y_pos, inflow_vals, color=colors, alpha=0.6, label='Inflow', edgecolor='black')
-    ax.barh(y_pos, outflow_vals, color=colors, alpha=0.3, label='Outflow', edgecolor='black', left=0)
+    # Create Sankey diagram
+    sankey = Sankey(
+        flows=sankey_flows,
+        labels=labels,
+        flow_labels=None,  # Don't show values on flows
+        orientations=[0] * len(nodes),  # All horizontal
+        edgecolor='black',
+        facecolors=flow_colors,
+        headangle=180,
+        margin=0.2,
+        scale=1.0 / max([sum([f[2] for f in sankey_flows if f[0] == i]) for i in range(len(nodes))]) if sankey_flows else 1.0
+    )
 
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels)
-    ax.invert_yaxis()
-    ax.set_xlabel('Amount ($)', fontsize=10, fontweight='bold')
-    ax.set_title(f'{title}\n(Flow Visualization)', fontsize=12, fontweight='bold')
-    ax.legend(loc='lower right')
-    ax.grid(True, alpha=0.3, axis='x')
+    sankey.finish()
 
-    # Format x-axis
-    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1000:.0f}k' if x >= 1000 else f'${int(x)}'))
-
-    plt.tight_layout()
+    ax.set_title(f'{title}\n(Cash Flow Sankey Diagram)', fontsize=14, fontweight='bold')
+    ax.axis('off')  # Turn off axis
 
     # Export
     buf = BytesIO()
@@ -178,7 +179,7 @@ def build_sankey(event=None):
         '''
         for imb in imbalances[:5]:  # Show first 5
             diff_text = f"+${imb['diff']:,.0f}" if imb['diff'] > 0 else f"-${abs(imb['diff']):,.0f}"
-            imbalance_warning += f'<li>{imb["node"]}: In ${imb["in"]:,.0f}, Out ${imb["out"]:,.0f} ({diff_text})</li>'
+            imbalance_warning += f'<li>{imb["node"]}: In ${imb["inflow"]:,.0f}, Out ${imb["outflow"]:,.0f} ({diff_text})</li>'
         imbalance_warning += '</ul></div>'
 
     summary_html = f'''
