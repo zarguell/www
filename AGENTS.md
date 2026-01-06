@@ -195,6 +195,7 @@ draft: false
 ## Additional Documentation
 
 - **README.md** - Human-friendly project overview
+- **TOOL-DEV-GUIDE.md** - Guide for building interactive tools with JavaScript (calculators, forms, etc.)
 - **docs/THEME.md** - Theme tokens and styling guidelines
 - **docs/CONTENT.md** - Content structure and writing guidelines
 - **PRD.md** - Original product requirements document

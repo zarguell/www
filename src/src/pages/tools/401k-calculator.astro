@@ -4,122 +4,97 @@ import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 ---
 
-<BaseLayout title="401(k) Calculator - Retro.SITE">
+<BaseLayout title="401k + Mega Backdoor Calculator - Retro.SITE">
 	<div class="calculator-hero">
-		<h1>401(k) Calculator</h1>
-		<p class="calculator-subtitle">Plan your retirement growth</p>
+		<h1>401k + Mega Backdoor Roth Calculator</h1>
+		<p class="calculator-subtitle">Tiered Match + Strategies</p>
+		<p class="last-updated" id="lastUpdated"></p>
 	</div>
 
 	<Window title="Calculator" badgeText="ACTIVE">
-		<form id="calculator-form" class="calculator-form">
+		<div class="calculator-form">
 			<div class="form-group">
-				<label for="salary">Annual Salary ($)</label>
-				<input
-					type="number"
-					id="salary"
-					name="salary"
-					required
-					min="0"
-					step="1000"
-					value="75000"
-					placeholder="e.g., 75000"
-				/>
+				<label for="salary">Annual base salary ($)</label>
+				<input type="number" id="salary" value="50000" step="100" />
 			</div>
 
 			<div class="form-group">
-				<label for="contribution">Contribution Rate (%)</label>
-				<input
-					type="number"
-					id="contribution"
-					name="contribution"
-					required
-					min="0"
-					max="100"
-					step="0.5"
-					value="6"
-					placeholder="e.g., 6"
-				/>
+				<label for="payPeriods">Pay periods per year</label>
+				<input type="number" id="payPeriods" value="26" step="1" />
+			</div>
+
+			<h3>Your elective deferral strategy</h3>
+			<div class="form-group">
+				<label for="strategy">Strategy</label>
+				<select id="strategy">
+					<option value="minTspMax401k">Minimum TSP (full match), Max 401k Schwab</option>
+					<option value="min401kMaxTsp">Minimum 401k (full match), Max TSP</option>
+					<option value="custom">Custom TSP / 401k %</option>
+				</select>
+			</div>
+
+			<div id="customInputs" style="display:none;">
+				<div class="form-group">
+					<label for="employeeTspPct">Custom TSP contribution (% of salary)</label>
+					<input type="number" id="employeeTspPct" value="5" step="0.1" />
+				</div>
+
+				<div class="form-group">
+					<label for="employeeK401Pct">Custom 401k contribution (% of salary)</label>
+					<input type="number" id="employeeK401Pct" value="10" step="0.1" />
+				</div>
+			</div>
+
+			<h3>Employer contribution settings</h3>
+			<div class="form-group">
+				<label for="autoTspPct">Automatic TSP contribution (% of salary)</label>
+				<input type="number" id="autoTspPct" value="1" step="0.1" />
 			</div>
 
 			<div class="form-group">
-				<label for="match">Employer Match (%)</label>
-				<input
-					type="number"
-					id="match"
-					name="match"
-					required
-					min="0"
-					max="100"
-					step="0.5"
-					value="3"
-					placeholder="e.g., 3"
-				/>
+				<label for="autoK401Pct">Automatic 401k contribution (% of salary)</label>
+				<input type="number" id="autoK401Pct" value="4" step="0.1" />
 			</div>
 
 			<div class="form-group">
-				<label for="years">Investment Period (years)</label>
-				<input
-					type="number"
-					id="years"
-					name="years"
-					required
-					min="1"
-					max="50"
-					step="1"
-					value="30"
-					placeholder="e.g., 30"
-				/>
+				<label for="tspMatchTier1">TSP match: 1:1 up to (%)</label>
+				<input type="number" id="tspMatchTier1" value="3" step="0.1" />
 			</div>
 
 			<div class="form-group">
-				<label for="return-rate">Annual Return Rate (%)</label>
-				<input
-					type="number"
-					id="return-rate"
-					name="return-rate"
-					required
-					min="0"
-					max="20"
-					step="0.1"
-					value="7"
-					placeholder="e.g., 7"
-				/>
+				<label for="tspMatchTier2">TSP match: 50% for next (%)</label>
+				<input type="number" id="tspMatchTier2" value="2" step="0.1" />
 			</div>
 
-			<RetroButton type="submit" variant="primary">
-				Calculate
+			<div class="form-group">
+				<label for="k401MatchTier">401k match: 1:1 up to (%)</label>
+				<input type="number" id="k401MatchTier" value="1" step="0.1" />
+			</div>
+
+			<hr />
+
+			<RetroButton variant="primary" onClick="calculate()">
+				Calculate Max Contributions
 			</RetroButton>
-		</form>
+		</div>
 	</Window>
 
-	<div id="results" class="results-section" style="display: none;">
+	<div id="results" class="results-section" style="display:none;">
 		<Window title="Results" badgeText="CALCULATED">
 			<div class="results-content">
-				<div class="result-item">
-					<span class="result-label">Your Annual Contribution:</span>
-					<span class="result-value" id="your-contribution"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Employer Annual Contribution:</span>
-					<span class="result-value" id="employer-contribution"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Total Annual Contribution:</span>
-					<span class="result-value" id="total-annual"></span>
-				</div>
-				<hr class="result-divider" />
-				<div class="result-item result-highlight">
-					<span class="result-label">Projected Balance After <span id="years-display"></span> Years:</span>
-					<span class="result-value result-value-large" id="final-balance"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Total Contributed:</span>
-					<span class="result-value" id="total-contributed"></span>
-				</div>
-				<div class="result-item">
-					<span class="result-label">Total Investment Earnings:</span>
-					<span class="result-value" id="total-earnings"></span>
-				</div>
+				<p><strong>Bi-weekly salary:</strong> <span id="biWeekly"></span></p>
+
+				<h3>Strategy & elective deferrals</h3>
+				<div id="electiveDetails"></div>
+
+				<h3>Employer contributions (auto + match)</h3>
+				<div id="employerBreakdown"></div>
+
+				<h3>After-tax (Mega Backdoor) space</h3>
+				<div id="afterTaxDetails"></div>
+
+				<h3>Annual totals</h3>
+				<div id="annualSummary"></div>
 			</div>
 		</Window>
 	</div>
@@ -132,7 +107,7 @@ import RetroButton from '../../components/RetroButton.astro';
 	}
 
 	.calculator-hero h1 {
-		font-size: 3rem;
+		font-size: 2.5rem;
 		margin: 0 0 0.5rem 0;
 	}
 
@@ -142,10 +117,16 @@ import RetroButton from '../../components/RetroButton.astro';
 		margin: 0;
 	}
 
+	.last-updated {
+		font-size: 0.85rem;
+		color: var(--muted);
+		margin-top: 0.5rem;
+	}
+
 	.calculator-form {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1rem;
 	}
 
 	.form-group {
@@ -160,7 +141,8 @@ import RetroButton from '../../components/RetroButton.astro';
 		color: var(--text);
 	}
 
-	.form-group input {
+	.form-group input,
+	.form-group select {
 		font-family: 'VT323', monospace;
 		font-size: 1.2rem;
 		padding: 0.75rem;
@@ -171,9 +153,17 @@ import RetroButton from '../../components/RetroButton.astro';
 		transition: all 0.2s ease;
 	}
 
-	.form-group input:focus {
+	.form-group input:focus,
+	.form-group select:focus {
 		border-color: var(--focus);
 		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	.calculator-form h3 {
+		font-size: 1.3rem;
+		margin-top: 1rem;
+		margin-bottom: 0.5rem;
+		color: var(--accent);
 	}
 
 	.results-section {
@@ -186,117 +176,282 @@ import RetroButton from '../../components/RetroButton.astro';
 		gap: 1rem;
 	}
 
-	.result-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.5rem 0;
-	}
-
-	.result-label {
-		font-size: 1.1rem;
-		color: var(--muted);
-	}
-
-	.result-value {
-		font-size: 1.2rem;
-		font-weight: bold;
-		color: var(--text);
-	}
-
-	.result-value-large {
-		font-size: 1.5rem;
+	.results-content h3 {
+		font-size: 1.3rem;
+		margin-top: 1rem;
+		margin-bottom: 0.5rem;
 		color: var(--accent);
 	}
 
-	.result-highlight {
-		background: var(--bg2);
-		padding: 1rem;
-		border-radius: 4px;
-		border: 2px solid var(--accent);
+	.small {
+		font-size: 0.85rem;
+		color: var(--muted);
 	}
 
-	.result-divider {
-		border: none;
-		border-top: 2px solid var(--border);
+	.highlight {
+		background: var(--bg2);
+		padding: 0.5rem;
+		border-left: 4px solid var(--accent);
 		margin: 0.5rem 0;
+	}
+
+	.warning {
+		background: var(--bg2);
+		padding: 0.5rem;
+		border-left: 4px solid #ffc107;
+		margin: 0.5rem 0;
+		color: var(--text);
+	}
+
+	.match-tier {
+		background: var(--bg2);
+		padding: 0.5rem;
+		margin: 0.25rem 0;
+		border-left: 3px solid var(--border);
 	}
 
 	@media (max-width: 768px) {
 		.calculator-hero h1 {
-			font-size: 2.5rem;
-		}
-
-		.result-item {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.25rem;
-		}
-
-		.result-value-large {
-			font-size: 1.3rem;
+			font-size: 2rem;
 		}
 	}
 </style>
 
-<script>
-	function calculate401k(e: Event) {
-		e.preventDefault();
+<script is:inline>
+	document.addEventListener("DOMContentLoaded", function() {
+		// ============================
+		// CONFIGURABLE CONSTANTS
+		// ============================
 
-		const form = e.target as HTMLFormElement;
-		const salary = parseFloat((form.elements.namedItem('salary') as HTMLInputElement).value);
-		const contributionRate = parseFloat((form.elements.namedItem('contribution') as HTMLInputElement).value) / 100;
-		const matchRate = parseFloat((form.elements.namedItem('match') as HTMLInputElement).value) / 100;
-		const years = parseInt((form.elements.namedItem('years') as HTMLInputElement).value);
-		const returnRate = parseFloat((form.elements.namedItem('return-rate') as HTMLInputElement).value) / 100;
+		const ELECTIVE_LIMIT = 24500;  // Employee elective deferral limit
+		const TOTAL_LIMIT    = 72000;  // Total additions (employee + employer)
+		const LAST_UPDATED_TEXT = "Last updated: Jan 5, 2026";
 
-		// Calculate annual contributions
-		const yourAnnualContribution = salary * contributionRate;
-		const employerAnnualContribution = salary * matchRate;
-		const totalAnnualContribution = yourAnnualContribution + employerAnnualContribution;
+		// ============================
+		// HELPERS
+		// ============================
 
-		// Calculate compound interest
-		let balance = 0;
-		for (let i = 0; i < years; i++) {
-			balance = (balance + totalAnnualContribution) * (1 + returnRate);
+		function formatCurrency(amount) {
+			return "$" + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		}
 
-		const totalContributed = totalAnnualContribution * years;
-		const totalEarnings = balance - totalContributed;
-
-		// Update UI
-		(
-			document.getElementById('your-contribution') as HTMLElement
-		).textContent = `$${yourAnnualContribution.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-		(
-			document.getElementById('employer-contribution') as HTMLElement
-		).textContent = `$${employerAnnualContribution.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-		(
-			document.getElementById('total-annual') as HTMLElement
-		).textContent = `$${totalAnnualContribution.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-		(document.getElementById('years-display') as HTMLElement).textContent = years.toString();
-		(
-			document.getElementById('final-balance') as HTMLElement
-		).textContent = `$${balance.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-		(
-			document.getElementById('total-contributed') as HTMLElement
-		).textContent = `$${totalContributed.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-		(
-			document.getElementById('total-earnings') as HTMLElement
-		).textContent = `$${totalEarnings.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-
-		// Show results
-		(document.getElementById('results') as HTMLElement).style.display = 'block';
-
-		// Scroll to results
-		(document.getElementById('results') as HTMLElement).scrollIntoView({ behavior: 'smooth' });
-	}
-
-	// Add event listener when DOM is ready
-	document.addEventListener('DOMContentLoaded', () => {
-		const form = document.getElementById('calculator-form');
-		if (form) {
-			form.addEventListener('submit', calculate401k);
+		function formatPercent(value) {
+			return value.toFixed(2) + "%";
 		}
+
+		// Tiered TSP match: 1:1 on first tier1%, 50% on next tier2%
+		function calcTspMatchPerPay(biWeekly, employeeTspPct, tier1, tier2) {
+			let match = 0;
+
+			// First tier: 1:1 up to tier1%
+			const pctTier1Used = Math.min(employeeTspPct, tier1);
+			match += biWeekly * (pctTier1Used / 100);
+
+			// Second tier: 50% up to tier2% above tier1
+			if (employeeTspPct > tier1) {
+				const pctAboveTier1 = employeeTspPct - tier1;
+				const pctTier2Used = Math.min(pctAboveTier1, tier2);
+				match += biWeekly * (pctTier2Used / 100) * 0.5;
+			}
+
+			return match;
+		}
+
+		// Simple 1:1 match up to k401MatchTier%
+		function calc401kMatchPerPay(biWeekly, employeeK401Pct, matchTier) {
+			const pctUsed = Math.min(employeeK401Pct, matchTier);
+			return biWeekly * (pctUsed / 100);
+		}
+
+		// ============================
+		// MAIN CALCULATION
+		// ============================
+
+		function calculate() {
+			const salary        = parseFloat(document.getElementById("salary").value) || 0;
+			const payPeriods    = parseInt(document.getElementById("payPeriods").value, 10) || 26;
+			const strategy      = document.getElementById("strategy").value;
+
+			const autoTspPct    = parseFloat(document.getElementById("autoTspPct").value) || 0;
+			const autoK401Pct   = parseFloat(document.getElementById("autoK401Pct").value) || 0;
+			const tspMatchTier1 = parseFloat(document.getElementById("tspMatchTier1").value) || 0;
+			const tspMatchTier2 = parseFloat(document.getElementById("tspMatchTier2").value) || 0;
+			const k401MatchTier = parseFloat(document.getElementById("k401MatchTier").value) || 0;
+
+			if (salary <= 0 || payPeriods <= 0) {
+				alert("Please enter positive salary and pay periods.");
+				return;
+			}
+
+			const biWeekly = salary / payPeriods;
+
+			// Decide employee TSP% and 401k% based on strategy
+			let employeeTspPct, employeeK401Pct, strategyText, warnings = "";
+
+			if (strategy === "minTspMax401k") {
+				// Minimum TSP for full match: tier1 + tier2
+				const fullTspMatchPct = tspMatchTier1 + tspMatchTier2;
+				employeeTspPct = fullTspMatchPct;
+
+				const tspElectiveAnnual = salary * (employeeTspPct / 100);
+				let remainingElective = ELECTIVE_LIMIT - tspElectiveAnnual;
+				if (remainingElective < 0) {
+					remainingElective = 0;
+					warnings += `<div class="warning">Warning: TSP % alone exceeds elective limit.</div>`;
+				}
+				employeeK401Pct = (remainingElective / salary) * 100;
+
+				strategyText = `
+					<p><strong>Strategy:</strong> Minimum TSP (full match at ${fullTspMatchPct.toFixed(2)}%), remaining elective to 401k Schwab.</p>
+				`;
+			} else if (strategy === "min401kMaxTsp") {
+				// Minimum 401k for full match: k401MatchTier
+				employeeK401Pct = k401MatchTier;
+
+				const k401ElectiveAnnual = salary * (employeeK401Pct / 100);
+				let remainingElective = ELECTIVE_LIMIT - k401ElectiveAnnual;
+				if (remainingElective < 0) {
+					remainingElective = 0;
+					warnings += `<div class="warning">Warning: 401k % alone exceeds elective limit.</div>`;
+				}
+				employeeTspPct = (remainingElective / salary) * 100;
+
+				strategyText = `
+					<p><strong>Strategy:</strong> Minimum 401k (full match at ${k401MatchTier.toFixed(2)}%), remaining elective to TSP.</p>
+				`;
+			} else {
+				// Custom: read from inputs
+				const customTsp = parseFloat(document.getElementById("employeeTspPct").value) || 0;
+				const custom401 = parseFloat(document.getElementById("employeeK401Pct").value) || 0;
+				employeeTspPct = customTsp;
+				employeeK401Pct = custom401;
+
+				strategyText = `
+					<p><strong>Strategy:</strong> Custom TSP and 401k percentages.</p>
+				`;
+
+				// Basic match warnings
+				if (employeeTspPct < tspMatchTier1 + tspMatchTier2) {
+					warnings += `<div class="warning">TSP % is below level needed for full match (${(tspMatchTier1 + tspMatchTier2).toFixed(1)}%).</div>`;
+				}
+				if (employeeK401Pct < k401MatchTier) {
+					warnings += `<div class="warning">401k % is below level needed for full match (${k401MatchTier.toFixed(1)}%).</div>`;
+				}
+			}
+
+			// Employee elective per paycheck and annual
+			const employeeTspPerPay   = biWeekly * (employeeTspPct / 100);
+			const employeeK401PerPay  = biWeekly * (employeeK401Pct / 100);
+			const employeeTspAnnual   = employeeTspPerPay * payPeriods;
+			const employeeK401Annual  = employeeK401PerPay * payPeriods;
+			const totalElectiveAnnual = employeeTspAnnual + employeeK401Annual;
+
+			if (totalElectiveAnnual > ELECTIVE_LIMIT + 1e-2) {
+				warnings += `<div class="warning">
+					Elective deferrals (${formatCurrency(totalElectiveAnnual)}) exceed the limit of ${formatCurrency(ELECTIVE_LIMIT)}.
+					Consider reducing TSP or 401k %.
+				</div>`;
+			}
+
+			// Automatic employer contributions
+			const autoTspPerPay  = biWeekly * (autoTspPct / 100);
+			const autoK401PerPay = biWeekly * (autoK401Pct / 100);
+
+			// Matching employer contributions
+			const tspMatchPerPay  = calcTspMatchPerPay(biWeekly, employeeTspPct, tspMatchTier1, tspMatchTier2);
+			const k401MatchPerPay = calc401kMatchPerPay(biWeekly, employeeK401Pct, k401MatchTier);
+
+			const totalEmployerPerPay = autoTspPerPay + autoK401PerPay + tspMatchPerPay + k401MatchPerPay;
+			const totalEmployerAnnual = totalEmployerPerPay * payPeriods;
+
+			// After-tax space
+			let afterTaxAnnual = TOTAL_LIMIT - totalElectiveAnnual - totalEmployerAnnual;
+			if (afterTaxAnnual < 0) {
+				afterTaxAnnual = 0;
+				warnings += `<div class="warning">
+					Total contributions (elective + employer) exceed ${formatCurrency(TOTAL_LIMIT)}. No after-tax room.
+				</div>`;
+			}
+			const afterTaxPerPay = afterTaxAnnual / payPeriods;
+
+			// Update DOM
+			document.getElementById("biWeekly").textContent = formatCurrency(biWeekly);
+
+			// Elective details
+			const electiveHtml = `
+				${strategyText}
+				<p>
+					<strong>TSP employee %:</strong> ${formatPercent(employeeTspPct)}<br>
+					<strong>401k employee %:</strong> ${formatPercent(employeeK401Pct)}
+				</p>
+				<p>
+					<strong>TSP elective:</strong> ${formatCurrency(employeeTspPerPay)} per paycheck (${formatCurrency(employeeTspAnnual)} annual)<br>
+					<strong>401k elective:</strong> ${formatCurrency(employeeK401PerPay)} per paycheck (${formatCurrency(employeeK401Annual)} annual)<br>
+					<strong>Total elective:</strong> ${formatCurrency(totalElectiveAnnual)} / ${formatCurrency(ELECTIVE_LIMIT)}
+				</p>
+				${warnings}
+			`;
+			document.getElementById("electiveDetails").innerHTML = electiveHtml;
+
+			// Employer breakdown
+			const employerHtml = `
+				<div class="match-tier">
+					<strong>Automatic TSP:</strong> ${formatCurrency(autoTspPerPay)} per paycheck (${formatCurrency(autoTspPerPay * payPeriods)} annual)
+				</div>
+				<div class="match-tier">
+					<strong>Automatic 401k:</strong> ${formatCurrency(autoK401PerPay)} per paycheck (${formatCurrency(autoK401PerPay * payPeriods)} annual)
+				</div>
+				<div class="match-tier">
+					<strong>TSP match (tiered):</strong> ${formatCurrency(tspMatchPerPay)} per paycheck (${formatCurrency(tspMatchPerPay * payPeriods)} annual)
+				</div>
+				<div class="match-tier">
+					<strong>401k match:</strong> ${formatCurrency(k401MatchPerPay)} per paycheck (${formatCurrency(k401MatchPerPay * payPeriods)} annual)
+				</div>
+				<div class="highlight">
+					<strong>Total employer per paycheck:</strong> ${formatCurrency(totalEmployerPerPay)}<br>
+					<strong>Total employer annual:</strong> ${formatCurrency(totalEmployerAnnual)}
+				</div>
+			`;
+			document.getElementById("employerBreakdown").innerHTML = employerHtml;
+
+			// After-tax details
+			const afterTaxHtml = `
+				<p>
+					<strong>Max after-tax per paycheck:</strong> ${formatCurrency(afterTaxPerPay)}<br>
+					<strong>Max after-tax annual:</strong> ${formatCurrency(afterTaxAnnual)}
+				</p>
+				<p class="small">
+					After-tax space = ${formatCurrency(TOTAL_LIMIT)} − ${formatCurrency(totalElectiveAnnual)} (elective) − ${formatCurrency(totalEmployerAnnual)} (employer).
+				</p>
+			`;
+			document.getElementById("afterTaxDetails").innerHTML = afterTaxHtml;
+
+			// Annual summary
+			const totalAnnual = totalElectiveAnnual + totalEmployerAnnual + afterTaxAnnual;
+			const summaryHtml = `
+				<div class="highlight">
+					<strong>Employee elective:</strong> ${formatCurrency(totalElectiveAnnual)}<br>
+					<strong>Employer (auto + match):</strong> ${formatCurrency(totalEmployerAnnual)}<br>
+					<strong>After-tax (mega backdoor):</strong> ${formatCurrency(afterTaxAnnual)}<br>
+					<strong>Total contributions:</strong> ${formatCurrency(totalAnnual)}
+				</div>
+			`;
+			document.getElementById("annualSummary").innerHTML = summaryHtml;
+
+			document.getElementById("results").style.display = "block";
+		}
+
+		// Make calculate available globally
+		window.calculate = calculate;
+
+		// Show/hide custom inputs
+		document.getElementById("strategy").addEventListener("change", function() {
+			const isCustom = this.value === "custom";
+			document.getElementById("customInputs").style.display = isCustom ? "block" : "none";
+		});
+
+		// Set last updated text and run initial calc
+		document.getElementById("lastUpdated").textContent = LAST_UPDATED_TEXT;
+		calculate();
 	});
 </script>
