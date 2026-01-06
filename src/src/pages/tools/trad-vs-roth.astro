@@ -1,0 +1,118 @@
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<PythonToolLayout title="Traditional vs Roth Analyzer - Retro.SITE">
+	<div class="tool-header">
+		<h1>Traditional vs Roth Analyzer</h1>
+		<p class="tool-subtitle">Compare Traditional and Roth IRA outcomes across different future tax rates</p>
+	</div>
+
+	<div class="tool-content">
+		<form id="simulationForm">
+			<Window title="Portfolio Parameters" badgeText="INPUTS">
+				<div class="form-group">
+					<label for="initialPortfolio">Initial Portfolio <small>($)</small></label>
+					<input type="number" id="initialPortfolio" min="10000" max="2000000" step="10000" value="100000" required />
+					<small>Starting portfolio value</small>
+				</div>
+
+				<div class="form-group">
+					<label for="annualContribution">Annual Contribution <small>($)</small></label>
+					<input type="number" id="annualContribution" min="0" max="50000" step="1000" value="10000" required />
+					<small>Amount invested each year</small>
+				</div>
+
+				<div class="form-group">
+					<label for="timeHorizon">Time Horizon <small>(years)</small></label>
+					<input type="number" id="timeHorizon" min="10" max="40" value="30" required />
+					<small>Years to simulate</small>
+				</div>
+
+				<div class="form-group">
+					<label for="targetReturn">Target Return <small>(decimal)</small></label>
+					<input type="number" id="targetReturn" min="0.02" max="0.12" step="0.005" value="0.07" required />
+					<small>Average annual return (2% - 12%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="volatility">Volatility <small>(decimal)</small></label>
+					<input type="number" id="volatility" min="0.05" max="0.25" step="0.01" value="0.15" required />
+					<small>Annual volatility (5% - 25%)</small>
+				</div>
+
+				<div class="button-group">
+					<button type="submit" class="retro-button retro-button-primary" py-click="run_analysis">
+						Explore Sequences
+					</button>
+				</div>
+			</Window>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+</PythonToolLayout>
+
+<script define:vars={{}}>
+	const initZoomableChart = (imgId, checkboxId) => {
+		const chartImg = document.getElementById(imgId);
+		if (chartImg && !chartImg.dataset.zoomInitialized) {
+			chartImg.dataset.zoomInitialized = 'true';
+			const clickZoom = document.createElement('div');
+			clickZoom.className = 'click-zoom';
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.id = checkboxId;
+			const label = document.createElement('label');
+			label.htmlFor = checkboxId;
+			label.className = 'zoom-label';
+			chartImg.parentNode.insertBefore(clickZoom, chartImg);
+			clickZoom.appendChild(checkbox);
+			clickZoom.appendChild(label);
+			label.appendChild(chartImg);
+		}
+	};
+
+	const observer = new MutationObserver(() => {
+		if (document.getElementById('chartImg')) {
+			initZoomableChart('chartImg', 'zoom-checkbox-chart');
+		}
+	});
+	observer.observe(document.getElementById('chart'), { childList: true });
+</script>
+
+<style>
+	.tool-header { text-align: center; margin-bottom: 2rem; }
+	.tool-header h1 { font-size: 2.5rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+	.tool-subtitle { font-size: 1.2rem; color: var(--muted); margin: 0; }
+	.tool-content { display: flex; flex-direction: column; gap: 2rem; }
+	.form-group { margin-bottom: 1.5rem; }
+	.form-group label { display: block; font-weight: bold; margin-bottom: 0.5rem; color: var(--text); }
+	.form-group label small { font-weight: normal; color: var(--muted); font-size: 0.9rem; }
+	.form-group input { width: 100%; padding: 0.75rem; font-family: 'VT323', monospace; font-size: 1.1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; }
+	.form-group input:focus { outline: none; border-color: var(--accent); }
+	.form-group small { display: block; margin-top: 0.5rem; color: var(--muted); font-size: 0.95rem; }
+	.button-group { display: flex; gap: 1rem; margin-top: 1rem; }
+	.retro-button { flex: 1; padding: 1rem 2rem; font-family: 'VT323', monospace; font-size: 1.2rem; border: 3px solid var(--border); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-weight: bold; }
+	.retro-button-primary { background: var(--accent); color: var(--bg); box-shadow: 4px 4px 0 var(--shadow); }
+	.retro-button-primary:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow); }
+	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel-bg); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); }
+	:global(#chart img) { max-width: 100% !important; height: auto !important; display: block !important; }
+	:global(.click-zoom input[type="checkbox"]) { display: none; }
+	:global(.click-zoom input:checked + .zoom-label) { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; cursor: zoom-out; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+	:global(.click-zoom input:checked + .zoom-label img) { max-width: 95vw !important; max-height: 95vh !important; object-fit: contain; }
+	:global(#summary) { margin-top: 2rem; }
+
+	@media (max-width: 768px) {
+		.tool-header h1 { font-size: 2rem; }
+		.tool-subtitle { font-size: 1rem; }
+		.button-group { flex-direction: column; }
+	}
+</style>
+
+<script type="py" src="/tools/trad-vs-roth/main.py" config="/tools/trad-vs-roth/config.json"></script>
