@@ -11,6 +11,10 @@ import Window from '../../components/Window.astro';
 
 	<div class="tool-content">
 		<form id="simulationForm">
+
+		<script>
+			document.getElementById("simulationForm").addEventListener("submit", (e) => e.preventDefault());
+		</script>
 			<Window title="Portfolio Parameters" badgeText="INPUTS">
 				<div class="form-group">
 					<label for="initialPortfolio">Initial Portfolio <small>($)</small></label>
@@ -43,7 +47,7 @@ import Window from '../../components/Window.astro';
 				</div>
 
 				<div class="button-group">
-					<button type="submit" class="retro-button retro-button-primary" py-click="run_explorer">
+					<button type="button" class="retro-button retro-button-primary" py-click="run_explorer">
 						Explore Sequences
 					</button>
 				</div>
