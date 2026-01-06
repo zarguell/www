@@ -1,0 +1,115 @@
+---
+/**
+ * SiteFooter Component
+ * Playful retro footer with "best viewed" styling
+ */
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+	<div class="site-footer__inner">
+		<div class="site-footer__badges">
+			<span class="site-footer__badge">BUILT WITH ASTRO</span>
+			<span class="site-footer__badge">NO TRACKERS</span>
+			<span class="site-footer__badge">STATIC SITE</span>
+		</div>
+
+		<div class="site-footer__copy">
+			<p class="site-footer__text">
+				Best viewed in <strong>Netscape Navigator 4.0</strong> or higher at 800×600
+			</p>
+			<p class="site-footer__text">
+				© {currentYear} | Powered by <em>Astro</em> & <em>VT323</em>
+			</p>
+		</div>
+
+		<div class="site-footer__retro">
+			<span class="site-footer__blink">●</span>
+			<span class="site-footer__status">ONLINE</span>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		background: var(--bg2);
+		border-top: 3px solid var(--border);
+		padding: 2rem 0;
+		margin-top: 4rem;
+	}
+
+	.site-footer__inner {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5rem;
+		text-align: center;
+	}
+
+	.site-footer__badges {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.site-footer__badge {
+		background: var(--accent);
+		color: var(--sticker-text);
+		padding: 0.3em 0.6em;
+		font-size: 0.9rem;
+		border: 2px solid var(--border);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.site-footer__copy {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.site-footer__text {
+		margin: 0;
+		font-size: 1.1rem;
+		color: var(--muted);
+	}
+
+	.site-footer__retro {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.9rem;
+		color: var(--muted);
+	}
+
+	.site-footer__blink {
+		color: #00ff00;
+		font-size: 1.2rem;
+		animation: blink 1s step-end infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.site-footer__blink {
+			animation: none;
+		}
+	}
+
+	@keyframes blink {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
+	}
+
+	.site-footer__status {
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+	}
+</style>

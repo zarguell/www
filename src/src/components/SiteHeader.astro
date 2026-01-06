@@ -1,0 +1,166 @@
+---
+/**
+ * SiteHeader Component
+ * Main navigation with theme toggle
+ */
+import { initTheme, toggleTheme } from '../scripts/theme';
+
+const currentYear = new Date().getFullYear();
+---
+
+<header class="site-header">
+	<div class="site-header__inner">
+		<a href="/" class="site-header__logo">
+			<span class="site-header__title">RETRO.SITE</span>
+			<span class="site-header__badge">{'{{ 90s }}'}</span>
+		</a>
+
+		<nav class="site-header__nav" aria-label="Main navigation">
+			<a href="/" class="site-header__link">Home</a>
+			<a href="/blog/" class="site-header__link">Blog</a>
+			<a href="/tools/" class="site-header__link">Tools</a>
+			<a href="/links/" class="site-header__link">Links</a>
+			<a href="/about/" class="site-header__link">About</a>
+			<a href="/styleguide/" class="site-header__link">Styleguide</a>
+		</nav>
+
+		<button
+			class="theme-toggle"
+			onClick="toggleTheme()"
+			aria-label="Toggle theme"
+			title="Switch between neon-night and mall-pastel themes"
+		>
+			<span class="theme-toggle__icon">◑</span>
+			<span class="sr-only">Toggle theme</span>
+		</button>
+	</div>
+</header>
+
+<script>
+	import { initTheme, toggleTheme } from '../scripts/theme';
+
+	// Initialize theme on page load
+	initTheme();
+
+	// Expose toggle function to window for button onClick
+	(window as any).toggleTheme = toggleTheme;
+</script>
+
+<style>
+	.site-header {
+		background: var(--bg2);
+		border-bottom: 3px solid var(--border);
+		padding: 1rem 0;
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		box-shadow: 0 4px 6px var(--shadow);
+	}
+
+	.site-header__inner {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+	}
+
+	.site-header__logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		text-decoration: none;
+		border: none;
+	}
+
+	.site-header__title {
+		font-size: 2rem;
+		font-weight: 400;
+		color: var(--text);
+		text-shadow: 2px 2px 0 var(--accent);
+	}
+
+	.site-header__badge {
+		background: var(--accent);
+		color: var(--sticker-text);
+		padding: 0.2em 0.5em;
+		font-size: 0.9rem;
+		border: 2px solid var(--border);
+		text-transform: uppercase;
+	}
+
+	.site-header__nav {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.site-header__link {
+		padding: 0.4em 0.8em;
+		font-size: 1.1rem;
+		color: var(--text);
+		text-decoration: none;
+		border: 2px solid transparent;
+		border-radius: 3px;
+		transition: all 0.2s ease;
+	}
+
+	.site-header__link:hover,
+	.site-header__link:focus {
+		background: var(--bg);
+		border-color: var(--accent);
+		color: var(--focus);
+	}
+
+	.theme-toggle {
+		background: var(--bg);
+		border: 3px solid var(--border);
+		border-radius: 4px;
+		padding: 0.5em 0.8em;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 3px 3px 0 var(--shadow);
+		transition: all 0.1s ease;
+	}
+
+	.theme-toggle:hover {
+		transform: translate(1px, 1px);
+		box-shadow: 2px 2px 0 var(--shadow);
+		background: var(--bg2);
+	}
+
+	.theme-toggle:active {
+		transform: translate(3px, 3px);
+		box-shadow: none;
+	}
+
+	.theme-toggle__icon {
+		font-size: 1.5rem;
+		color: var(--accent);
+	}
+
+	.theme-toggle:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 768px) {
+		.site-header__inner {
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.site-header__nav {
+			justify-content: center;
+		}
+
+		.site-header__link {
+			font-size: 1rem;
+			padding: 0.3em 0.6em;
+		}
+	}
+</style>
