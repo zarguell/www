@@ -1,0 +1,302 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<BaseLayout title="401(k) Calculator - Retro.SITE">
+	<div class="calculator-hero">
+		<h1>401(k) Calculator</h1>
+		<p class="calculator-subtitle">Plan your retirement growth</p>
+	</div>
+
+	<Window title="Calculator" badgeText="ACTIVE">
+		<form id="calculator-form" class="calculator-form">
+			<div class="form-group">
+				<label for="salary">Annual Salary ($)</label>
+				<input
+					type="number"
+					id="salary"
+					name="salary"
+					required
+					min="0"
+					step="1000"
+					value="75000"
+					placeholder="e.g., 75000"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="contribution">Contribution Rate (%)</label>
+				<input
+					type="number"
+					id="contribution"
+					name="contribution"
+					required
+					min="0"
+					max="100"
+					step="0.5"
+					value="6"
+					placeholder="e.g., 6"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="match">Employer Match (%)</label>
+				<input
+					type="number"
+					id="match"
+					name="match"
+					required
+					min="0"
+					max="100"
+					step="0.5"
+					value="3"
+					placeholder="e.g., 3"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="years">Investment Period (years)</label>
+				<input
+					type="number"
+					id="years"
+					name="years"
+					required
+					min="1"
+					max="50"
+					step="1"
+					value="30"
+					placeholder="e.g., 30"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="return-rate">Annual Return Rate (%)</label>
+				<input
+					type="number"
+					id="return-rate"
+					name="return-rate"
+					required
+					min="0"
+					max="20"
+					step="0.1"
+					value="7"
+					placeholder="e.g., 7"
+				/>
+			</div>
+
+			<RetroButton type="submit" variant="primary">
+				Calculate
+			</RetroButton>
+		</form>
+	</Window>
+
+	<div id="results" class="results-section" style="display: none;">
+		<Window title="Results" badgeText="CALCULATED">
+			<div class="results-content">
+				<div class="result-item">
+					<span class="result-label">Your Annual Contribution:</span>
+					<span class="result-value" id="your-contribution"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Employer Annual Contribution:</span>
+					<span class="result-value" id="employer-contribution"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Total Annual Contribution:</span>
+					<span class="result-value" id="total-annual"></span>
+				</div>
+				<hr class="result-divider" />
+				<div class="result-item result-highlight">
+					<span class="result-label">Projected Balance After <span id="years-display"></span> Years:</span>
+					<span class="result-value result-value-large" id="final-balance"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Total Contributed:</span>
+					<span class="result-value" id="total-contributed"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Total Investment Earnings:</span>
+					<span class="result-value" id="total-earnings"></span>
+				</div>
+			</div>
+		</Window>
+	</div>
+</BaseLayout>
+
+<style>
+	.calculator-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.calculator-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.calculator-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.calculator-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-size: 1.1rem;
+		font-weight: bold;
+		color: var(--text);
+	}
+
+	.form-group input {
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		padding: 0.75rem;
+		border: 3px solid var(--border);
+		background: var(--bg2);
+		color: var(--text);
+		outline: none;
+		transition: all 0.2s ease;
+	}
+
+	.form-group input:focus {
+		border-color: var(--focus);
+		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	.results-section {
+		margin-top: 2rem;
+	}
+
+	.results-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.result-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0;
+	}
+
+	.result-label {
+		font-size: 1.1rem;
+		color: var(--muted);
+	}
+
+	.result-value {
+		font-size: 1.2rem;
+		font-weight: bold;
+		color: var(--text);
+	}
+
+	.result-value-large {
+		font-size: 1.5rem;
+		color: var(--accent);
+	}
+
+	.result-highlight {
+		background: var(--bg2);
+		padding: 1rem;
+		border-radius: 4px;
+		border: 2px solid var(--accent);
+	}
+
+	.result-divider {
+		border: none;
+		border-top: 2px solid var(--border);
+		margin: 0.5rem 0;
+	}
+
+	@media (max-width: 768px) {
+		.calculator-hero h1 {
+			font-size: 2.5rem;
+		}
+
+		.result-item {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.25rem;
+		}
+
+		.result-value-large {
+			font-size: 1.3rem;
+		}
+	}
+</style>
+
+<script>
+	function calculate401k(e: Event) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const salary = parseFloat((form.elements.namedItem('salary') as HTMLInputElement).value);
+		const contributionRate = parseFloat((form.elements.namedItem('contribution') as HTMLInputElement).value) / 100;
+		const matchRate = parseFloat((form.elements.namedItem('match') as HTMLInputElement).value) / 100;
+		const years = parseInt((form.elements.namedItem('years') as HTMLInputElement).value);
+		const returnRate = parseFloat((form.elements.namedItem('return-rate') as HTMLInputElement).value) / 100;
+
+		// Calculate annual contributions
+		const yourAnnualContribution = salary * contributionRate;
+		const employerAnnualContribution = salary * matchRate;
+		const totalAnnualContribution = yourAnnualContribution + employerAnnualContribution;
+
+		// Calculate compound interest
+		let balance = 0;
+		for (let i = 0; i < years; i++) {
+			balance = (balance + totalAnnualContribution) * (1 + returnRate);
+		}
+
+		const totalContributed = totalAnnualContribution * years;
+		const totalEarnings = balance - totalContributed;
+
+		// Update UI
+		(
+			document.getElementById('your-contribution') as HTMLElement
+		).textContent = `$${yourAnnualContribution.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+		(
+			document.getElementById('employer-contribution') as HTMLElement
+		).textContent = `$${employerAnnualContribution.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+		(
+			document.getElementById('total-annual') as HTMLElement
+		).textContent = `$${totalAnnualContribution.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+		(document.getElementById('years-display') as HTMLElement).textContent = years.toString();
+		(
+			document.getElementById('final-balance') as HTMLElement
+		).textContent = `$${balance.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+		(
+			document.getElementById('total-contributed') as HTMLElement
+		).textContent = `$${totalContributed.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+		(
+			document.getElementById('total-earnings') as HTMLElement
+		).textContent = `$${totalEarnings.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+
+		// Show results
+		(document.getElementById('results') as HTMLElement).style.display = 'block';
+
+		// Scroll to results
+		(document.getElementById('results') as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+	}
+
+	// Add event listener when DOM is ready
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.getElementById('calculator-form');
+		if (form) {
+			form.addEventListener('submit', calculate401k);
+		}
+	});
+</script>

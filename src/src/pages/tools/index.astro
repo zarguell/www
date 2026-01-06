@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+import Badge from '../../components/Badge.astro';
+---
+
+<BaseLayout title="Tools - Retro.SITE">
+	<div class="tools-hero">
+		<h1>Tools</h1>
+		<p class="tools-subtitle">Calculators and utilities for your digital life</p>
+	</div>
+
+	<div class="tools-grid">
+		<Window title="401(k) Calculator" badgeText="FINANCE">
+			<div class="tool-card">
+				<p class="tool-description">
+					Plan your retirement with our compound interest calculator. See how your contributions grow over time.
+				</p>
+				<ul class="tool-features">
+					<li>✓ Salary-based contributions</li>
+					<li>✓ Employer match included</li>
+					<li>✓ Annual return projections</li>
+					<li>✓ Multi-year growth charts</li>
+				</ul>
+				<RetroButton href="/tools/401k-calculator" variant="primary">
+					Calculate Now
+				</RetroButton>
+			</div>
+		</Window>
+
+		<Window title="Rune Calculator" badgeText="GAMING">
+			<div class="tool-card">
+				<p class="tool-description">
+					Plan your leveling strategy in Elden Ring. Calculate exactly how many runes you need to reach your target level.
+				</p>
+				<ul class="tool-features">
+					<li>✓ Current to target level</li>
+					<li>✓ Accurate rune costs</li>
+					<li>✓ Planning made easy</li>
+					<li>✓ No spoilers included</li>
+				</ul>
+				<RetroButton href="/tools/rune-calculator" variant="primary">
+					Calculate Runes
+				</RetroButton>
+			</div>
+		</Window>
+	</div>
+
+	<Window title="More Coming Soon" badgeText="WIP">
+		<div class="prose">
+			<p>
+				Got an idea for a useful tool? <a href="https://twitter.com">Let me know</a> and I might add it to the collection.
+			</p>
+			<p>
+				<em>Current priorities: unit converters, percentage calculators, and maybe something fun.</em>
+			</p>
+		</div>
+	</Window>
+</BaseLayout>
+
+<style>
+	.tools-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.tools-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.tools-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.tools-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+		margin-bottom: 2rem;
+	}
+
+	.tool-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.tool-description {
+		margin: 0;
+		font-size: 1.1rem;
+		line-height: 1.5;
+		color: var(--text);
+	}
+
+	.tool-features {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.tool-features li {
+		font-size: 1rem;
+		color: var(--muted);
+		padding: 0.25rem 0;
+	}
+
+	@media (max-width: 768px) {
+		.tools-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.tools-hero h1 {
+			font-size: 2.5rem;
+		}
+	}
+</style>

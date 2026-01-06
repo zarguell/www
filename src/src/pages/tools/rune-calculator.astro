@@ -1,0 +1,273 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<BaseLayout title="Rune Calculator - Retro.SITE">
+	<div class="calculator-hero">
+		<h1>Rune Calculator</h1>
+		<p class="calculator-subtitle">Plan your leveling in Elden Ring</p>
+	</div>
+
+	<Window title="Calculator" badgeText="ACTIVE">
+		<form id="rune-form" class="calculator-form">
+			<div class="form-group">
+				<label for="current-level">Current Level</label>
+				<input
+					type="number"
+					id="current-level"
+					name="current-level"
+					required
+					min="1"
+					max="713"
+					step="1"
+					value="1"
+					placeholder="e.g., 1"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="target-level">Target Level</label>
+				<input
+					type="number"
+					id="target-level"
+					name="target-level"
+					required
+					min="1"
+					max="713"
+					step="1"
+					value="50"
+					placeholder="e.g., 50"
+				/>
+			</div>
+
+			<RetroButton type="submit" variant="primary">
+				Calculate Runes
+			</RetroButton>
+		</form>
+	</Window>
+
+	<div id="results" class="results-section" style="display: none;">
+		<Window title="Results" badgeText="CALCULATED">
+			<div class="results-content">
+				<div class="result-item result-highlight">
+					<span class="result-label">Runes Needed:</span>
+					<span class="result-value result-value-large" id="runes-needed"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Levels to Gain:</span>
+					<span class="result-value" id="levels-gain"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Current Level Cost:</span>
+					<span class="result-value" id="current-cost"></span>
+				</div>
+				<div class="result-item">
+					<span class="result-label">Target Level Cost:</span>
+					<span class="result-value" id="target-cost"></span>
+				</div>
+				<div class="result-info">
+					<p class="info-text">
+						<strong>Note:</strong> This calculator shows the total runes needed to go from your current level to your target level.
+					</p>
+				</div>
+			</div>
+		</Window>
+	</div>
+</BaseLayout>
+
+<style>
+	.calculator-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.calculator-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.calculator-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.calculator-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-size: 1.1rem;
+		font-weight: bold;
+		color: var(--text);
+	}
+
+	.form-group input {
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		padding: 0.75rem;
+		border: 3px solid var(--border);
+		background: var(--bg2);
+		color: var(--text);
+		outline: none;
+		transition: all 0.2s ease;
+	}
+
+	.form-group input:focus {
+		border-color: var(--focus);
+		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	.results-section {
+		margin-top: 2rem;
+	}
+
+	.results-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.result-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0;
+	}
+
+	.result-label {
+		font-size: 1.1rem;
+		color: var(--muted);
+	}
+
+	.result-value {
+		font-size: 1.2rem;
+		font-weight: bold;
+		color: var(--text);
+	}
+
+	.result-value-large {
+		font-size: 1.5rem;
+		color: var(--accent);
+	}
+
+	.result-highlight {
+		background: var(--bg2);
+		padding: 1rem;
+		border-radius: 4px;
+		border: 2px solid var(--accent);
+	}
+
+	.result-info {
+		margin-top: 0.5rem;
+		padding: 1rem;
+		background: var(--bg2);
+		border-radius: 4px;
+		border: 2px solid var(--border);
+	}
+
+	.info-text {
+		margin: 0;
+		font-size: 1rem;
+		color: var(--muted);
+		line-height: 1.5;
+	}
+
+	@media (max-width: 768px) {
+		.calculator-hero h1 {
+			font-size: 2.5rem;
+		}
+
+		.result-item {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.25rem;
+		}
+
+		.result-value-large {
+			font-size: 1.3rem;
+		}
+	}
+</style>
+
+<script>
+	// Elden Ring rune cost formula (simplified approximation)
+	// Based on the actual game formula: cost = 0.02 * level^3 + 3.06 * level^2 + 105.6 * level - 895
+	function getRuneCost(level: number): number {
+		if (level <= 0) return 0;
+		const cost = Math.floor(0.02 * Math.pow(level, 3) + 3.06 * Math.pow(level, 2) + 105.6 * level - 895);
+		return Math.max(cost, level === 1 ? 0 : cost);
+	}
+
+	// Calculate total runes from level 1 to target level
+	function getTotalRunes(targetLevel: number): number {
+		let total = 0;
+		for (let i = 1; i < targetLevel; i++) {
+			total += getRuneCost(i + 1);
+		}
+		return total;
+	}
+
+	function calculateRunes(e: Event) {
+		e.preventDefault();
+
+		const form = e.target as HTMLFormElement;
+		const currentLevel = parseInt((form.elements.namedItem('current-level') as HTMLInputElement).value);
+		const targetLevel = parseInt((form.elements.namedItem('target-level') as HTMLInputElement).value);
+
+		// Validate input
+		if (targetLevel <= currentLevel) {
+			alert('Target level must be higher than current level!');
+			return;
+		}
+
+		if (currentLevel < 1 || currentLevel > 713 || targetLevel < 1 || targetLevel > 713) {
+			alert('Levels must be between 1 and 713!');
+			return;
+		}
+
+		// Calculate runes
+		const totalRunesTarget = getTotalRunes(targetLevel);
+		const totalRunesCurrent = getTotalRunes(currentLevel);
+		const runesNeeded = totalRunesTarget - totalRunesCurrent;
+		const levelsGain = targetLevel - currentLevel;
+		const currentCost = getRuneCost(currentLevel + 1);
+		const targetCost = getRuneCost(targetLevel);
+
+		// Update UI
+		(
+			document.getElementById('runes-needed') as HTMLElement
+		).textContent = runesNeeded.toLocaleString('en-US');
+		(document.getElementById('levels-gain') as HTMLElement).textContent = levelsGain.toString();
+		(
+			document.getElementById('current-cost') as HTMLElement
+		).textContent = currentCost.toLocaleString('en-US');
+		(
+			document.getElementById('target-cost') as HTMLElement
+		).textContent = targetCost.toLocaleString('en-US');
+
+		// Show results
+		(document.getElementById('results') as HTMLElement).style.display = 'block';
+
+		// Scroll to results
+		(document.getElementById('results') as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+	}
+
+	// Add event listener when DOM is ready
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.getElementById('rune-form');
+		if (form) {
+			form.addEventListener('submit', calculateRunes);
+		}
+	});
+</script>
