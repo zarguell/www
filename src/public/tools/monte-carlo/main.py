@@ -268,7 +268,7 @@ def run_simulation(event=None):
         autosize=True
     )
 
-    fig_line.update_yaxis(tickformat='$,.0f')
+    fig_line.update_yaxes(tickformat='$,.0f')
 
     # Histogram: Final portfolio values
     fig_hist = go.Figure()
