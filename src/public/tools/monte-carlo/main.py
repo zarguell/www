@@ -5,9 +5,12 @@ Demonstrates sequence-of-returns risk and portfolio survival probabilities.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import json
 from pyscript import display, document, HTML
 from io import BytesIO
 import base64
+from js import Plotly, JSON
 
 # Configure matplotlib for responsive output
 plt.rcParams['figure.figsize'] = [10, 8]
@@ -204,6 +207,165 @@ def run_simulation(event=None):
          style="max-width: 100%; height: auto; display: block;">
     '''
     display(HTML(img_html), target="#chart")
+
+    # Create interactive Plotly charts
+    # Line chart: Sample paths + percentiles
+    fig_line = go.Figure()
+
+    # Add sample paths (first 50)
+    sample_indices = np.random.choice(num_simulations, min(50, num_simulations), replace=False)
+    for i in sample_indices:
+        fig_line.add_trace(go.Scatter(
+            x=ages.tolist(),
+            y=portfolio_values[i, :].tolist(),
+            mode='lines',
+            opacity=0.3,
+            line=dict(width=1),
+            hoverinfo='skip',
+            showlegend=False
+        ))
+
+    # Add percentile lines
+    fig_line.add_trace(go.Scatter(
+        x=ages.tolist(),
+        y=median_path.tolist(),
+        mode='lines',
+        name='Median',
+        line=dict(color='blue', width=2, dash='dash')
+    ))
+
+    fig_line.add_trace(go.Scatter(
+        x=ages.tolist(),
+        y=percentile_10_path.tolist(),
+        mode='lines',
+        name='10th Percentile',
+        line=dict(color='red', width=2, dash='dot')
+    ))
+
+    fig_line.add_trace(go.Scatter(
+        x=ages.tolist(),
+        y=percentile_90_path.tolist(),
+        mode='lines',
+        name='90th Percentile',
+        line=dict(color='green', width=2, dash='dot')
+    ))
+
+    # Add retirement age line
+    fig_line.add_vline(
+        x=retirement_age,
+        line_dash='solid',
+        line_color='orange',
+        line_width=2,
+        annotation_text='Retirement'
+    )
+
+    fig_line.update_layout(
+        title=f'Monte Carlo Simulation ({num_simulations} paths shown: 50 sample)',
+        xaxis_title='Age',
+        yaxis_title='Portfolio Value ($)',
+        hovermode='x unified',
+        height=500,
+        autosize=True
+    )
+
+    fig_line.update_yaxis(tickformat='$,.0f')
+
+    # Histogram: Final portfolio values
+    fig_hist = go.Figure()
+    fig_hist.add_trace(go.Histogram(
+        x=final_values.tolist(),
+        nbinsx=50,
+        name='Final Values',
+        marker_color='steelblue',
+        opacity=0.7
+    ))
+
+    fig_hist.add_vline(
+        x=median_final,
+        line_dash='dash',
+        line_color='blue',
+        line_width=2,
+        annotation_text=f'Median: ${median_final:,.0f}'
+    )
+
+    fig_hist.add_vline(
+        x=percentile_10,
+        line_dash='dot',
+        line_color='red',
+        line_width=2,
+        annotation_text=f'10th: ${percentile_10:,.0f}'
+    )
+
+    fig_hist.add_vline(
+        x=percentile_90,
+        line_dash='dot',
+        line_color='green',
+        line_width=2,
+        annotation_text=f'90th: ${percentile_90:,.0f}'
+    )
+
+    fig_hist.update_layout(
+        title='Distribution of Final Portfolio Values',
+        xaxis_title='Final Portfolio Value at Age 95 ($)',
+        yaxis_title='Frequency',
+        height=400,
+        autosize=True
+    )
+
+    fig_hist.update_xaxes(tickformat='$,.0f')
+
+    # Render Plotly charts side by side using subplots
+    from plotly.subplots import make_subplots
+    fig_combined = make_subplots(
+        rows=2, cols=1,
+        subplot_titles=('Simulation Paths (50 sample)', 'Final Values Distribution'),
+        vertical_spacing=0.15,
+        row_heights=[0.6, 0.4]
+    )
+
+    # Add traces to combined figure
+    for trace in fig_line.data:
+        fig_combined.add_trace(trace, row=1, col=1)
+
+    for trace in fig_hist.data:
+        fig_combined.add_trace(trace, row=2, col=1)
+
+    fig_combined.update_xaxes(title_text='Age', row=1)
+    fig_combined.update_xaxes(title_text='Final Portfolio Value ($)', row=2)
+    fig_combined.update_yaxes(title_text='Portfolio Value ($)', row=1)
+    fig_combined.update_layout(
+        height=900,
+        autosize=True,
+        hovermode='x unified'
+    )
+    fig_combined.update_yaxes(tickformat='$,.0f')
+    fig_combined.update_xaxes(tickformat='$,.0f')
+
+    # Render Plotly chart
+    plotly_element = document.querySelector("#plotlyChart")
+    plotly_element.innerHTML = ""
+
+    spec = fig_combined.to_plotly_json()
+    spec_json = json.dumps(spec)
+    spec_js = JSON.parse(spec_json)
+
+    config = {
+        'displayModeBar': True,
+        'displaylogo': False,
+        'responsive': True,
+        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': 'monte-carlo-simulation',
+            'height': 1200,
+            'width': 1600,
+            'scale': 2
+        }
+    }
+    config_json = json.dumps(config)
+    config_js = JSON.parse(config_json)
+
+    Plotly.react(plotly_element, spec_js.data, spec_js.layout, config_js)
 
     # Display summary statistics
     summary_html = f'''
