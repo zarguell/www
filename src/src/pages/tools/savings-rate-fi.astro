@@ -3,10 +3,10 @@ import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
 import Window from '../../components/Window.astro';
 ---
 
-<PythonToolLayout title="Sequence of Returns Risk Explorer - Retro.SITE">
+<PythonToolLayout title="Savings Rate to FI Calculator - Retro.SITE">
 	<div class="tool-header">
-		<h1>Sequence of Returns Risk Explorer</h1>
-		<p class="tool-subtitle">See how early retirement returns matter more than late returns</p>
+		<h1>Savings Rate to FI Calculator</h1>
+		<p class="tool-subtitle">See the powerful relationship between savings rate and time to financial independence</p>
 	</div>
 
 	<div class="tool-content">
@@ -15,40 +15,40 @@ import Window from '../../components/Window.astro';
 		<script>
 			document.getElementById("simulationForm").addEventListener("submit", (e) => e.preventDefault());
 		</script>
-			<Window title="Portfolio Parameters" badgeText="INPUTS">
+			<Window title="Financial Parameters" badgeText="INPUTS">
 				<div class="form-group">
-					<label for="initialPortfolio">Initial Portfolio <small>($)</small></label>
-					<input type="number" id="initialPortfolio" min="10000" max="2000000" step="10000" value="100000" required />
-					<small>Starting portfolio value</small>
+					<label for="annualIncome">Annual Income <small>($)</small></label>
+					<input type="number" id="annualIncome" min="30000" max="500000" step="5000" value="150000" required />
+					<small>Your annual gross income</small>
 				</div>
 
 				<div class="form-group">
-					<label for="annualContribution">Annual Contribution <small>($)</small></label>
-					<input type="number" id="annualContribution" min="0" max="50000" step="1000" value="10000" required />
-					<small>Amount invested each year</small>
+					<label for="currentSavings">Current Savings <small>($)</small></label>
+					<input type="number" id="currentSavings" min="0" max="2000000" step="10000" value="100000" required />
+					<small>Current invested assets</small>
 				</div>
 
 				<div class="form-group">
-					<label for="timeHorizon">Time Horizon <small>(years)</small></label>
-					<input type="number" id="timeHorizon" min="10" max="40" value="30" required />
-					<small>Years to simulate</small>
+					<label for="savingsRate">Savings Rate <small>(decimal)</small></label>
+					<input type="number" id="savingsRate" min="0.05" max="0.80" step="0.05" value="0.40" required />
+					<small>Percentage of income saved (5% - 80%)</small>
 				</div>
 
 				<div class="form-group">
-					<label for="targetReturn">Target Return <small>(decimal)</small></label>
-					<input type="number" id="targetReturn" min="0.02" max="0.12" step="0.005" value="0.07" required />
-					<small>Average annual return (2% - 12%)</small>
+					<label for="withdrawalRate">Withdrawal Rate <small>(decimal)</small></label>
+					<input type="number" id="withdrawalRate" min="0.02" max="0.05" step="0.005" value="0.035" required />
+					<small>Safe withdrawal rate (2% - 5%)</small>
 				</div>
 
 				<div class="form-group">
-					<label for="volatility">Volatility <small>(decimal)</small></label>
-					<input type="number" id="volatility" min="0.05" max="0.25" step="0.01" value="0.15" required />
-					<small>Annual volatility (5% - 25%)</small>
+					<label for="realReturn">Real Return <small>(decimal)</small></label>
+					<input type="number" id="realReturn" min="0.02" max="0.10" step="0.005" value="0.05" required />
+					<small>Expected inflation-adjusted return (2% - 10%)</small>
 				</div>
 
 				<div class="button-group">
-					<button type="button" class="retro-button retro-button-primary" py-click="run_explorer">
-						Explore Sequences
+					<button type="button" class="retro-button retro-button-primary" py-click="calculate_fi">
+						Calculate Years to FI
 					</button>
 				</div>
 			</Window>
