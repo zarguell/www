@@ -1,110 +1,167 @@
 ---
 import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
 import Window from '../../components/Window.astro';
-import ZoomableImage from '../../components/ZoomableImage.astro';
 ---
 
-<PythonToolLayout title="Roth Compounding Calculator - Retro.SITE">
+<PythonToolLayout title="Roth vs Taxable Calculator - Retro.SITE">
 	<div class="calculator-hero">
-		<h1>Backdoor & Mega Backdoor Roth Calculator</h1>
-		<p class="calculator-subtitle">Projection with Compounding (PyScript Powered)</p>
+		<h1>Roth vs Taxable Investment Calculator</h1>
+		<p class="calculator-subtitle">Compare Backdoor Roth, Taxable Brokerage, and Cash (PyScript Powered)</p>
 	</div>
 
-	<Window title="Roth Calculator" badgeText="PYTHON">
+	<Window title="Investment Scenarios" badgeText="SELECTION">
 		<div class="calculator-form">
-			<div class="form-group">
-				<label for="currentAge">Current Age</label>
-				<input type="number" id="currentAge" value="30" />
+			<div class="form-group checkbox-group">
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" id="includeBackdoor" checked style="width: auto; margin: 0;" />
+					<span>Compare Backdoor Roth (tax-free growth)</span>
+				</label>
+				<small style="display: block; margin-left: 1.5rem; opacity: 0.8;">Traditional IRA contribution → immediate Roth conversion</small>
 			</div>
 
-			<div class="form-group">
-				<label for="retirementAge">Retirement Age</label>
-				<input type="number" id="retirementAge" value="58" />
+			<div class="form-group checkbox-group">
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" id="includeTaxable" checked style="width: auto; margin: 0;" />
+					<span>Compare Taxable Brokerage (tax drag + capital gains)</span>
+				</label>
+				<small style="display: block; margin-left: 1.5rem; opacity: 0.8;">Standard brokerage account with ongoing taxation</small>
 			</div>
 
-			<div class="form-group">
-				<label for="returnRate">Expected Return (% per year)</label>
-				<input type="number" id="returnRate" step="0.1" value="7" />
-			</div>
-
-			<div class="form-group">
-				<label for="backdoorAnnual">Backdoor Roth Contribution ($/year)</label>
-				<input type="number" id="backdoorAnnual" value="7000" />
-			</div>
-
-			<div class="form-group">
-				<label for="megaAnnual">Mega Backdoor Contribution ($/year)</label>
-				<input type="number" id="megaAnnual" value="46500" />
-			</div>
-
-			<div class="button-group">
-				<button
-					id="runBtn"
-					class="retro-button retro-button--primary"
-					py-click="run_projection">
-					Run Projection
-				</button>
+			<div class="form-group checkbox-group">
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" id="includeCash" checked style="width: auto; margin: 0;" />
+					<span>Compare Cash / No Investing (opportunity cost)</span>
+				</label>
+				<small style="display: block; margin-left: 1.5rem; opacity: 0.8;">0% growth - shows the cost of not investing</small>
 			</div>
 		</div>
 	</Window>
 
+	<Window title="Time Horizon & Returns" badgeText="BASIC">
+		<div class="calculator-form">
+			<div class="form-row">
+				<div class="form-group">
+					<label for="currentAge">Current Age</label>
+					<input type="number" id="currentAge" value="30" min="0" max="100" />
+				</div>
+
+				<div class="form-group">
+					<label for="retirementAge">Retirement Age</label>
+					<input type="number" id="retirementAge" value="58" min="0" max="100" />
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="returnRate">Expected Return (% per year)</label>
+					<input type="number" id="returnRate" step="0.1" value="7" min="0" max="20" />
+				</div>
+
+				<div class="form-group">
+					<label for="expenseRatio">Expense Ratio (% per year)</label>
+					<input type="number" id="expenseRatio" step="0.01" value="0.05" min="0" max="5" />
+					<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">Fund fees (e.g., 0.05% for index funds)</small>
+				</div>
+			</div>
+		</div>
+	</Window>
+
+	<Window title="Annual Contributions" badgeText="CONTRIBUTIONS">
+		<div class="calculator-form">
+			<div class="form-group">
+				<label for="backdoorAnnual">Backdoor Roth Contribution ($/year)</label>
+				<input type="number" id="backdoorAnnual" value="7000" min="0" max="69000" />
+				<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">IRS limit: $7,000 ($8,000 if age 50+)</small>
+			</div>
+
+			<div class="form-group checkbox-group">
+				<label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+					<input type="checkbox" id="includeMega" checked style="width: auto; margin: 0;" />
+					<span>Add Mega Backdoor Roth (after-tax 401k → Roth)</span>
+				</label>
+			</div>
+
+			<div class="form-group">
+				<label for="megaAnnual">Mega Backdoor Contribution ($/year)</label>
+				<input type="number" id="megaAnnual" value="46500" min="0" max="69000" />
+				<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">After-tax 401k + in-plan conversion (if plan allows)</small>
+			</div>
+		</div>
+	</Window>
+
+	<Window title="Tax Parameters" badgeText="TAX MODEL">
+		<div class="calculator-form">
+			<div class="form-row">
+				<div class="form-group">
+					<label for="federalRate">Federal Marginal Tax Rate (%)</label>
+					<input type="number" id="federalRate" step="1" value="24" min="0" max="50" />
+					<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">Your current tax bracket</small>
+				</div>
+
+				<div class="form-group">
+					<label for="stateRate">State Tax Rate (%)</label>
+					<input type="number" id="stateRate" step="0.1" value="5" min="0" max="13" />
+					<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">0% if no state income tax</small>
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="capGainsRate">Long-Term Capital Gains Rate (%)</label>
+					<input type="number" id="capGainsRate" step="1" value="15" min="0" max="20" />
+					<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">0%, 15%, or 20% based on income</small>
+				</div>
+
+				<div class="form-group">
+					<label for="dividendYield">Qualified Dividend Yield (%)</label>
+					<input type="number" id="dividendYield" step="0.1" value="2" min="0" max="10" />
+					<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">Annual tax drag from dividends</small>
+				</div>
+			</div>
+		</div>
+	</Window>
+
+	<Window title="Backdoor Roth Details" badgeText="ADVANCED">
+		<div class="calculator-form">
+			<div class="form-group">
+				<label for="existingPreTaxIRA">Existing Pre-Tax IRA Balance ($)</label>
+				<input type="number" id="existingPreTaxIRA" value="0" min="0" step="1000" />
+				<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">⚠️ Triggers pro-rata rule - part of conversion becomes taxable</small>
+			</div>
+
+			<div class="form-group">
+				<label for="conversionDelay">Conversion Delay (days)</label>
+				<input type="number" id="conversionDelay" value="0" min="0" max="90" />
+				<small style="display: block; margin-top: 0.25rem; opacity: 0.7;">Days between contribution and conversion (gains become taxable)</small>
+			</div>
+		</div>
+	</Window>
+
+	<div class="button-group">
+		<button
+			id="runBtn"
+			class="retro-button retro-button--primary"
+			py-click="run_projection">
+			Run Comparison
+		</button>
+	</div>
+
 	<div id="chart-container" style="margin-top: 2rem;">
-		<Window title="Growth Chart" badgeText="VISUALIZATION">
+		<Window title="Account Balances Over Time" badgeText="CHART 1">
 			<div id="chart"></div>
 			<!-- Click-to-zoom will be initialized here after chart is generated -->
-			<script define:vars={{}}>
-				// Initialize click-to-zoom when chart is generated
-				const initZoomableChart = () => {
-					const chartImg = document.getElementById('chartImg');
-					if (chartImg && !chartImg.dataset.zoomInitialized) {
-						chartImg.dataset.zoomInitialized = 'true';
+		</Window>
+	</div>
 
-						// Wrap in click-zoom structure
-						const clickZoom = document.createElement('div');
-						clickZoom.className = 'click-zoom';
-
-						const checkbox = document.createElement('input');
-						checkbox.type = 'checkbox';
-						checkbox.id = 'zoom-checkbox-chart';
-						checkbox.className = 'zoom-checkbox';
-
-						const label = document.createElement('label');
-						label.htmlFor = 'zoom-checkbox-chart';
-						label.className = 'zoom-label';
-
-						// Move image into label
-						chartImg.parentNode.insertBefore(clickZoom, chartImg);
-						clickZoom.appendChild(checkbox);
-						clickZoom.appendChild(label);
-						label.appendChild(chartImg);
-
-						// Add zoom hint
-						const hint = document.createElement('div');
-						hint.className = 'zoom-hint';
-						hint.textContent = '🔍 Click image to view fullscreen';
-						clickZoom.parentNode.insertBefore(hint, clickZoom);
-					}
-				};
-
-				// Watch for chart generation
-				const observer = new MutationObserver((mutations) => {
-					mutations.forEach((mutation) => {
-						if (mutation.addedNodes.length) {
-							const chartImg = document.getElementById('chartImg');
-							if (chartImg) {
-								initZoomableChart();
-							}
-						}
-					});
-				});
-
-				observer.observe(document.getElementById('chart'), { childList: true });
-			</script>
+	<div id="chart2-container" style="margin-top: 2rem;">
+		<Window title="Cumulative Taxes Paid Over Time" badgeText="CHART 2">
+			<div id="chart2"></div>
+			<!-- Click-to-zoom will be initialized here after chart is generated -->
 		</Window>
 	</div>
 
 	<div id="summary-container" style="margin-top: 2rem;">
-		<Window title="Summary" badgeText="RESULTS">
+		<Window title="Comparison & Insights" badgeText="RESULTS">
 			<div id="summary"></div>
 		</Window>
 	</div>
@@ -119,30 +176,35 @@ import ZoomableImage from '../../components/ZoomableImage.astro';
 
 <style>
 	#chart,
+	#chart2,
 	#summary {
 		min-height: 100px;
 	}
 
 	/* Chart container - prevents overflow */
 	#chart-container,
+	#chart2-container,
 	#summary-container {
 		width: 100%;
 		overflow-x: hidden;
 	}
 
-	:global(#chart) {
+	:global(#chart),
+	:global(#chart2) {
 		width: 100%;
 		overflow: hidden;
 	}
 
 	/* PyScript renders matplotlib as an <img> tag - target it for responsiveness */
-	:global(#chart img) {
+	:global(#chart img),
+	:global(#chart2 img) {
 		max-width: 100% !important;
 		height: auto !important;
 		display: block !important;
 	}
 
-	:global(#chart figure) {
+	:global(#chart figure),
+	:global(#chart2 figure) {
 		width: 100% !important;
 		max-width: 100% !important;
 		margin: 0 !important;
@@ -154,11 +216,47 @@ import ZoomableImage from '../../components/ZoomableImage.astro';
 		line-height: 1.6;
 	}
 
-	:global(.inputs) {
+	:global(#summary table) {
+		margin-bottom: 2rem;
+	}
+
+	:global(#summary th),
+	:global(#summary td) {
+		padding: 0.75rem;
+	}
+
+	.calculator-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-row {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 1rem;
-		margin-bottom: 1.5rem;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		font-weight: bold;
+	}
+
+	.form-group small {
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		line-height: 1.4;
+	}
+
+	.checkbox-group {
+		padding: 0.75rem 0;
 	}
 
 	:global(input[type="number"]) {
@@ -172,8 +270,15 @@ import ZoomableImage from '../../components/ZoomableImage.astro';
 		color: var(--color-text);
 	}
 
+	:global(input[type="checkbox"]) {
+		width: 1.2rem;
+		height: 1.2rem;
+		cursor: pointer;
+	}
+
 	.button-group {
-		margin-top: 1rem;
+		margin: 2rem 0;
+		text-align: center;
 	}
 
 	.retro-button {
@@ -206,21 +311,17 @@ import ZoomableImage from '../../components/ZoomableImage.astro';
 
 	/* Mobile-specific adjustments */
 	@media (max-width: 768px) {
-		:global(#chart figure) {
+		:global(#chart figure),
+		:global(#chart2 figure) {
 			font-size: 0.75rem !important;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
 		}
 	}
 
-	/* Click-to-zoom styles */
-	:global(.zoom-hint) {
-		font-family: 'VT323', monospace;
-		font-size: 1rem;
-		color: var(--color-text);
-		opacity: 0.7;
-		margin-bottom: 0.5rem;
-		text-align: center;
-	}
-
+	/* Click-to-zoom styles for both charts */
 	:global(.click-zoom input[type="checkbox"]) {
 		display: none;
 	}
@@ -242,14 +343,16 @@ import ZoomableImage from '../../components/ZoomableImage.astro';
 		padding: 2rem;
 	}
 
-	:global(.click-zoom input:checked + .zoom-label #chartImg) {
+	:global(.click-zoom input:checked + .zoom-label #chartImg),
+	:global(.click-zoom input:checked + .zoom-label #chartImg2) {
 		max-width: 100%;
 		max-height: 95vh;
 		object-fit: contain;
 		cursor: zoom-out;
 	}
 
-	:global(#chartImg) {
+	:global(#chartImg),
+	:global(#chartImg2) {
 		max-width: 100%;
 		height: auto;
 		display: block;
@@ -257,3 +360,65 @@ import ZoomableImage from '../../components/ZoomableImage.astro';
 		cursor: zoom-in;
 	}
 </style>
+
+<script define:vars={{}}>
+	// Initialize click-to-zoom when charts are generated
+	const initZoomableChart = (imgId, checkboxId) => {
+		const chartImg = document.getElementById(imgId);
+		if (chartImg && !chartImg.dataset.zoomInitialized) {
+			chartImg.dataset.zoomInitialized = 'true';
+
+			// Wrap in click-zoom structure
+			const clickZoom = document.createElement('div');
+			clickZoom.className = 'click-zoom';
+
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.id = checkboxId;
+			checkbox.className = 'zoom-checkbox';
+
+			const label = document.createElement('label');
+			label.htmlFor = checkboxId;
+			label.className = 'zoom-label';
+
+			// Move image into label
+			chartImg.parentNode.insertBefore(clickZoom, chartImg);
+			clickZoom.appendChild(checkbox);
+			clickZoom.appendChild(label);
+			label.appendChild(chartImg);
+
+			// Add zoom hint
+			const hint = document.createElement('div');
+			hint.className = 'zoom-hint';
+			hint.style.fontFamily = 'VT323, monospace';
+			hint.style.fontSize = '1rem';
+			hint.style.color = 'var(--color-text)';
+			hint.style.opacity = '0.7';
+			hint.style.marginBottom = '0.5rem';
+			hint.style.textAlign = 'center';
+			hint.textContent = '🔍 Click image to view fullscreen';
+			clickZoom.parentNode.insertBefore(hint, clickZoom);
+		}
+	};
+
+	// Watch for chart generation
+	const observer = new MutationObserver((mutations) => {
+		mutations.forEach((mutation) => {
+			if (mutation.addedNodes.length) {
+				const chartImg = document.getElementById('chartImg');
+				if (chartImg) {
+					initZoomableChart('chartImg', 'zoom-checkbox-chart');
+				}
+
+				const chartImg2 = document.getElementById('chartImg2');
+				if (chartImg2) {
+					initZoomableChart('chartImg2', 'zoom-checkbox-chart2');
+				}
+			}
+		});
+	});
+
+	// Observe both chart containers
+	observer.observe(document.getElementById('chart'), { childList: true });
+	observer.observe(document.getElementById('chart2'), { childList: true });
+</script>
