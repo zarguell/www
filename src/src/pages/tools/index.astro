@@ -11,59 +11,230 @@ import Badge from '../../components/Badge.astro';
 		<p class="tools-subtitle">Calculators and utilities for your digital life</p>
 	</div>
 
-	<div class="tools-grid">
-		<Window title="401(k) Calculator" badgeText="FINANCE">
-			<div class="tool-card">
-				<p class="tool-description">
-					Plan your retirement with our compound interest calculator. See how your contributions grow over time.
-				</p>
-				<ul class="tool-features">
-					<li>✓ Salary-based contributions</li>
-					<li>✓ Employer match included</li>
-					<li>✓ Annual return projections</li>
-					<li>✓ Multi-year growth charts</li>
-				</ul>
-				<RetroButton href="/tools/401k-calculator" variant="primary">
-					Calculate Now
-				</RetroButton>
-			</div>
-		</Window>
+	<!-- Category Navigation -->
+	<nav class="category-nav">
+		<a href="#existing" class="category-link">Existing Tools</a>
+		<a href="#retirement" class="category-link">Retirement Planning</a>
+		<a href="#investment" class="category-link">Investment Analysis</a>
+		<a href="#tax" class="category-link">Tax & Strategy</a>
+		<a href="#visualization" class="category-link">Visualization</a>
+	</nav>
 
-		<Window title="Rune Calculator" badgeText="GAMING">
-			<div class="tool-card">
-				<p class="tool-description">
-					Elden Ring golden runes are super helpful for quickly leveling your character up, especially when you only need a few more runes to get to the next level. I got tired of doing the mental math in my head, calculating how many runes I needed, etc. So I made this quick and dirty calculator by asking chatGPT to make it for me.
-				</p>
-				<ul class="tool-features">
-					<li>✓ Current to target level</li>
-					<li>✓ Optimize number of golden runes</li>
-					<li>✓ Planning made easy</li>
-					<li>✓ No spoilers included</li>
-				</ul>
-				<RetroButton href="/tools/rune-calculator" variant="primary">
-					Calculate Runes
-				</RetroButton>
-			</div>
-		</Window>
+	<!-- Existing Tools Section -->
+	<section id="existing" class="tool-category">
+		<h2 class="category-title">Existing Tools</h2>
+		<div class="tools-grid">
+			<Window title="401(k) Calculator" badgeText="RETIREMENT">
+				<div class="tool-card">
+					<p class="tool-description">
+						Plan your retirement with our compound interest calculator. See how your contributions grow over time.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Salary-based contributions</li>
+						<li>✓ Employer match included</li>
+						<li>✓ Annual return projections</li>
+						<li>✓ Multi-year growth charts</li>
+					</ul>
+					<RetroButton href="/tools/401k-calculator" variant="primary">
+						Calculate Now
+					</RetroButton>
+				</div>
+			</Window>
 
-		<Window title="Roth vs Taxable Calculator" badgeText="PYTHON">
-			<div class="tool-card">
-				<p class="tool-description">
-					Compare Backdoor Roth, Taxable Brokerage, and Cash side-by-side with realistic tax modeling. See which strategy delivers the most spendable wealth at retirement, with Python-powered calculations running directly in your browser.
-				</p>
-				<ul class="tool-features">
-					<li>✓ Three-scenario comparison (Roth/Taxable/Cash)</li>
-					<li>✓ Tax drag + capital gains modeling</li>
-					<li>✓ Pro-rata rule warnings</li>
-					<li>✓ Dual charts: balances & taxes paid</li>
-					<li>✓ Auto-generated insights</li>
-				</ul>
-				<RetroButton href="/tools/roth-calculator" variant="primary">
-					Compare Strategies
-				</RetroButton>
-			</div>
-		</Window>
-	</div>
+			<Window title="Roth vs Taxable Calculator" badgeText="RETIREMENT">
+				<div class="tool-card">
+					<p class="tool-description">
+						Compare Backdoor Roth, Taxable Brokerage, and Cash side-by-side with realistic tax modeling. See which strategy delivers the most spendable wealth at retirement, with Python-powered calculations running directly in your browser.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Three-scenario comparison (Roth/Taxable/Cash)</li>
+						<li>✓ Tax drag + capital gains modeling</li>
+						<li>✓ Pro-rata rule warnings</li>
+						<li>✓ Dual charts: balances & taxes paid</li>
+						<li>✓ Auto-generated insights</li>
+					</ul>
+					<RetroButton href="/tools/roth-calculator" variant="primary">
+						Compare Strategies
+					</RetroButton>
+				</div>
+			</Window>
+
+			<Window title="Rune Calculator" badgeText="GAMING">
+				<div class="tool-card">
+					<p class="tool-description">
+						Elden Ring golden runes are super helpful for quickly leveling your character up, especially when you only need a few more runes to get to the next level. I got tired of doing the mental math in my head, calculating how many runes I needed, etc. So I made this quick and dirty calculator by asking chatGPT to make it for me.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Current to target level</li>
+						<li>✓ Optimize number of golden runes</li>
+						<li>✓ Planning made easy</li>
+						<li>✓ No spoilers included</li>
+					</ul>
+					<RetroButton href="/tools/rune-calculator" variant="primary">
+						Calculate Runes
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Retirement Planning Section -->
+	<section id="retirement" class="tool-category">
+		<h2 class="category-title">Retirement Planning</h2>
+		<p class="category-description">Plan your financial independence with sophisticated projections and withdrawal strategies.</p>
+
+		<div class="tools-grid">
+			<Window title="Monte Carlo Retirement Lab" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						Simulate thousands of retirement scenarios to see sequence-of-returns risk in action. Understand the probability of success and see worst-case outcomes.
+					</p>
+					<ul class="tool-features">
+						<li>✓ 1,000+ simulation paths</li>
+						<li>✓ Correlated stock/bond returns</li>
+						<li>✓ Success rate at age 95</li>
+						<li>✓ Median & percentile projections</li>
+						<li>✓ Dual charts: paths + histogram</li>
+					</ul>
+					<RetroButton href="/tools/monte-carlo" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+
+			<Window title="Safe Withdrawal Rate Comparison" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						Compare three withdrawal strategies: constant dollar, percentage of portfolio, and dynamic guardrails. See which approach balances stability and flexibility.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Constant $ withdrawal (inflation-adjusted)</li>
+						<li>✓ Percentage of portfolio method</li>
+						<li>✓ Guardrails with +/- 20% bands</li>
+						<li>✓ Success rate comparison</li>
+						<li>✓ Withdrawal volatility analysis</li>
+					</ul>
+					<RetroButton href="/tools/safe-withdrawal" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Investment Analysis Section -->
+	<section id="investment" class="tool-category">
+		<h2 class="category-title">Investment Analysis</h2>
+		<p class="category-description">Understand how costs, timing, and asset allocation impact long-term wealth building.</p>
+
+		<div class="tools-grid">
+			<Window title="Expense Ratio Impact Visualizer" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						See the long-term cost of high expense ratios. Compare two funds side-by-side and watch how fees compound over decades.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Side-by-side fund comparison</li>
+						<li>✓ 30-year fee projections</li>
+						<li>✓ Cumulative fee bar chart</li>
+						<li>✓ Wealth lost percentage</li>
+						<li>✓ Annotated insights</li>
+					</ul>
+					<RetroButton href="/tools/expense-ratio" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+
+			<Window title="Sequence of Returns Explorer" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						Demonstrate how early retirement returns matter more than late returns. Compare good-early vs bad-early scenarios with identical average returns.
+					</p>
+					<ul class="tool-features">
+						<li>✓ 4 return sequence scenarios</li>
+						<li>✓ Good early vs bad early</li>
+						<li>✓ Steady vs random walk</li>
+						<li>✓ Final wealth comparison table</li>
+						<li>✓ Visual sequence impact</li>
+					</ul>
+					<RetroButton href="/tools/sequence-risk" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Tax & Strategy Section -->
+	<section id="tax" class="tool-category">
+		<h2 class="category-title">Tax & Contribution Strategy</h2>
+		<p class="category-description">Optimize your tax-advantaged accounts and find your path to financial independence.</p>
+
+		<div class="tools-grid">
+			<Window title="Traditional vs Roth Analyzer" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						Compare Traditional and Roth IRA outcomes across different future tax rates. See the break-even point and make informed decisions.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Tax rate sensitivity analysis</li>
+						<li>✓ Side-by-side comparison</li>
+						<li>✓ Break-even visualization</li>
+						<li>✓ Shaded win regions</li>
+						<li>✓ Clear decision framework</li>
+					</ul>
+					<RetroButton href="/tools/trad-vs-roth" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+
+			<Window title="Savings Rate to FI Calculator" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						See the powerful relationship between savings rate and time to financial independence. Small changes in savings rate dramatically accelerate FI.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Savings rate vs years to FI</li>
+						<li>✓ Your rate highlighted</li>
+						<li>✓ FI target calculation</li>
+						<li>✓ Interactive-style plot</li>
+						<li>✓ Goal tracking insights</li>
+					</ul>
+					<RetroButton href="/tools/savings-rate-fi" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Visualization Tools Section -->
+	<section id="visualization" class="tool-category">
+		<h2 class="category-title">Visualization Tools</h2>
+		<p class="category-description">Create visual representations of your financial flows and understand where your money goes.</p>
+
+		<div class="tools-grid">
+			<Window title="Cash Flow Sankey Builder" badgeText="PYTHON">
+				<div class="tool-card">
+					<p class="tool-description">
+						Create beautiful Sankey diagrams from simple text input. Visualize income, taxes, savings, and expenses in an elegant flow chart.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Simple text input format</li>
+						<li>✓ Auto-generate Sankey diagram</li>
+						<li>✓ Color-coded flows</li>
+						<li>✓ Flow validation warnings</li>
+						<li>✓ Savings rate calculation</li>
+					</ul>
+					<RetroButton href="/tools/sankey-builder" variant="primary" disabled>
+						Coming Soon
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
 
 	<Window title="More Coming Soon" badgeText="WIP">
 		<div class="prose">
@@ -71,7 +242,7 @@ import Badge from '../../components/Badge.astro';
 				Got an idea for a useful tool? <a href="https://twitter.com">Let me know</a> and I might add it to the collection.
 			</p>
 			<p>
-				<em>Current priorities: unit converters, percentage calculators, and maybe something fun.</em>
+				<em>Currently building out the Boglehead-aligned financial toolkit with PyScript-powered Python tools.</em>
 			</p>
 		</div>
 	</Window>
@@ -92,6 +263,54 @@ import Badge from '../../components/Badge.astro';
 		font-size: 1.3rem;
 		color: var(--muted);
 		margin: 0;
+	}
+
+	.category-nav {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 1rem;
+		padding: 1.5rem 0;
+		margin-bottom: 2rem;
+		border-bottom: 2px solid var(--border);
+	}
+
+	.category-link {
+		padding: 0.5rem 1rem;
+		background: var(--panel-bg);
+		border: 2px solid var(--border);
+		color: var(--text);
+		text-decoration: none;
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		transition: all 0.2s ease;
+		box-shadow: 2px 2px 0 var(--shadow);
+	}
+
+	.category-link:hover {
+		background: var(--accent);
+		color: var(--bg);
+		transform: translate(1px, 1px);
+		box-shadow: 1px 1px 0 var(--shadow);
+	}
+
+	.tool-category {
+		margin-bottom: 3rem;
+		scroll-margin-top: 2rem;
+	}
+
+	.category-title {
+		font-size: 2.5rem;
+		margin: 0 0 0.5rem 0;
+		color: var(--accent);
+		border-bottom: 3px solid var(--border);
+		padding-bottom: 0.5rem;
+	}
+
+	.category-description {
+		font-size: 1.2rem;
+		color: var(--muted);
+		margin: 0 0 1.5rem 0;
 	}
 
 	.tools-grid {
@@ -136,6 +355,19 @@ import Badge from '../../components/Badge.astro';
 
 		.tools-hero h1 {
 			font-size: 2.5rem;
+		}
+
+		.category-nav {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.category-link {
+			text-align: center;
+		}
+
+		.category-title {
+			font-size: 2rem;
 		}
 	}
 </style>
