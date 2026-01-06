@@ -1,0 +1,105 @@
+---
+/**
+ * Window Component
+ * Retro panel/window wrapper with beveled styling and title bar
+ */
+interface Props {
+	title?: string;
+	badgeText?: string;
+	variant?: 'default' | 'primary' | 'secondary';
+}
+
+const {
+	title = 'Window',
+	badgeText,
+	variant = 'default',
+} = Astro.props;
+
+const variantStyles = {
+	default: 'background: var(--panel);',
+	primary: 'background: var(--accent); color: var(--sticker-text);',
+	secondary: 'background: var(--accent2); color: var(--bg);',
+};
+---
+
+<div class={`window window--${variant}`}>
+	<div class="window__title-bar">
+		<span class="window__title">{title}</span>
+		{badgeText && <span class="window__badge">{badgeText}</span>}
+		<div class="window__controls">
+			<span class="window__control window__control--close"></span>
+			<span class="window__control window__control--minimize"></span>
+			<span class="window__control window__control--maximize"></span>
+		</div>
+	</div>
+	<div class="window__content">
+		<slot />
+	</div>
+</div>
+
+<style>
+	.window {
+		background: var(--panel);
+		border: 3px solid var(--border);
+		border-radius: 8px;
+		box-shadow: 6px 6px 0 var(--shadow);
+		margin-bottom: 1.5rem;
+		overflow: hidden;
+	}
+
+	.window__title-bar {
+		background: linear-gradient(180deg, var(--bevel-light), var(--bevel-dark));
+		border-bottom: 2px solid var(--border);
+		padding: 0.5rem 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.window__title {
+		font-size: 1.5rem;
+		font-weight: 400;
+		color: var(--text);
+		flex: 1;
+	}
+
+	.window__badge {
+		background: var(--sticker-bg);
+		color: var(--sticker-text);
+		padding: 0.2em 0.6em;
+		font-size: 1rem;
+		border: 2px solid var(--border);
+		text-transform: uppercase;
+		font-weight: 400;
+	}
+
+	.window__controls {
+		display: flex;
+		gap: 0.4rem;
+	}
+
+	.window__control {
+		width: 16px;
+		height: 16px;
+		border: 2px solid var(--border);
+		background: var(--bg);
+		display: inline-block;
+	}
+
+	.window__control--close {
+		background: #ff4444;
+	}
+
+	.window__control--minimize {
+		background: #ffaa00;
+	}
+
+	.window__control--maximize {
+		background: #00cc00;
+	}
+
+	.window__content {
+		padding: 1.5rem;
+	}
+</style>

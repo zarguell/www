@@ -1,0 +1,59 @@
+---
+/**
+ * Badge Component
+ * Small inline badges for NEW, HOT, WIP, etc.
+ */
+interface Props {
+	text: string;
+	variant?: 'default' | 'accent' | 'success' | 'warning';
+}
+
+const {
+	text,
+	variant = 'default',
+} = Astro.props;
+
+const variantStyles = {
+	default: 'background: var(--sticker-bg); color: var(--sticker-text);',
+	accent: 'background: var(--accent); color: var(--sticker-text);',
+	success: 'background: #00cc00; color: #ffffff;',
+	warning: 'background: #ffaa00; color: #000000;',
+};
+---
+
+<span class={`badge badge--${variant}`}>{text}</span>
+
+<style>
+	.badge {
+		display: inline-block;
+		padding: 0.2em 0.6em;
+		font-size: 0.9rem;
+		font-weight: 400;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		border: 2px solid var(--border);
+		border-radius: 3px;
+		margin-left: 0.5em;
+		vertical-align: middle;
+	}
+
+	.badge--default {
+		background: var(--sticker-bg);
+		color: var(--sticker-text);
+	}
+
+	.badge--accent {
+		background: var(--accent);
+		color: var(--sticker-text);
+	}
+
+	.badge--success {
+		background: #00cc00;
+		color: #ffffff;
+	}
+
+	.badge--warning {
+		background: #ffaa00;
+		color: #000000;
+	}
+</style>

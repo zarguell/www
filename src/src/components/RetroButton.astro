@@ -1,0 +1,121 @@
+---
+/**
+ * RetroButton Component
+ * Beveled buttons with variants (primary/secondary/danger)
+ */
+interface Props {
+	href?: string;
+	variant?: 'primary' | 'secondary' | 'danger';
+	disabled?: boolean;
+	target?: string;
+	type?: 'button' | 'submit' | 'reset';
+	onClick?: string;
+}
+
+const {
+	href,
+	variant = 'primary',
+	disabled = false,
+	target,
+	type = 'button',
+	onClick,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+
+const variantStyles = {
+	primary: `
+		background: var(--accent);
+		color: var(--sticker-text);
+		border-color: var(--accent);
+	`,
+	secondary: `
+		background: var(--bg2);
+		color: var(--text);
+		border-color: var(--border);
+	`,
+	danger: `
+		background: #ff4444;
+		color: #ffffff;
+		border-color: #ff0000;
+	`,
+};
+---
+
+{href ? (
+	<a
+		href={href}
+		target={target}
+		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
+		aria-disabled={disabled}
+	>
+		<slot />
+	</a>
+) : (
+	<button
+		type={type}
+		disabled={disabled}
+		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
+		onClick={onClick}
+	>
+		<slot />
+	</button>
+)}
+
+<style>
+	.retro-button {
+		display: inline-block;
+		padding: 0.6em 1.2em;
+		font-family: "VT323", monospace;
+		font-size: 1.2rem;
+		font-weight: 400;
+		text-decoration: none;
+		border: 3px solid;
+		border-radius: 4px;
+		cursor: pointer;
+		box-shadow: 3px 3px 0 var(--shadow);
+		transition: all 0.1s ease;
+		text-align: center;
+	}
+
+	.retro-button:hover:not(.retro-button--disabled) {
+		transform: translate(1px, 1px);
+		box-shadow: 2px 2px 0 var(--shadow);
+		filter: brightness(1.1);
+	}
+
+	.retro-button:active:not(.retro-button--disabled) {
+		transform: translate(3px, 3px);
+		box-shadow: 0 0 0 var(--shadow);
+	}
+
+	.retro-button:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	.retro-button--primary {
+		background: var(--accent);
+		color: var(--sticker-text);
+		border-color: var(--accent);
+	}
+
+	.retro-button--secondary {
+		background: var(--bg2);
+		color: var(--text);
+		border-color: var(--border);
+	}
+
+	.retro-button--danger {
+		background: #ff4444;
+		color: #ffffff;
+		border-color: #ff0000;
+	}
+
+	.retro-button--disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		box-shadow: none;
+		transform: none;
+	}
+</style>

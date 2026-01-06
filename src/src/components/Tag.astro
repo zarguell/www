@@ -1,0 +1,44 @@
+---
+/**
+ * Tag Component
+ * Styled links for blog post tags
+ */
+interface Props {
+	tag: string;
+	href: string;
+}
+
+const { tag, href } = Astro.props;
+---
+
+<a href={href} class="tag">#{tag}</a>
+
+<style>
+	.tag {
+		display: inline-block;
+		padding: 0.2em 0.5em;
+		font-size: 1rem;
+		font-weight: 400;
+		color: var(--link);
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		border-radius: 3px;
+		margin-right: 0.5em;
+		margin-bottom: 0.5em;
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.tag:hover {
+		background: var(--accent);
+		color: var(--sticker-text);
+		border-color: var(--accent);
+		transform: translateY(-2px);
+		box-shadow: 2px 2px 0 var(--shadow);
+	}
+
+	.tag:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+</style>
