@@ -1,6 +1,6 @@
 # Retro.SITE
 
-A personal website with a **90s Jean Paul Gaultier / retro web** aesthetic — fashion-forward, playful, and maximalist. Built with Astro, custom CSS, and static generation.
+A personal website with a **90s retro web** aesthetic — fashion-forward, playful, and maximalist. Built with Astro, custom CSS, and static generation.
 
 ## Features
 
