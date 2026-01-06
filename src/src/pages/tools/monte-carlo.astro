@@ -1,0 +1,445 @@
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<PythonToolLayout title="Monte Carlo Retirement Lab - Retro.SITE">
+	<div class="tool-header">
+		<h1>Monte Carlo Retirement Projection Lab</h1>
+		<p class="tool-subtitle">Simulate thousands of retirement scenarios to see sequence-of-returns risk in action</p>
+	</div>
+
+	<div class="tool-content">
+		<form id="simulationForm">
+			<Window title="Personal Information" badgeText="STEP 1">
+				<div class="form-group">
+					<label for="currentAge">
+						Current Age
+						<small>(years)</small>
+					</label>
+					<input
+						type="number"
+						id="currentAge"
+						min="25"
+						max="65"
+						value="30"
+						required
+					/>
+					<small>Enter your current age (25-65)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="retirementAge">
+						Target Retirement Age
+						<small>(years)</small>
+					</label>
+					<input
+						type="number"
+						id="retirementAge"
+						min="40"
+						max="70"
+						value="58"
+						required
+					/>
+					<small>When you plan to retire (40-70)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="currentPortfolio">
+						Current Portfolio Value
+						<small>(dollars)</small>
+					</label>
+					<input
+						type="number"
+						id="currentPortfolio"
+						min="0"
+						max="5000000"
+						step="10000"
+						value="500000"
+						required
+					/>
+					<small>Your current invested assets ($0 - $5M)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="annualContribution">
+						Annual Contribution
+						<small>(dollars)</small>
+					</label>
+					<input
+						type="number"
+						id="annualContribution"
+						min="0"
+						max="100000"
+						step="1000"
+						value="60000"
+						required
+					/>
+					<small>Annual amount you'll invest until retirement</small>
+				</div>
+			</Window>
+
+			<Window title="Asset Allocation & Returns" badgeText="STEP 2">
+				<div class="form-group">
+					<label for="stockAllocation">
+						Stock Allocation
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="stockAllocation"
+						min="0"
+						max="1"
+						step="0.05"
+						value="0.8"
+						required
+					/>
+					<small>Percentage in stocks (0.0 - 1.0, e.g., 0.8 = 80%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="bondAllocation">
+						Bond Allocation
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="bondAllocation"
+						min="0"
+						max="1"
+						step="0.05"
+						value="0.2"
+						required
+					/>
+					<small>Percentage in bonds (must equal 1 - stock allocation)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="stockReturn">
+						Expected Stock Return
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="stockReturn"
+						min="0.02"
+						max="0.12"
+						step="0.005"
+						value="0.07"
+						required
+					/>
+					<small>Expected annual stock return (2% - 12%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="bondReturn">
+						Expected Bond Return
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="bondReturn"
+						min="0.01"
+						max="0.08"
+						step="0.005"
+						value="0.03"
+						required
+					/>
+					<small>Expected annual bond return (1% - 8%)</small>
+				</div>
+			</Window>
+
+			<Window title="Risk & Volatility" badgeText="STEP 3">
+				<div class="form-group">
+					<label for="stockVolatility">
+						Stock Volatility (σ)
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="stockVolatility"
+						min="0.10"
+						max="0.30"
+						step="0.01"
+						value="0.16"
+						required
+					/>
+					<small>Annual stock volatility (10% - 30%, historical ~16%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="bondVolatility">
+						Bond Volatility (σ)
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="bondVolatility"
+						min="0.03"
+						max="0.15"
+						step="0.01"
+						value="0.05"
+						required
+					/>
+					<small>Annual bond volatility (3% - 15%, historical ~5%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="correlation">
+						Stock-Bond Correlation (ρ)
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="correlation"
+						min="-0.5"
+						max="1.0"
+						step="0.1"
+						value="0.1"
+						required
+					/>
+					<small>Correlation between stock and bond returns (-0.5 to 1.0)</small>
+				</div>
+			</Window>
+
+			<Window title="Retirement Withdrawals" badgeText="STEP 4">
+				<div class="form-group">
+					<label for="withdrawalRate">
+						Withdrawal Rate
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="withdrawalRate"
+						min="0.02"
+						max="0.06"
+						step="0.005"
+						value="0.035"
+						required
+					/>
+					<small>Annual withdrawal rate in retirement (2% - 6%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="numSimulations">
+						Number of Simulations
+						<small>(count)</small>
+					</label>
+					<input
+						type="number"
+						id="numSimulations"
+						min="100"
+						max="10000"
+						step="100"
+						value="1000"
+						required
+					/>
+					<small>How many scenarios to run (100 - 10,000, more = slower)</small>
+				</div>
+			</Window>
+
+			<div class="button-group">
+				<button type="submit" class="retro-button retro-button-primary" py-click="run_simulation">
+					Run Simulation
+				</button>
+			</div>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+</PythonToolLayout>
+
+<script define:vars={{}}>
+	// Click-to-zoom functionality for dynamically generated charts
+	const initZoomableChart = (imgId, checkboxId) => {
+		const chartImg = document.getElementById(imgId);
+		if (chartImg && !chartImg.dataset.zoomInitialized) {
+			chartImg.dataset.zoomInitialized = 'true';
+
+			const clickZoom = document.createElement('div');
+			clickZoom.className = 'click-zoom';
+
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.id = checkboxId;
+
+			const label = document.createElement('label');
+			label.htmlFor = checkboxId;
+			label.className = 'zoom-label';
+
+			chartImg.parentNode.insertBefore(clickZoom, chartImg);
+			clickZoom.appendChild(checkbox);
+			clickZoom.appendChild(label);
+			label.appendChild(chartImg);
+		}
+	};
+
+	// Watch for chart generation
+	const observer = new MutationObserver(() => {
+		if (document.getElementById('chartImg')) {
+			initZoomableChart('chartImg', 'zoom-checkbox-chart');
+		}
+	});
+	observer.observe(document.getElementById('chart'), { childList: true });
+</script>
+
+<style>
+	.tool-header {
+		text-align: center;
+		margin-bottom: 2rem;
+	}
+
+	.tool-header h1 {
+		font-size: 2.5rem;
+		margin: 0 0 0.5rem 0;
+		color: var(--accent);
+	}
+
+	.tool-subtitle {
+		font-size: 1.2rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.tool-content {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.form-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.form-group label {
+		display: block;
+		font-weight: bold;
+		margin-bottom: 0.5rem;
+		color: var(--text);
+	}
+
+	.form-group label small {
+		font-weight: normal;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+
+	.form-group input {
+		width: 100%;
+		padding: 0.75rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		border: 2px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
+		box-sizing: border-box;
+	}
+
+	.form-group input:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.form-group small {
+		display: block;
+		margin-top: 0.5rem;
+		color: var(--muted);
+		font-size: 0.95rem;
+	}
+
+	.button-group {
+		display: flex;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+
+	.retro-button {
+		flex: 1;
+		padding: 1rem 2rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		border: 3px solid var(--border);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-transform: uppercase;
+		font-weight: bold;
+	}
+
+	.retro-button-primary {
+		background: var(--accent);
+		color: var(--bg);
+		box-shadow: 4px 4px 0 var(--shadow);
+	}
+
+	.retro-button-primary:hover {
+		transform: translate(2px, 2px);
+		box-shadow: 2px 2px 0 var(--shadow);
+	}
+
+	.retro-button-primary:active {
+		transform: translate(4px, 4px);
+		box-shadow: none;
+	}
+
+	.chart-container {
+		width: 100%;
+		overflow-x: hidden;
+		border: 3px solid var(--border);
+		background: var(--panel-bg);
+		padding: 1rem;
+		box-shadow: 4px 4px 0 var(--shadow);
+	}
+
+	:global(#chart img) {
+		max-width: 100% !important;
+		height: auto !important;
+		display: block !important;
+	}
+
+	:global(.click-zoom input[type="checkbox"]) {
+		display: none;
+	}
+
+	:global(.click-zoom input:checked + .zoom-label) {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.95);
+		z-index: 9999;
+		cursor: zoom-out;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem;
+	}
+
+	:global(.click-zoom input:checked + .zoom-label img) {
+		max-width: 95vw !important;
+		max-height: 95vh !important;
+		object-fit: contain;
+	}
+
+	:global(#summary) {
+		margin-top: 2rem;
+	}
+
+	@media (max-width: 768px) {
+		.tool-header h1 {
+			font-size: 2rem;
+		}
+
+		.tool-subtitle {
+			font-size: 1rem;
+		}
+
+		.button-group {
+			flex-direction: column;
+		}
+	}
+</style>
+
+<script type="py" src="/tools/monte-carlo/main.py" config="/tools/monte-carlo/config.json"></script>
