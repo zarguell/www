@@ -148,8 +148,24 @@ def build_sankey(event=None):
     spec_json = json.dumps(spec)  # Convert to JSON string
     spec_js = JSON.parse(spec_json)  # Parse in JS to get plain JS objects
 
-    # Access properties via attributes (not subscript) on JsProxy
-    Plotly.react(chart_element, spec_js.data, spec_js.layout)
+    # Plotly configuration for fullscreen and toolbar
+    config = {
+        'displayModeBar': True,
+        'displaylogo': False,
+        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': 'sankey-diagram',
+            'height': 1200,
+            'width': 1600,
+            'scale': 2
+        }
+    }
+    config_json = json.dumps(config)
+    config_js = JSON.parse(config_json)
+
+    # Render with fullscreen support
+    Plotly.react(chart_element, spec_js.data, spec_js.layout, config_js)
 
     # Summary statistics
     total_income = sum([inflows.get(node, 0) for node in nodes if outflows.get(node, 0) == 0 or inflows.get(node, 0) > outflows.get(node, 0)])
