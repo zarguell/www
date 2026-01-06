@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Window from '../components/Window.astro';
+import RetroButton from '../components/RetroButton.astro';
+import Badge from '../components/Badge.astro';
+import { linksData } from '../data/links';
+---
+
+<BaseLayout title="Links - Retro.SITE">
+	<div class="links-hero">
+		<h1>Links</h1>
+		<p class="links-subtitle">Curated corners of the internet</p>
+	</div>
+
+	<div class="links-grid">
+		{linksData.map((category) => (
+			<Window title={category.name}>
+				<div class="link-list">
+					{category.links.map((link) => (
+						<div class="link-item">
+							<RetroButton href={link.url} variant="secondary" target="_blank">
+								{link.title}
+							</RetroButton>
+							<p class="link-description">{link.description}</p>
+						</div>
+					))}
+				</div>
+			</Window>
+		))}
+	</div>
+
+	<Window title="Submit a Link" badgeText="OPEN">
+		<div class="prose">
+			<p>
+				Know a cool corner of the web? <a href="https://twitter.com">DM me on Twitter</a> with your suggestion. I'm always looking for interesting sites to add.
+			</p>
+			<p>
+				<em>Criteria: Must be interesting, useful, or delightfully weird.</em>
+			</p>
+		</div>
+	</Window>
+</BaseLayout>
+
+<style>
+	.links-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.links-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.links-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.links-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+		margin-bottom: 2rem;
+	}
+
+	.link-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.link-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.link-description {
+		margin: 0;
+		font-size: 1rem;
+		color: var(--muted);
+		line-height: 1.4;
+	}
+
+	@media (max-width: 768px) {
+		.links-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.links-hero h1 {
+			font-size: 2.5rem;
+		}
+	}
+</style>
