@@ -1,0 +1,1214 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<BaseLayout title="Cocktail Batch Calculator - ARGUELLES.ME">
+	<div class="tool-hero">
+		<h1>Cocktail Batch Calculator</h1>
+		<p class="tool-subtitle">Build batch cocktails with precise ABV and dilution calculations</p>
+	</div>
+
+	<div class="cocktail-name-row">
+		<input id="cocktailName" class="cocktail-name-input" placeholder="Cocktail name" value="My Batch Cocktail" />
+		<span class="status-pill" id="headlinePill">Ready</span>
+	</div>
+
+	<div class="batch-grid">
+		<!-- Left: Ingredient library -->
+		<Window title="Ingredient Library" badgeText="BUILD">
+			<div class="form-row">
+				<select id="presetSelect" class="preset-select"></select>
+				<button id="addPresetBtn" class="retro-button retro-button--primary">Add</button>
+			</div>
+
+			<details class="custom-ingredient-details">
+				<summary>➕ Add custom ingredient</summary>
+				<div class="form-row">
+					<input id="custEmoji" placeholder="🧪" class="emoji-input" />
+					<input id="custName" placeholder="Name" class="name-input" />
+				</div>
+				<div class="form-row">
+					<input id="custAbv" type="number" min="0" max="100" step="0.1" placeholder="Default ABV %" class="abv-input" />
+					<button id="addCustomBtn" class="retro-button retro-button--secondary">Add custom</button>
+				</div>
+				<div class="muted">Set ABV to 0 for juices/syrups/mixers.</div>
+			</details>
+
+			<div class="kpi-container">
+				<div class="kpi-box">
+					<div class="kpi-label">Single serving (undiluted)</div>
+					<div class="kpi-value"><span id="baseTotalMl">0</span> ml</div>
+				</div>
+				<div class="kpi-box">
+					<div class="kpi-label">Single serving ethanol</div>
+					<div class="kpi-value"><span id="baseEthanolMl">0</span> ml</div>
+				</div>
+			</div>
+		</Window>
+
+		<!-- Right: Recipe builder -->
+		<Window title="Recipe Builder (Single Serving)" badgeText="RECIPE">
+			<div class="recipe-header">
+				<div class="recipe-controls">
+					<button id="clearBtn" class="retro-button retro-button--secondary retro-button--small">Clear</button>
+					<button id="exampleBtn" class="retro-button retro-button--secondary retro-button--small">Load Example</button>
+				</div>
+			</div>
+
+			<div class="recipe-table-wrapper">
+				<table class="recipe-table">
+					<thead>
+						<tr>
+							<th>Ingredient</th>
+							<th class="right">Amount</th>
+							<th>Unit</th>
+							<th class="right">ABV%</th>
+							<th class="center">Move</th>
+							<th class="center">Remove</th>
+						</tr>
+					</thead>
+					<tbody id="recipeTbody"></tbody>
+				</table>
+			</div>
+
+			<div class="muted">
+				ABV is editable per ingredient (useful for overproof spirits or specific brands).
+			</div>
+		</Window>
+	</div>
+
+	<!-- Full width: Settings + output card -->
+	<Window title="Batch Settings & Export" badgeText="CALCULATE">
+		<div class="batch-settings-grid">
+			<div class="settings-column">
+				<div class="batch-mode-section">
+					<div class="radio-group">
+						<label class="radio-label">
+							<input type="radio" name="scaleMode" value="total" checked />
+							Target total volume
+						</label>
+						<label class="radio-label">
+							<input type="radio" name="scaleMode" value="servings" />
+							Number of servings
+						</label>
+					</div>
+				</div>
+
+				<div class="form-group" id="totalRow">
+					<label for="targetTotal">Target final volume</label>
+					<div class="input-row">
+						<input id="targetTotal" type="number" value="750" min="1" step="1" />
+						<select id="targetUnit">
+							<option value="ml">ml</option>
+							<option value="oz">oz</option>
+							<option value="cup">cups</option>
+							<option value="l">L</option>
+						</select>
+					</div>
+					<div class="muted">Final volume including dilution water</div>
+				</div>
+
+				<div class="form-group" id="servingsRow" style="display:none">
+					<label for="servings">Number of servings</label>
+					<input id="servings" type="number" value="10" min="1" step="1" />
+				</div>
+
+				<div class="form-group">
+					<label for="dilutionMode">Dilution method</label>
+					<div class="input-row">
+						<select id="dilutionMode">
+							<option value="none">No dilution water</option>
+							<option value="stirred">Stirred (20% default)</option>
+							<option value="shaken">Shaken (30% default)</option>
+							<option value="custom">Custom %</option>
+						</select>
+						<input id="customDilution" type="number" min="0" max="200" step="0.1" value="20" style="display:none" />
+					</div>
+					<div class="muted">
+						If guests will pour the batch over fresh ice, consider aiming a bit lower because the glass ice will continue diluting.
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="displayUnit">Display unit for recipe card</label>
+					<select id="displayUnit">
+						<option value="ml">ml</option>
+						<option value="oz">oz</option>
+						<option value="cup">cups</option>
+						<option value="l">L</option>
+					</select>
+				</div>
+
+				<div class="button-row">
+					<button id="calcBtn" class="retro-button retro-button--primary">Recalculate</button>
+				</div>
+
+				<div class="button-row">
+					<button id="saveBtn" class="retro-button retro-button--secondary">Save to Browser</button>
+					<button id="loadBtn" class="retro-button retro-button--secondary">Load</button>
+				</div>
+			</div>
+
+			<div class="export-column">
+				<div class="export-section">
+					<div class="export-header">
+						<span class="status-pill">Batch Recipe Card</span>
+						<button id="exportBtn" class="retro-button retro-button--primary">Export PNG</button>
+					</div>
+
+					<!-- Recipe Card -->
+					<div id="card" class="recipe-card">
+						<div class="card-header">
+							<div class="card-title-section">
+								<h3 id="cardTitle">My Batch Cocktail</h3>
+								<div class="card-meta" id="cardMeta">Batching sheet</div>
+							</div>
+							<div class="card-tags">
+								<div class="tag" id="tagMethod">Method: —</div>
+								<div class="tag" id="tagFreezer">Freezer: —</div>
+							</div>
+						</div>
+
+						<div class="card-stats">
+							<div><strong>Final volume:</strong> <span id="cardFinalVol">—</span></div>
+							<div><strong>ABV:</strong> <span id="cardAbv">—</span></div>
+							<div><strong>Dilution water:</strong> <span id="cardWater">—</span></div>
+						</div>
+
+						<table class="card-table">
+							<thead>
+								<tr>
+									<th>Ingredient</th>
+									<th class="right">Scaled amount</th>
+								</tr>
+							</thead>
+							<tbody id="cardBody"></tbody>
+						</table>
+
+						<div class="card-note" id="cardNotes">
+							Notes: If guests will pour over fresh ice, consider lowering added water since the glass ice will keep diluting.
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</Window>
+
+	<div class="toast" id="toast"></div>
+</BaseLayout>
+
+<!-- html-to-image for PNG export -->
+<script is:inline src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		// -------- Units (volume only) --------
+		// 1 US fl oz = 29.5735 ml; 1 US cup = 236.588 ml
+		function toMl(value, unit) {
+			const v = Number(value) || 0;
+			if (unit === "ml") return v;
+			if (unit === "l") return v * 1000;
+			if (unit === "oz") return v * 29.5735;
+			if (unit === "cup") return v * 236.588;
+			return v;
+		}
+
+		function fromMl(ml, unit) {
+			if (unit === "ml") return ml;
+			if (unit === "l") return ml / 1000;
+			if (unit === "oz") return ml / 29.5735;
+			if (unit === "cup") return ml / 236.588;
+			return ml;
+		}
+
+		function fmt(n, digits = 1) {
+			const x = Number(n);
+			if (!isFinite(x)) return "0";
+			return x.toFixed(digits).replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+		}
+
+		// -------- Preset ingredients --------
+		const presets = [
+			{ emoji: "🍸", name: "Gin", abv: 40 },
+			{ emoji: "🍸", name: "Vodka", abv: 40 },
+			{ emoji: "🥃", name: "Bourbon", abv: 45 },
+			{ emoji: "🥃", name: "Rye whiskey", abv: 45 },
+			{ emoji: "🥃", name: "Scotch", abv: 43 },
+			{ emoji: "🍹", name: "White rum", abv: 40 },
+			{ emoji: "🍹", name: "Aged rum", abv: 40 },
+			{ emoji: "🌵", name: "Tequila blanco", abv: 40 },
+			{ emoji: "🌵", name: "Mezcal", abv: 45 },
+			{ emoji: "🍊", name: "Triple sec", abv: 30 },
+			{ emoji: "🍊", name: "Orange curaçao", abv: 40 },
+			{ emoji: "🍷", name: "Sweet vermouth", abv: 16 },
+			{ emoji: "🍷", name: "Dry vermouth", abv: 18 },
+			{ emoji: "🍒", name: "Maraschino liqueur", abv: 32 },
+			{ emoji: "🥥", name: "Coconut cream", abv: 0 },
+			{ emoji: "🍍", name: "Pineapple juice", abv: 0 },
+			{ emoji: "🍋", name: "Lemon juice", abv: 0 },
+			{ emoji: "🍋", name: "Lime juice", abv: 0 },
+			{ emoji: "🍯", name: "Simple syrup", abv: 0 },
+			{ emoji: "🧊", name: "Soda water", abv: 0 },
+			{ emoji: "🫚", name: "Ginger beer", abv: 0 },
+			{ emoji: "☕", name: "Coffee", abv: 0 },
+			{ emoji: "🧂", name: "Saline (drops)", abv: 0 },
+			{ emoji: "🌿", name: "Bitters", abv: 44 },
+		];
+
+		// -------- App state --------
+		const STORAGE_KEY = "cocktail_batch_tool_v1";
+
+		let recipe = [
+			{ emoji: "🍸", name: "Gin", amount: 2, unit: "oz", abv: 40 },
+			{ emoji: "🍋", name: "Lemon juice", amount: 1, unit: "oz", abv: 0 },
+			{ emoji: "🍯", name: "Simple syrup", amount: 0.75, unit: "oz", abv: 0 }
+		];
+
+		// -------- DOM helpers --------
+		const el = (id) => document.getElementById(id);
+
+		// Populate preset select
+		(function initPresetSelect() {
+			const s = el("presetSelect");
+			s.innerHTML = "";
+			presets.forEach((p, i) => {
+				const opt = document.createElement("option");
+				opt.value = String(i);
+				opt.textContent = `${p.emoji} ${p.name} (${p.abv}% ABV)`;
+				s.appendChild(opt);
+			});
+		})();
+
+		// -------- Helpers --------
+		function toast(msg) {
+			const t = el("toast");
+			t.textContent = msg;
+			t.classList.add("show");
+			setTimeout(() => t.classList.remove("show"), 2200);
+		}
+
+		function baseTotals() {
+			const baseTotal = recipe.reduce((sum, i) => sum + toMl(i.amount, i.unit), 0);
+			const ethanol = recipe.reduce((sum, i) => sum + toMl(i.amount, i.unit) * ((Number(i.abv) || 0) / 100), 0);
+			return { baseTotal, ethanol };
+		}
+
+		function getScaleMode() {
+			return document.querySelector('input[name="scaleMode"]:checked').value;
+		}
+
+		function getDilutionPct() {
+			const mode = el("dilutionMode").value;
+			if (mode === "none") return 0;
+			if (mode === "shaken") return 0.30;
+			if (mode === "stirred") return 0.20;
+			if (mode === "custom") return (Number(el("customDilution").value || 0) / 100);
+			return 0;
+		}
+
+		function methodLabel() {
+			const mode = el("dilutionMode").value;
+			if (mode === "none") return "No dilution";
+			if (mode === "stirred") return "Stirred";
+			if (mode === "shaken") return "Shaken";
+			if (mode === "custom") return "Custom dilution";
+			return "—";
+		}
+
+		function freezerTag(abvPct) {
+			const a = Number(abvPct || 0);
+			// Rule-of-thumb guidance only
+			if (a <= 15) return { label: "Likely freezes (≤15% ABV)", cls: "danger" };
+			if (a < 25) return { label: "May slush/freeze (~20% ABV)", cls: "warn" };
+			if (a < 35) return { label: "Borderline (~30% ABV)", cls: "warn" };
+			if (a < 50) return { label: "Likely liquid (~40% ABV)", cls: "ok" };
+			return { label: "Very likely liquid (high ABV)", cls: "ok" };
+		}
+
+		function computeBatch() {
+			const { baseTotal } = baseTotals();
+			const dilutionPct = getDilutionPct();
+			if (baseTotal <= 0) return null;
+
+			let scale = 1;
+			let finalTargetMl = null;
+			let servings = null;
+
+			if (getScaleMode() === "servings") {
+				servings = Math.max(1, Number(el("servings").value || 1));
+				scale = servings;
+			} else {
+				const targetFinalMl = toMl(el("targetTotal").value, el("targetUnit").value);
+				finalTargetMl = targetFinalMl;
+				const targetUndiluted = targetFinalMl / (1 + dilutionPct);
+				scale = targetUndiluted / baseTotal;
+			}
+
+			const scaled = recipe.map(i => {
+				const ml = toMl(i.amount, i.unit) * scale;
+				const ethanolMl = ml * ((Number(i.abv) || 0) / 100);
+				return { ...i, ml, ethanolMl };
+			});
+
+			const undilutedMl = scaled.reduce((s, i) => s + i.ml, 0);
+			const waterMl = undilutedMl * dilutionPct;
+			const finalMl = undilutedMl + waterMl;
+			const ethanolMl = scaled.reduce((s, i) => s + i.ethanolMl, 0);
+			const abvPct = finalMl > 0 ? (100 * ethanolMl / finalMl) : 0;
+
+			return { scaled, undilutedMl, waterMl, finalMl, ethanolMl, abvPct, dilutionPct, finalTargetMl, servings, scale };
+		}
+
+		// -------- Rendering --------
+		function updateBaseKpis() {
+			const { baseTotal, ethanol } = baseTotals();
+			el("baseTotalMl").textContent = fmt(baseTotal, 1);
+			el("baseEthanolMl").textContent = fmt(ethanol, 1);
+		}
+
+		function renderRecipe() {
+			const tb = el("recipeTbody");
+			tb.innerHTML = "";
+
+			recipe.forEach((ing, idx) => {
+				const tr = document.createElement("tr");
+
+				const tdName = document.createElement("td");
+				tdName.textContent = `${ing.emoji} ${ing.name}`;
+				tr.appendChild(tdName);
+
+				const tdAmt = document.createElement("td");
+				tdAmt.className = "right";
+				const amt = document.createElement("input");
+				amt.type = "number";
+				amt.step = "0.01";
+				amt.min = "0";
+				amt.value = ing.amount;
+				amt.oninput = () => {
+					ing.amount = Number(amt.value || 0);
+					updateBaseKpis();
+					calculateAndRenderCard();
+				};
+				tdAmt.appendChild(amt);
+				tr.appendChild(tdAmt);
+
+				const tdUnit = document.createElement("td");
+				const unit = document.createElement("select");
+				["ml", "oz", "cup", "l"].forEach(u => {
+					const o = document.createElement("option");
+					o.value = u;
+					o.textContent = u;
+					if (u === ing.unit) o.selected = true;
+					unit.appendChild(o);
+				});
+				unit.onchange = () => {
+					ing.unit = unit.value;
+					updateBaseKpis();
+					calculateAndRenderCard();
+				};
+				tdUnit.appendChild(unit);
+				tr.appendChild(tdUnit);
+
+				const tdAbv = document.createElement("td");
+				tdAbv.className = "right";
+				const abv = document.createElement("input");
+				abv.type = "number";
+				abv.step = "0.1";
+				abv.min = "0";
+				abv.max = "100";
+				abv.value = ing.abv;
+				abv.oninput = () => {
+					ing.abv = Number(abv.value || 0);
+					updateBaseKpis();
+					calculateAndRenderCard();
+				};
+				tdAbv.appendChild(abv);
+				tr.appendChild(tdAbv);
+
+				const tdMove = document.createElement("td");
+				tdMove.className = "center";
+				const up = document.createElement("button");
+				up.className = "icon-button";
+				up.textContent = "↑";
+				up.disabled = idx === 0;
+				up.onclick = () => {
+					[recipe[idx - 1], recipe[idx]] = [recipe[idx], recipe[idx - 1]];
+					renderRecipe();
+					calculateAndRenderCard();
+				};
+				const down = document.createElement("button");
+				down.className = "icon-button";
+				down.textContent = "↓";
+				down.disabled = idx === recipe.length - 1;
+				down.onclick = () => {
+					[recipe[idx + 1], recipe[idx]] = [recipe[idx], recipe[idx + 1]];
+					renderRecipe();
+					calculateAndRenderCard();
+				};
+				tdMove.appendChild(up);
+				tdMove.appendChild(down);
+				tr.appendChild(tdMove);
+
+				const tdX = document.createElement("td");
+				tdX.className = "center";
+				const x = document.createElement("button");
+				x.className = "icon-button icon-button--danger";
+				x.textContent = "✕";
+				x.onclick = () => {
+					recipe.splice(idx, 1);
+					renderRecipe();
+					calculateAndRenderCard();
+				};
+				tdX.appendChild(x);
+				tr.appendChild(tdX);
+
+				tb.appendChild(tr);
+			});
+
+			updateBaseKpis();
+		}
+
+		function setHeadline(msg, kind = "ok") {
+			const pill = el("headlinePill");
+			pill.textContent = msg;
+			pill.className = `status-pill status-pill--${kind}`;
+		}
+
+		function calculateAndRenderCard() {
+			el("cardTitle").textContent = el("cocktailName").value || "Batch Cocktail";
+
+			const batch = computeBatch();
+			if (!batch) {
+				el("cardFinalVol").textContent = "—";
+				el("cardAbv").textContent = "—";
+				el("cardWater").textContent = "—";
+				el("cardBody").innerHTML = "";
+				setHeadline("Add ingredients", "danger");
+				return;
+			}
+
+			const dispUnit = el("displayUnit").value;
+
+			el("tagMethod").textContent = `Method: ${methodLabel()}`;
+			const freezer = freezerTag(batch.abvPct);
+			el("tagFreezer").textContent = `Freezer: ${freezer.label}`;
+			el("tagFreezer").className = `tag tag--${freezer.cls}`;
+
+			el("cardMeta").textContent =
+				getScaleMode() === "servings"
+					? `Scaled to ${batch.servings} servings (dilution ${fmt(batch.dilutionPct * 100, 1)}%)`
+					: `Scaled to target total (dilution ${fmt(batch.dilutionPct * 100, 1)}%)`;
+
+			const finalDisp = fromMl(batch.finalMl, dispUnit);
+			el("cardFinalVol").textContent = `${fmt(finalDisp, dispUnit === "ml" ? 0 : 2)} ${dispUnit}`;
+
+			el("cardAbv").textContent = `${fmt(batch.abvPct, 1)}%`;
+
+			const waterDisp = fromMl(batch.waterMl, dispUnit);
+			el("cardWater").textContent = `${fmt(waterDisp, dispUnit === "ml" ? 0 : 2)} ${dispUnit}`;
+
+			// Ingredients list
+			const body = el("cardBody");
+			body.innerHTML = "";
+			batch.scaled.forEach(i => {
+				const tr = document.createElement("tr");
+				const td1 = document.createElement("td");
+				td1.textContent = `${i.emoji} ${i.name}`;
+				const td2 = document.createElement("td");
+				td2.className = "right";
+				const v = fromMl(i.ml, dispUnit);
+				td2.textContent = `${fmt(v, dispUnit === "ml" ? 0 : 2)} ${dispUnit}`;
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+				body.appendChild(tr);
+			});
+
+			// Card notes
+			el("cardNotes").textContent =
+				"Notes: If guests will pour the batch over fresh ice, consider aiming a bit lower on added water since the glass ice will keep diluting.";
+
+			// Headline
+			if (getScaleMode() === "servings") {
+				setHeadline(`Scaled ×${fmt(batch.scale, 2)} (servings)`);
+			} else {
+				const tgtMl = toMl(el("targetTotal").value, el("targetUnit").value);
+				setHeadline(`Target ${fmt(tgtMl, 0)} ml final • ABV ${fmt(batch.abvPct, 1)}%`);
+			}
+		}
+
+		// -------- Events --------
+		el("addPresetBtn").addEventListener("click", () => {
+			const p = presets[Number(el("presetSelect").value)];
+			recipe.push({ ...p, amount: 1, unit: "oz" });
+			renderRecipe();
+			calculateAndRenderCard();
+			toast("Added ingredient");
+		});
+
+		el("addCustomBtn").addEventListener("click", () => {
+			const emoji = (el("custEmoji").value || "🧪").trim();
+			const name = (el("custName").value || "Custom").trim();
+			const abv = Number(el("custAbv").value || 0);
+
+			recipe.push({ emoji, name, amount: 1, unit: "oz", abv });
+			el("custEmoji").value = "";
+			el("custName").value = "";
+			el("custAbv").value = "";
+			renderRecipe();
+			calculateAndRenderCard();
+			toast("Added custom ingredient");
+		});
+
+		el("cocktailName").addEventListener("input", () => calculateAndRenderCard());
+
+		document.querySelectorAll('input[name="scaleMode"]').forEach(r => {
+			r.addEventListener("change", () => {
+				const mode = getScaleMode();
+				el("totalRow").style.display = mode === "total" ? "" : "none";
+				el("servingsRow").style.display = mode === "servings" ? "" : "none";
+				calculateAndRenderCard();
+			});
+		});
+
+		["targetTotal", "targetUnit", "servings", "displayUnit"].forEach(id => {
+			el(id).addEventListener("input", () => calculateAndRenderCard());
+			el(id).addEventListener("change", () => calculateAndRenderCard());
+		});
+
+		el("dilutionMode").addEventListener("change", () => {
+			const mode = el("dilutionMode").value;
+			el("customDilution").style.display = mode === "custom" ? "" : "none";
+
+			// Set a friendly default when switching into custom
+			if (mode === "custom") el("customDilution").value = "25";
+			if (mode === "stirred") el("customDilution").value = "20";
+			if (mode === "shaken") el("customDilution").value = "30";
+
+			calculateAndRenderCard();
+		});
+
+		el("customDilution").addEventListener("input", () => calculateAndRenderCard());
+		el("calcBtn").addEventListener("click", () => calculateAndRenderCard());
+
+		el("clearBtn").addEventListener("click", () => {
+			recipe = [];
+			renderRecipe();
+			calculateAndRenderCard();
+			toast("Cleared");
+		});
+
+		el("exampleBtn").addEventListener("click", () => {
+			recipe = [
+				{ emoji: "🥃", name: "Bourbon", amount: 2, unit: "oz", abv: 45 },
+				{ emoji: "🍋", name: "Lemon juice", amount: 0.75, unit: "oz", abv: 0 },
+				{ emoji: "🍯", name: "Simple syrup", amount: 0.75, unit: "oz", abv: 0 },
+				{ emoji: "🌿", name: "Bitters", amount: 0.1, unit: "oz", abv: 44 }
+			];
+			el("cocktailName").value = "Whiskey Sour-ish Batch";
+			el("dilutionMode").value = "shaken";
+			el("customDilution").value = "30";
+			renderRecipe();
+			calculateAndRenderCard();
+			toast("Loaded example");
+		});
+
+		el("saveBtn").addEventListener("click", () => {
+			const payload = {
+				cocktailName: el("cocktailName").value || "",
+				recipe,
+				scaleMode: getScaleMode(),
+				targetTotal: el("targetTotal").value,
+				targetUnit: el("targetUnit").value,
+				servings: el("servings").value,
+				dilutionMode: el("dilutionMode").value,
+				customDilution: el("customDilution").value,
+				displayUnit: el("displayUnit").value
+			};
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+			toast("Saved");
+		});
+
+		el("loadBtn").addEventListener("click", () => {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (!raw) return toast("Nothing saved yet");
+			try {
+				const p = JSON.parse(raw);
+				el("cocktailName").value = p.cocktailName || "Batch Cocktail";
+				recipe = Array.isArray(p.recipe) ? p.recipe : [];
+				document.querySelector(`input[name="scaleMode"][value="${p.scaleMode || "total"}"]`).checked = true;
+				el("targetTotal").value = p.targetTotal ?? "750";
+				el("targetUnit").value = p.targetUnit ?? "ml";
+				el("servings").value = p.servings ?? "10";
+				el("dilutionMode").value = p.dilutionMode ?? "stirred";
+				el("customDilution").value = p.customDilution ?? "20";
+				el("displayUnit").value = p.displayUnit ?? "ml";
+
+				const mode = getScaleMode();
+				el("totalRow").style.display = mode === "total" ? "" : "none";
+				el("servingsRow").style.display = mode === "servings" ? "" : "none";
+				el("customDilution").style.display = el("dilutionMode").value === "custom" ? "" : "none";
+
+				renderRecipe();
+				calculateAndRenderCard();
+				toast("Loaded");
+			} catch (e) {
+				toast("Load failed (bad data)");
+			}
+		});
+
+		// Export card to PNG via html-to-image
+		el("exportBtn").addEventListener("click", async () => {
+			const node = el("card");
+			try {
+				toast("Rendering PNG…");
+				const dataUrl = await htmlToImage.toPng(node, {
+					pixelRatio: 2,
+					cacheBust: true,
+					backgroundColor: "#ffffff"
+				});
+				const a = document.createElement("a");
+				const name = (el("cocktailName").value || "batch-recipe").trim().replace(/[^\w\-]+/g, "_");
+				a.download = `${name}.png`;
+				a.href = dataUrl;
+				a.click();
+				toast("Downloaded PNG");
+			} catch (err) {
+				console.error(err);
+				toast("Export failed (try another browser)");
+			}
+		});
+
+		// -------- Init --------
+		renderRecipe();
+		calculateAndRenderCard();
+	});
+</script>
+
+<style>
+	.tool-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.tool-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+		color: var(--accent);
+	}
+
+	.tool-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.cocktail-name-row {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+		margin-bottom: 1.5rem;
+	}
+
+	.cocktail-name-input {
+		flex: 1;
+		font-family: 'VT323', monospace;
+		font-size: 1.3rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		background: var(--panel-bg);
+		color: var(--text);
+		border-radius: 4px;
+		min-width: 200px;
+	}
+
+	.cocktail-name-input:focus {
+		outline: none;
+		border-color: var(--accent);
+		box-shadow: 0 0 0 2px var(--accent);
+	}
+
+	.status-pill {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		font-size: 1rem;
+		border: 2px solid var(--accent);
+		background: rgba(255, 0, 255, 0.1);
+		color: var(--accent);
+		border-radius: 999px;
+		white-space: nowrap;
+	}
+
+	.status-pill--ok {
+		border-color: var(--accent);
+		background: rgba(255, 0, 255, 0.1);
+		color: var(--accent);
+	}
+
+	.status-pill--danger {
+		border-color: #fb7185;
+		background: rgba(251, 113, 133, 0.12);
+		color: #ffd5dc;
+	}
+
+	.batch-grid {
+		display: grid;
+		grid-template-columns: 1fr 1.5fr;
+		gap: 1.5rem;
+		align-items: start;
+	}
+
+	@media (max-width: 1200px) {
+		.batch-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	/* Form elements */
+	.form-row {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin-bottom: 1rem;
+	}
+
+	label {
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--text);
+	}
+
+	input:not(.icon-button),
+	select {
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		padding: 0.75rem;
+		border: 3px solid var(--border);
+		background: var(--bg2);
+		color: var(--text);
+		border-radius: 4px;
+		outline: none;
+	}
+
+	input:focus,
+	select:focus {
+		border-color: var(--focus);
+		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	.input-row {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.preset-select {
+		flex: 1;
+	}
+
+	.emoji-input {
+		width: 80px;
+	}
+
+	.name-input {
+		flex: 1;
+	}
+
+	.abv-input {
+		width: 180px;
+	}
+
+	.muted {
+		color: var(--muted);
+		font-size: 0.9rem;
+		line-height: 1.4;
+	}
+
+	/* Custom ingredient details */
+	.custom-ingredient-details {
+		margin-top: 1rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		padding: 1rem;
+		background: rgba(255, 255, 255, 0.02);
+	}
+
+	.custom-ingredient-details summary {
+		cursor: pointer;
+		font-weight: 600;
+		color: var(--text);
+		margin-bottom: 0.5rem;
+	}
+
+	.custom-ingredient-details summary:hover {
+		color: var(--accent);
+	}
+
+	/* KPI boxes */
+	.kpi-container {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 2px solid var(--border);
+	}
+
+	.kpi-box {
+		flex: 1;
+		min-width: 160px;
+		background: rgba(255, 255, 255, 0.03);
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		padding: 1rem;
+	}
+
+	.kpi-label {
+		font-size: 0.9rem;
+		color: var(--muted);
+		margin-bottom: 0.25rem;
+	}
+
+	.kpi-value {
+		font-size: 1.3rem;
+		font-weight: 700;
+		color: var(--accent);
+	}
+
+	/* Recipe builder */
+	.recipe-header {
+		margin-bottom: 1rem;
+	}
+
+	.recipe-controls {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.recipe-table-wrapper {
+		overflow-x: auto;
+	}
+
+	.recipe-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.recipe-table th,
+	.recipe-table td {
+		padding: 0.75rem 0.5rem;
+		border-bottom: 2px solid var(--border);
+		text-align: left;
+		vertical-align: middle;
+	}
+
+	.recipe-table th {
+		font-size: 0.9rem;
+		color: var(--muted);
+		font-weight: 600;
+	}
+
+	.recipe-table td.right,
+	.recipe-table th.right {
+		text-align: right;
+	}
+
+	.recipe-table td.center,
+	.recipe-table th.center {
+		text-align: center;
+	}
+
+	/* Ensure table inputs and selects get retro styling */
+	.recipe-table input,
+	.recipe-table select {
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		padding: 0.5rem;
+		border: 3px solid var(--border);
+		background: var(--bg2);
+		color: var(--text);
+		border-radius: 4px;
+		outline: none;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.recipe-table input:focus,
+	.recipe-table select:focus {
+		border-color: var(--focus);
+		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	.icon-button {
+		padding: 0.3em 0.6em;
+		font-size: 1rem;
+		border: 2px solid var(--border);
+		background: var(--bg2);
+		color: var(--text);
+		border-radius: 4px;
+		cursor: pointer;
+		margin: 0 2px;
+		box-shadow: 2px 2px 0 var(--shadow);
+		transition: all 0.1s ease;
+		font-family: "VT323", monospace;
+	}
+
+	.icon-button:hover:not(:disabled) {
+		transform: translate(1px, 1px);
+		box-shadow: 1px 1px 0 var(--shadow);
+		filter: brightness(1.1);
+	}
+
+	.icon-button:active:not(:disabled) {
+		transform: translate(2px, 2px);
+		box-shadow: 0 0 0 var(--shadow);
+	}
+
+	.icon-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		box-shadow: none;
+		transform: none;
+	}
+
+	.icon-button--danger {
+		background: #ff4444;
+		color: #ffffff;
+		border-color: #ff0000;
+	}
+
+	/* Batch settings */
+	.batch-settings-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2rem;
+		align-items: start;
+	}
+
+	@media (max-width: 1000px) {
+		.batch-settings-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.batch-mode-section {
+		margin-bottom: 1rem;
+	}
+
+	.radio-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.radio-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-size: 1rem;
+	}
+
+	.radio-label input[type="radio"] {
+		min-width: auto;
+		width: auto;
+		cursor: pointer;
+	}
+
+	.button-row {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+
+	/* Export section */
+	.export-section {
+		margin-top: 0;
+	}
+
+	.export-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	/* Recipe card (export target) */
+	.recipe-card {
+		background: #ffffff;
+		color: #0b1020;
+		border-radius: 12px;
+		padding: 1.5rem;
+		border: 3px solid rgba(0, 0, 0, 0.9);
+		font-family: system-ui, -apple-system, sans-serif;
+	}
+
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: start;
+		gap: 1rem;
+		margin-bottom: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.card-title-section h3 {
+		margin: 0;
+		font-size: 1.5rem;
+		color: #0b1020;
+		font-weight: 700;
+	}
+
+	.card-meta {
+		color: rgba(0, 0, 0, 0.65);
+		font-size: 0.9rem;
+		margin-top: 0.25rem;
+	}
+
+	.card-tags {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.card-stats {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		padding: 1rem 0;
+		border-top: 2px solid rgba(0, 0, 0, 0.12);
+		border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+		font-size: 0.95rem;
+	}
+
+	.card-table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-top: 1rem;
+	}
+
+	.card-table th {
+		text-align: left;
+		color: rgba(0, 0, 0, 0.6);
+		border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+		padding: 0.5rem;
+		font-size: 0.85rem;
+	}
+
+	.card-table td {
+		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		padding: 0.5rem;
+		font-size: 0.95rem;
+	}
+
+	.card-table td.right {
+		text-align: right;
+	}
+
+	.tag {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 999px;
+		border: 1px solid rgba(0, 0, 0, 0.15);
+		background: rgba(0, 0, 0, 0.03);
+		font-size: 0.8rem;
+		font-weight: 600;
+	}
+
+	.tag--ok {
+		border-color: rgba(16, 185, 129, 0.35);
+		background: rgba(16, 185, 129, 0.1);
+	}
+
+	.tag--warn {
+		border-color: rgba(245, 158, 11, 0.35);
+		background: rgba(245, 158, 11, 0.12);
+	}
+
+	.tag--danger {
+		border-color: rgba(239, 68, 68, 0.35);
+		background: rgba(239, 68, 68, 0.1);
+	}
+
+	.card-note {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		border-radius: 8px;
+		background: rgba(0, 0, 0, 0.04);
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		font-size: 0.85rem;
+		color: rgba(0, 0, 0, 0.72);
+		line-height: 1.4;
+	}
+
+	/* Toast */
+	.toast {
+		position: fixed;
+		left: 50%;
+		transform: translateX(-50%);
+		bottom: 2rem;
+		background: rgba(26, 26, 46, 0.95);
+		border: 2px solid var(--border);
+		color: var(--text);
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		display: none;
+		max-width: min(560px, calc(100vw - 2rem));
+		z-index: 1000;
+	}
+
+	.toast.show {
+		display: block;
+	}
+
+	/* Retro button sizing overrides for compact buttons */
+	.retro-button--small {
+		font-size: 1rem;
+		padding: 0.4em 0.8em;
+	}
+
+	@media (max-width: 768px) {
+		.batch-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.batch-settings-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.tool-hero h1 {
+			font-size: 2rem;
+		}
+
+		.cocktail-name-row {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.status-pill {
+			align-self: flex-start;
+		}
+
+		.export-header {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.card-header {
+			flex-direction: column;
+		}
+
+		.card-stats {
+			flex-direction: column;
+		}
+	}
+</style>
