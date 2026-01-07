@@ -304,7 +304,7 @@ import Window from '../../components/Window.astro';
 		overflow: hidden;
 	}
 
-	.rules-header {
+	:global(.rules-header) {
 		display: grid;
 		grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1.5fr 1fr 1fr;
 		gap: 0.5rem;
@@ -322,7 +322,7 @@ import Window from '../../components/Window.astro';
 		overflow-y: auto;
 	}
 
-	.rule-item {
+	:global(.rule-item) {
 		display: grid;
 		grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1.5fr 1fr 1fr;
 		gap: 0.5rem;
@@ -333,11 +333,11 @@ import Window from '../../components/Window.astro';
 		font-size: 1rem;
 	}
 
-	.rule-item:last-child {
+	:global(.rule-item:last-child) {
 		border-bottom: none;
 	}
 
-	.rule-name {
+	:global(.rule-name) {
 		font-weight: bold;
 		color: var(--text);
 		overflow: hidden;
@@ -345,21 +345,21 @@ import Window from '../../components/Window.astro';
 		white-space: nowrap;
 	}
 
-	.rule-pattern,
-	.rule-replacement {
+	:global(.rule-pattern),
+	:global(.rule-replacement) {
 		color: var(--muted);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.rule-type,
-	.rule-category {
+	:global(.rule-type),
+	:global(.rule-category) {
 		color: var(--text);
 		font-size: 0.9rem;
 	}
 
-	.rule-actions {
+	:global(.rule-actions) {
 		display: flex;
 		gap: 0.5rem;
 	}
@@ -569,12 +569,6 @@ import Window from '../../components/Window.astro';
 			font-size: 2.5rem;
 		}
 
-		.rules-header,
-		.rule-item {
-			grid-template-columns: 1fr;
-			gap: 0.25rem;
-		}
-
 		.config-bar {
 			flex-direction: column;
 		}
@@ -583,6 +577,15 @@ import Window from '../../components/Window.astro';
 			right: 1rem;
 			left: 1rem;
 			bottom: 1rem;
+		}
+	}
+
+	/* Only stack rules on very small screens (< 600px) */
+	@media (max-width: 600px) {
+		.rules-header,
+		.rule-item {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
 		}
 	}
 </style>
