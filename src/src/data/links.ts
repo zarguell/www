@@ -53,6 +53,11 @@ export const linksData: LinkCategory[] = [
 				url: "https://zarguell.github.io/tia-n-list/",
 				description: "My AI/LLM assisted Threat Intel Analyst",
 			},
+			{
+				title: "Cooklang Astro Recipes",
+				url: "https://zarguell.github.io/recipes-as-code/",
+				description: "Astro based static site for Cooklang recipes. Many recipes scraped via LLM from unstructured Instagram posts.",
+			},
 		],
 	},
 ];
