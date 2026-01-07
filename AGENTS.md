@@ -104,6 +104,10 @@ npm run astro    # Run Astro CLI commands
 - Define tokens in `[data-theme="..."]` selectors
 - Prefer custom CSS effects (gradients, shadows, bevels) over images
 - Respect `prefers-reduced-motion` - disable animations when set
+- **Avoid CSS duplication** - Check `./src/src/styles/global.css` before adding component-specific styles
+  - Global styles exist for: `.retro-button`, `.form-group`, `.calculator-hero`, `.tool-hero`, `.calculator-form`, etc.
+  - If a style appears in 3+ components, move it to global CSS instead
+  - This prevents code duplication and ensures consistency across the site
 
 ### Components
 - Keep components small and reusable
