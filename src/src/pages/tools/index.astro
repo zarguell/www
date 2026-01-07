@@ -17,6 +17,7 @@ import Badge from '../../components/Badge.astro';
 		<a href="#investment" class="category-link">Investment Analysis</a>
 		<a href="#tax" class="category-link">Tax & Strategy</a>
 		<a href="#visualization" class="category-link">Visualization</a>
+		<a href="#text" class="category-link">Text Manipulation</a>
 		<a href="#images" class="category-link">Image Tools</a>
 		<a href="#food" class="category-link">Food & Drinks</a>
 		<a href="#gaming" class="category-link">Video Games</a>
@@ -209,6 +210,32 @@ import Badge from '../../components/Badge.astro';
 					</ul>
 					<RetroButton href="/tools/sankey-builder" variant="primary">
 						Build Diagram
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Text Manipulation Section -->
+	<section id="text" class="tool-category">
+		<h2 class="category-title">Text Manipulation</h2>
+		<p class="category-description">Transform, sanitize, and process text with privacy-focused browser tools.</p>
+
+		<div class="tools-grid">
+			<Window title="Sanitext" badgeText="TEXT TOOL">
+				<div class="tool-card">
+					<p class="tool-description">
+						Privacy-focused, client-side text sanitization tool. Redact sensitive information like emails, phone numbers, SSNs, credit cards, and IP addresses using customizable regex or string replacement rules.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Pre-built rules for common PII (emails, phones, SSNs)</li>
+						<li>✓ Custom regex and string replacement rules</li>
+						<li>✓ Import/export rule configurations</li>
+						<li>✓ Real-time sanitization as you type</li>
+						<li>✓ 100% client-side (your text never leaves your browser)</li>
+					</ul>
+					<RetroButton href="/tools/sanitext" variant="primary">
+						Sanitize Text
 					</RetroButton>
 				</div>
 			</Window>

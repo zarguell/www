@@ -1,0 +1,1256 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<BaseLayout title="Sanitext - Privacy-Focused Text Sanitization">
+	<div class="sanitext-hero">
+		<h1>Sanitext</h1>
+		<p class="tagline">Privacy-focused, client-side text sanitization</p>
+	</div>
+
+	<!-- Configuration Button -->
+	<div class="config-bar">
+		<button id="configBtn" class="retro-button retro-button--secondary">Configure Rules</button>
+		<button id="importBtn" class="retro-button retro-button--secondary">Import Config</button>
+		<button id="exportBtn" class="retro-button retro-button--secondary">Export Config</button>
+		<button id="resetBtn" class="retro-button retro-button--outline">Reset to Defaults</button>
+	</div>
+
+	<!-- Main Text Areas -->
+	<div class="text-areas-container">
+		<Window title="Input Text" badgeText="INPUT">
+			<div class="section-header">
+				<span class="char-count" id="inputCharCount">0 characters</span>
+			</div>
+			<textarea
+				id="inputText"
+				class="text-area"
+				placeholder="Paste your text here to sanitize..."
+				spellcheck="false"
+			></textarea>
+		</Window>
+
+		<Window title="Sanitized Text" badgeText="OUTPUT">
+			<div class="section-header">
+				<span class="char-count" id="outputCharCount">0 characters</span>
+				<button id="copyBtn" class="retro-button retro-button--primary" disabled>Copy to Clipboard</button>
+			</div>
+			<textarea
+				id="outputText"
+				class="text-area"
+				readonly
+				placeholder="Sanitized text will appear here..."
+			></textarea>
+		</Window>
+	</div>
+
+	<!-- Configuration Modal -->
+	<div id="configModal" class="modal hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Sanitization Rules Configuration</h3>
+				<button class="modal-close" id="closeModal">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+					</svg>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<div class="config-actions">
+					<button id="addRuleBtn" class="retro-button retro-button--primary">Add Rule</button>
+				</div>
+
+				<div class="rules-container">
+					<div class="rules-header">
+						<span>Rule Name</span>
+						<span>Pattern/Text</span>
+						<span>Replacement</span>
+						<span>Type</span>
+						<span>Category</span>
+						<span>Enabled</span>
+						<span>Actions</span>
+					</div>
+					<div id="rulesList" class="rules-list"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Add/Edit Rule Modal -->
+	<div id="ruleModal" class="modal hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="ruleModalTitle">Add New Rule</h3>
+				<button class="modal-close" id="closeRuleModal">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+					</svg>
+				</button>
+			</div>
+
+			<form id="ruleForm" class="modal-body">
+				<div class="form-group">
+					<label class="form-label" for="ruleName">Rule Name</label>
+					<input type="text" id="ruleName" class="form-control" required>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="ruleType">Type</label>
+					<select id="ruleType" class="form-control" required>
+						<option value="string">String Match</option>
+						<option value="regex">Regular Expression</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="rulePattern">Pattern/Text to Match</label>
+					<textarea id="rulePattern" class="form-control" rows="2" required></textarea>
+					<small class="form-help">For regex type, enter a valid regular expression. For string type, enter exact text to match.</small>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="ruleReplacement">Replacement Text</label>
+					<input type="text" id="ruleReplacement" class="form-control" required>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="ruleCategory">Category</label>
+					<select id="ruleCategory" class="form-control" required>
+						<option value="Personal Information">Personal Information</option>
+						<option value="Financial Information">Financial Information</option>
+						<option value="Network Information">Network Information</option>
+						<option value="Custom Company Rules">Custom Company Rules</option>
+					</select>
+				</div>
+
+				<div class="checkbox-group">
+					<label class="checkbox-label">
+						<input type="checkbox" id="ruleEnabled" checked>
+						<span class="checkmark"></span>
+						Enable this rule
+					</label>
+				</div>
+
+				<div class="form-actions">
+					<button type="button" class="retro-button retro-button--outline" id="cancelRuleBtn">Cancel</button>
+					<button type="submit" class="retro-button retro-button--primary" id="saveRuleBtn">Save Rule</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Toast Notifications -->
+	<div id="toast" class="toast hidden">
+		<span id="toastMessage"></span>
+		<button class="toast-close" id="toastClose">×</button>
+	</div>
+
+	<input type="file" id="importFile" accept=".json" style="display: none;">
+
+	<div class="privacy-notice">
+		<p>100% Client-Side Processing - Your text never leaves your browser</p>
+	</div>
+</BaseLayout>
+
+<style>
+	.sanitext-hero {
+		text-align: center;
+		padding: 2rem 0;
+		margin-bottom: 2rem;
+	}
+
+	.sanitext-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+		color: var(--accent);
+	}
+
+	.tagline {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.config-bar {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin-bottom: 2rem;
+		justify-content: center;
+	}
+
+	.text-areas-container {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2rem;
+		margin-bottom: 2rem;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	.char-count {
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		color: var(--muted);
+	}
+
+	.text-area {
+		width: 100%;
+		min-height: 400px;
+		padding: 1rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		line-height: 1.6;
+		background: var(--bg);
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		color: var(--text);
+		resize: vertical;
+	}
+
+	.text-area:focus {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+		border-color: var(--accent);
+	}
+
+	.text-area[readonly] {
+		background: var(--bg2);
+	}
+
+	/* Modal Styles */
+	.modal {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.8);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		padding: 2rem;
+	}
+
+	.modal.hidden {
+		display: none;
+	}
+
+	.modal-content {
+		background: var(--panel);
+		border: 3px solid var(--border);
+		border-radius: 8px;
+		box-shadow: 6px 6px 0 var(--shadow);
+		max-width: 900px;
+		width: 100%;
+		max-height: 90vh;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.modal-header {
+		background: linear-gradient(180deg, var(--bevel-light), var(--bevel-dark));
+		border-bottom: 2px solid var(--border);
+		padding: 1rem 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.modal-header h3 {
+		margin: 0;
+		font-size: 1.5rem;
+		color: var(--text);
+	}
+
+	.modal-close {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.5rem;
+		color: var(--text);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.modal-close:hover {
+		color: var(--accent);
+	}
+
+	.modal-body {
+		padding: 1.5rem;
+		overflow-y: auto;
+		flex: 1;
+	}
+
+	.config-actions {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+		flex-wrap: wrap;
+	}
+
+	.rules-container {
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	.rules-header {
+		display: grid;
+		grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1.5fr 1fr 1fr;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		background: var(--bg2);
+		border-bottom: 2px solid var(--border);
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		font-weight: bold;
+		color: var(--text);
+	}
+
+	.rules-list {
+		max-height: 400px;
+		overflow-y: auto;
+	}
+
+	.rule-item {
+		display: grid;
+		grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1.5fr 1fr 1fr;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid var(--border);
+		align-items: center;
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+	}
+
+	.rule-item:last-child {
+		border-bottom: none;
+	}
+
+	.rule-name {
+		font-weight: bold;
+		color: var(--text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.rule-pattern,
+	.rule-replacement {
+		color: var(--muted);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.rule-type,
+	.rule-category {
+		color: var(--text);
+		font-size: 0.9rem;
+	}
+
+	.rule-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.rule-action-btn {
+		background: none;
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		cursor: pointer;
+		padding: 0.25rem 0.5rem;
+		color: var(--text);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+	.rule-action-btn:hover {
+		background: var(--accent);
+		color: var(--sticker-text);
+	}
+
+	.rule-action-btn.delete:hover {
+		background: #ff4444;
+		color: #ffffff;
+	}
+
+	/* Toggle Switch */
+	.toggle {
+		position: relative;
+		display: inline-block;
+		width: 50px;
+		height: 24px;
+	}
+
+	.toggle input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.toggle-slider {
+		position: absolute;
+		cursor: pointer;
+		inset: 0;
+		background-color: var(--bg2);
+		transition: 0.3s;
+		border: 2px solid var(--border);
+		border-radius: 24px;
+	}
+
+	.toggle-slider:before {
+		position: absolute;
+		content: "";
+		height: 16px;
+		width: 16px;
+		left: 2px;
+		bottom: 2px;
+		background-color: var(--text);
+		transition: 0.3s;
+		border-radius: 50%;
+	}
+
+	.toggle input:checked + .toggle-slider {
+		background-color: var(--accent);
+		border-color: var(--accent);
+	}
+
+	.toggle input:checked + .toggle-slider:before {
+		transform: translateX(26px);
+		background-color: var(--sticker-text);
+	}
+
+	/* Form Styles */
+	.form-group {
+		margin-bottom: 1.25rem;
+	}
+
+	.form-label {
+		display: block;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		font-weight: bold;
+		color: var(--text);
+		margin-bottom: 0.5rem;
+	}
+
+	.form-control {
+		width: 100%;
+		padding: 0.6em 0.8em;
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		background: var(--bg);
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		color: var(--text);
+		transition: all 0.2s ease;
+	}
+
+	.form-control:focus {
+		outline: none;
+		border-color: var(--accent);
+		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	.form-help {
+		display: block;
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		color: var(--muted);
+		margin-top: 0.5rem;
+	}
+
+	.checkbox-group {
+		margin-bottom: 1.25rem;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		cursor: pointer;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		color: var(--text);
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		width: 20px;
+		height: 20px;
+		cursor: pointer;
+	}
+
+	.form-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: flex-end;
+		margin-top: 1.5rem;
+	}
+
+	/* Toast Notifications */
+	.toast {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		padding: 1rem 1.5rem;
+		background: var(--panel);
+		border: 3px solid var(--border);
+		border-radius: 4px;
+		box-shadow: 6px 6px 0 var(--shadow);
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		color: var(--text);
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		z-index: 1001;
+		min-width: 300px;
+	}
+
+	.toast.hidden {
+		display: none;
+	}
+
+	.toast.success {
+		border-color: #00cc00;
+		background: var(--success-bg);
+	}
+
+	.toast.error {
+		border-color: #ff4444;
+		background: var(--error-bg);
+	}
+
+	.toast-close {
+		background: none;
+		border: none;
+		font-size: 2rem;
+		color: var(--text);
+		cursor: pointer;
+		padding: 0;
+		line-height: 1;
+	}
+
+	.toast-close:hover {
+		color: var(--accent);
+	}
+
+	.privacy-notice {
+		text-align: center;
+		padding: 2rem;
+		margin-top: 2rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		color: var(--muted);
+		border-top: 2px solid var(--border);
+	}
+
+	@media (max-width: 1024px) {
+		.text-areas-container {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.sanitext-hero h1 {
+			font-size: 2.5rem;
+		}
+
+		.rules-header,
+		.rule-item {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
+		}
+
+		.config-bar {
+			flex-direction: column;
+		}
+
+		.toast {
+			right: 1rem;
+			left: 1rem;
+			bottom: 1rem;
+		}
+	}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+	class SanitextApp {
+		constructor() {
+			this.rules = [];
+			this.defaultRules = [
+				{
+					id: "email",
+					name: "Email Addresses",
+					pattern: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",
+					replacement: "<REDACTED_EMAIL>",
+					type: "regex",
+					enabled: true,
+					category: "Personal Information"
+				},
+				{
+					id: "phone",
+					name: "Phone Numbers",
+					pattern: "\\b(?:\\+?1[-. ]?)?\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})\\b",
+					replacement: "<REDACTED_PHONE>",
+					type: "regex",
+					enabled: true,
+					category: "Personal Information"
+				},
+				{
+					id: "ssn",
+					name: "Social Security Numbers",
+					pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b",
+					replacement: "<REDACTED_SSN>",
+					type: "regex",
+					enabled: true,
+					category: "Personal Information"
+				},
+				{
+					id: "creditcard",
+					name: "Credit Card Numbers",
+					pattern: "\\b(?:\\d{4}[-\\s]?){3}\\d{4}\\b",
+					replacement: "<REDACTED_CC>",
+					type: "regex",
+					enabled: true,
+					category: "Financial Information"
+				},
+				{
+					id: "ipv4",
+					name: "IPv4 Addresses",
+					pattern: "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b",
+					replacement: "<REDACTED_IP>",
+					type: "regex",
+					enabled: true,
+					category: "Network Information"
+				},
+				{
+					id: "url",
+					name: "URLs",
+					pattern: "https?://[^\\s]+",
+					replacement: "<REDACTED_URL>",
+					type: "regex",
+					enabled: true,
+					category: "Network Information"
+				},
+				{
+					id: "company-example",
+					name: "Company Name Example",
+					pattern: "ACME Corporation",
+					replacement: "<REDACTED_COMPANY>",
+					type: "string",
+					enabled: false,
+					category: "Custom Company Rules"
+				}
+			];
+
+			this.currentEditingRule = null;
+		}
+
+		init() {
+			this.loadRules();
+			this.bindEvents();
+			this.updateCharCounts();
+
+			// Initial sanitization if there's content
+			setTimeout(() => {
+				this.sanitizeText();
+			}, 100);
+		}
+
+		// Load rules from localStorage or use defaults
+		loadRules() {
+			const savedRules = localStorage.getItem('sanitext-rules');
+			if (savedRules) {
+				try {
+					this.rules = JSON.parse(savedRules);
+				} catch (e) {
+					console.error('Error loading saved rules:', e);
+					this.rules = [...this.defaultRules];
+				}
+			} else {
+				this.rules = [...this.defaultRules];
+			}
+		}
+
+		// Save rules to localStorage
+		saveRules() {
+			localStorage.setItem('sanitext-rules', JSON.stringify(this.rules));
+		}
+
+		// Bind all event listeners
+		bindEvents() {
+			// Text input events
+			const inputText = document.getElementById('inputText');
+			if (inputText) {
+				inputText.addEventListener('input', () => {
+					this.sanitizeText();
+					this.updateCharCounts();
+				});
+
+				inputText.addEventListener('paste', () => {
+					setTimeout(() => {
+						this.sanitizeText();
+						this.updateCharCounts();
+					}, 10);
+				});
+
+				inputText.addEventListener('keyup', () => {
+					this.sanitizeText();
+					this.updateCharCounts();
+				});
+			}
+
+			// Copy button
+			const copyBtn = document.getElementById('copyBtn');
+			if (copyBtn) {
+				copyBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.copyToClipboard();
+				});
+			}
+
+			// Configuration buttons
+			const configBtn = document.getElementById('configBtn');
+			if (configBtn) {
+				configBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.openConfigModal();
+				});
+			}
+
+			const importBtn = document.getElementById('importBtn');
+			if (importBtn) {
+				importBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.importConfig();
+				});
+			}
+
+			const exportBtn = document.getElementById('exportBtn');
+			if (exportBtn) {
+				exportBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.exportConfig();
+				});
+			}
+
+			const resetBtn = document.getElementById('resetBtn');
+			if (resetBtn) {
+				resetBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.resetToDefaults();
+				});
+			}
+
+			// Configuration modal
+			const closeModal = document.getElementById('closeModal');
+			if (closeModal) {
+				closeModal.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.closeConfigModal();
+				});
+			}
+
+			// Rule management buttons
+			const addRuleBtn = document.getElementById('addRuleBtn');
+			if (addRuleBtn) {
+				addRuleBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.openRuleModal();
+				});
+			}
+
+			// Rule modal events
+			const closeRuleModal = document.getElementById('closeRuleModal');
+			if (closeRuleModal) {
+				closeRuleModal.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.closeRuleModal();
+				});
+			}
+
+			const cancelRuleBtn = document.getElementById('cancelRuleBtn');
+			if (cancelRuleBtn) {
+				cancelRuleBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.closeRuleModal();
+				});
+			}
+
+			const ruleForm = document.getElementById('ruleForm');
+			if (ruleForm) {
+				ruleForm.addEventListener('submit', (e) => {
+					e.preventDefault();
+					this.saveRule();
+				});
+			}
+
+			// Toast close
+			const toastClose = document.getElementById('toastClose');
+			if (toastClose) {
+				toastClose.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.hideToast();
+				});
+			}
+
+			// Import file input
+			const importFile = document.getElementById('importFile');
+			if (importFile) {
+				importFile.addEventListener('change', (e) => {
+					this.handleImportFile(e);
+				});
+			}
+
+			// Close modals on outside click
+			const configModal = document.getElementById('configModal');
+			if (configModal) {
+				configModal.addEventListener('click', (e) => {
+					if (e.target === e.currentTarget) {
+						this.closeConfigModal();
+					}
+				});
+			}
+
+			const ruleModal = document.getElementById('ruleModal');
+			if (ruleModal) {
+				ruleModal.addEventListener('click', (e) => {
+					if (e.target === e.currentTarget) {
+						this.closeRuleModal();
+					}
+				});
+			}
+		}
+
+		// Text sanitization engine
+		sanitizeText() {
+			const inputTextEl = document.getElementById('inputText');
+			const outputTextEl = document.getElementById('outputText');
+			const copyBtn = document.getElementById('copyBtn');
+
+			if (!inputTextEl || !outputTextEl) return;
+
+			const inputText = inputTextEl.value;
+
+			if (!inputText.trim()) {
+				outputTextEl.value = '';
+				if (copyBtn) copyBtn.disabled = true;
+				return;
+			}
+
+			let sanitizedText = inputText;
+
+			// Apply enabled rules in order
+			const enabledRules = this.rules.filter(rule => rule.enabled);
+
+			enabledRules.forEach(rule => {
+				try {
+					if (rule.type === 'regex') {
+						const regex = new RegExp(rule.pattern, 'g');
+						sanitizedText = sanitizedText.replace(regex, rule.replacement);
+					} else if (rule.type === 'string') {
+						const escapedPattern = this.escapeRegExp(rule.pattern);
+						const regex = new RegExp(escapedPattern, 'g');
+						sanitizedText = sanitizedText.replace(regex, rule.replacement);
+					}
+				} catch (error) {
+					console.error(`Error applying rule "${rule.name}":`, error);
+				}
+			});
+
+			outputTextEl.value = sanitizedText;
+			if (copyBtn) copyBtn.disabled = false;
+		}
+
+		// Escape special regex characters for string matching
+		escapeRegExp(string) {
+			return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		}
+
+		// Copy sanitized text to clipboard
+		async copyToClipboard() {
+			const outputTextEl = document.getElementById('outputText');
+			if (!outputTextEl || !outputTextEl.value.trim()) return;
+
+			try {
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					await navigator.clipboard.writeText(outputTextEl.value);
+					this.showToast('Text copied to clipboard!', 'success');
+				} else {
+					// Fallback for older browsers
+					outputTextEl.select();
+					outputTextEl.setSelectionRange(0, 99999);
+					const successful = document.execCommand('copy');
+					if (successful) {
+						this.showToast('Text copied to clipboard!', 'success');
+					} else {
+						this.showToast('Failed to copy text', 'error');
+					}
+				}
+			} catch (err) {
+				console.error('Copy failed:', err);
+				this.showToast('Failed to copy text', 'error');
+			}
+		}
+
+		// Update character counts
+		updateCharCounts() {
+			const inputTextEl = document.getElementById('inputText');
+			const outputTextEl = document.getElementById('outputText');
+			const inputCharCount = document.getElementById('inputCharCount');
+			const outputCharCount = document.getElementById('outputCharCount');
+
+			if (inputTextEl && inputCharCount) {
+				const inputLength = inputTextEl.value.length;
+				inputCharCount.textContent = `${inputLength.toLocaleString()} characters`;
+			}
+
+			if (outputTextEl && outputCharCount) {
+				const outputLength = outputTextEl.value.length;
+				outputCharCount.textContent = `${outputLength.toLocaleString()} characters`;
+			}
+		}
+
+		// Configuration Modal Management
+		openConfigModal() {
+			const modal = document.getElementById('configModal');
+			if (modal) {
+				modal.classList.remove('hidden');
+				this.renderRulesList();
+			}
+		}
+
+		closeConfigModal() {
+			const modal = document.getElementById('configModal');
+			if (modal) {
+				modal.classList.add('hidden');
+			}
+		}
+
+		// Render rules list in configuration modal
+		renderRulesList() {
+			const rulesList = document.getElementById('rulesList');
+			if (!rulesList) return;
+
+			rulesList.innerHTML = '';
+
+			this.rules.forEach((rule, index) => {
+				const ruleDiv = document.createElement('div');
+				ruleDiv.className = 'rule-item';
+				ruleDiv.innerHTML = `
+					<div class="rule-name">${this.escapeHtml(rule.name)}</div>
+					<div class="rule-pattern" title="${this.escapeHtml(rule.pattern)}">${this.escapeHtml(rule.pattern)}</div>
+					<div class="rule-replacement" title="${this.escapeHtml(rule.replacement)}">${this.escapeHtml(rule.replacement)}</div>
+					<div class="rule-type">${rule.type}</div>
+					<div class="rule-category">${rule.category}</div>
+					<div>
+						<label class="toggle">
+							<input type="checkbox" ${rule.enabled ? 'checked' : ''} data-rule-index="${index}">
+							<span class="toggle-slider"></span>
+						</label>
+					</div>
+					<div class="rule-actions">
+						<button class="rule-action-btn" data-action="edit" data-rule-index="${index}" title="Edit Rule">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+							</svg>
+						</button>
+						<button class="rule-action-btn delete" data-action="delete" data-rule-index="${index}" title="Delete Rule">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+							</svg>
+						</button>
+					</div>
+				`;
+				rulesList.appendChild(ruleDiv);
+			});
+
+			// Bind events for rule items
+			rulesList.addEventListener('change', (e) => {
+				if (e.target.type === 'checkbox' && e.target.dataset.ruleIndex) {
+					const index = parseInt(e.target.dataset.ruleIndex);
+					this.toggleRule(index);
+				}
+			});
+
+			rulesList.addEventListener('click', (e) => {
+				const btn = e.target.closest('.rule-action-btn');
+				if (btn && btn.dataset.ruleIndex) {
+					const index = parseInt(btn.dataset.ruleIndex);
+					const action = btn.dataset.action;
+
+					if (action === 'edit') {
+						this.editRule(index);
+					} else if (action === 'delete') {
+						this.deleteRule(index);
+					}
+				}
+			});
+		}
+
+		// Rule Management
+		toggleRule(index) {
+			if (this.rules[index]) {
+				this.rules[index].enabled = !this.rules[index].enabled;
+				this.saveRules();
+				this.sanitizeText();
+			}
+		}
+
+		editRule(index) {
+			const rule = this.rules[index];
+			if (!rule) return;
+
+			this.currentEditingRule = index;
+
+			const ruleModalTitle = document.getElementById('ruleModalTitle');
+			const ruleName = document.getElementById('ruleName');
+			const ruleType = document.getElementById('ruleType');
+			const rulePattern = document.getElementById('rulePattern');
+			const ruleReplacement = document.getElementById('ruleReplacement');
+			const ruleCategory = document.getElementById('ruleCategory');
+			const ruleEnabled = document.getElementById('ruleEnabled');
+
+			if (ruleModalTitle) ruleModalTitle.textContent = 'Edit Rule';
+			if (ruleName) ruleName.value = rule.name;
+			if (ruleType) ruleType.value = rule.type;
+			if (rulePattern) rulePattern.value = rule.pattern;
+			if (ruleReplacement) ruleReplacement.value = rule.replacement;
+			if (ruleCategory) ruleCategory.value = rule.category;
+			if (ruleEnabled) ruleEnabled.checked = rule.enabled;
+
+			this.openRuleModal();
+		}
+
+		deleteRule(index) {
+			if (confirm('Are you sure you want to delete this rule?')) {
+				this.rules.splice(index, 1);
+				this.saveRules();
+				this.renderRulesList();
+				this.sanitizeText();
+				this.showToast('Rule deleted successfully', 'success');
+			}
+		}
+
+		// Rule Modal Management
+		openRuleModal() {
+			const modal = document.getElementById('ruleModal');
+			if (modal) {
+				modal.classList.remove('hidden');
+				setTimeout(() => {
+					const ruleName = document.getElementById('ruleName');
+					if (ruleName) ruleName.focus();
+				}, 100);
+			}
+		}
+
+		closeRuleModal() {
+			const modal = document.getElementById('ruleModal');
+			if (modal) {
+				modal.classList.add('hidden');
+			}
+
+			const form = document.getElementById('ruleForm');
+			if (form) form.reset();
+
+			this.currentEditingRule = null;
+
+			const ruleModalTitle = document.getElementById('ruleModalTitle');
+			if (ruleModalTitle) ruleModalTitle.textContent = 'Add New Rule';
+		}
+
+		saveRule() {
+			const ruleName = document.getElementById('ruleName');
+			const ruleType = document.getElementById('ruleType');
+			const rulePattern = document.getElementById('rulePattern');
+			const ruleReplacement = document.getElementById('ruleReplacement');
+			const ruleCategory = document.getElementById('ruleCategory');
+			const ruleEnabled = document.getElementById('ruleEnabled');
+
+			if (!ruleName || !rulePattern || !ruleReplacement) {
+				this.showToast('Please fill in all required fields', 'error');
+				return;
+			}
+
+			const name = ruleName.value.trim();
+			const type = ruleType.value;
+			const pattern = rulePattern.value.trim();
+			const replacement = ruleReplacement.value;
+			const category = ruleCategory.value;
+			const enabled = ruleEnabled.checked;
+
+			if (!name || !pattern) {
+				this.showToast('Please fill in all required fields', 'error');
+				return;
+			}
+
+			// Validate regex pattern if type is regex
+			if (type === 'regex') {
+				try {
+					new RegExp(pattern);
+				} catch (e) {
+					this.showToast('Invalid regular expression pattern', 'error');
+					return;
+				}
+			}
+
+			const rule = {
+				id: this.currentEditingRule !== null ?
+					this.rules[this.currentEditingRule].id :
+					Date.now().toString(),
+				name,
+				pattern,
+				replacement,
+				type,
+				enabled,
+				category
+			};
+
+			if (this.currentEditingRule !== null) {
+				// Editing existing rule
+				this.rules[this.currentEditingRule] = rule;
+				this.showToast('Rule updated successfully', 'success');
+			} else {
+				// Adding new rule
+				this.rules.push(rule);
+				this.showToast('Rule added successfully', 'success');
+			}
+
+			this.saveRules();
+			this.renderRulesList();
+			this.sanitizeText();
+			this.closeRuleModal();
+		}
+
+		// Import/Export Configuration
+		importConfig() {
+			const importFile = document.getElementById('importFile');
+			if (importFile) {
+				importFile.click();
+			}
+		}
+
+		handleImportFile(event) {
+			const file = event.target.files[0];
+			if (!file) return;
+
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				try {
+					const config = JSON.parse(e.target.result);
+					if (Array.isArray(config) && config.length > 0) {
+						// Validate structure
+						const isValid = config.every(rule =>
+							rule.name && rule.pattern && rule.replacement !== undefined &&
+							rule.type && ['regex', 'string'].includes(rule.type)
+						);
+
+						if (isValid) {
+							this.rules = config.map(rule => ({
+								...rule,
+								id: rule.id || Date.now().toString() + Math.random(),
+								enabled: rule.enabled !== undefined ? rule.enabled : true,
+								category: rule.category || 'Custom Company Rules'
+							}));
+							this.saveRules();
+							this.renderRulesList();
+							this.sanitizeText();
+							this.showToast('Configuration imported successfully', 'success');
+						} else {
+							this.showToast('Invalid configuration file format', 'error');
+						}
+					} else {
+						this.showToast('Configuration file is empty or invalid', 'error');
+					}
+				} catch (error) {
+					this.showToast('Error reading configuration file', 'error');
+				}
+			};
+			reader.readAsText(file);
+
+			// Reset file input
+			event.target.value = '';
+		}
+
+		exportConfig() {
+			const config = JSON.stringify(this.rules, null, 2);
+			const blob = new Blob([config], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `sanitext-config-${new Date().toISOString().split('T')[0]}.json`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+
+			this.showToast('Configuration exported successfully', 'success');
+		}
+
+		resetToDefaults() {
+			if (confirm('Are you sure you want to reset all rules to defaults? This will remove all custom rules.')) {
+				this.rules = [...this.defaultRules];
+				this.saveRules();
+				this.renderRulesList();
+				this.sanitizeText();
+				this.showToast('Rules reset to defaults', 'success');
+			}
+		}
+
+		// Toast notifications
+		showToast(message, type = 'success') {
+			const toast = document.getElementById('toast');
+			const toastMessage = document.getElementById('toastMessage');
+
+			if (!toast || !toastMessage) return;
+
+			toastMessage.textContent = message;
+			toast.className = `toast ${type}`;
+
+			// Auto-hide after 4 seconds
+			setTimeout(() => {
+				this.hideToast();
+			}, 4000);
+		}
+
+		hideToast() {
+			const toast = document.getElementById('toast');
+			if (toast) {
+				toast.classList.add('hidden');
+			}
+		}
+
+		// Utility functions
+		escapeHtml(text) {
+			const map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return text.replace(/[&<>"']/g, m => map[m]);
+		}
+	}
+
+	// Initialize app
+	window.app = new SanitextApp();
+	window.app.init();
+});
+</script>
