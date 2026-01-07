@@ -1,0 +1,509 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<BaseLayout title="Super Juice Calculator - ARGUELLES.ME">
+	<div class="tool-hero">
+		<h1>Super Juice Calculator</h1>
+		<p class="tool-subtitle">Calculate citrus juice extraction with acid-infused peels</p>
+	</div>
+
+	<Window title="Super Juice Calculator" badgeText="FOOD & DRINKS">
+		<div class="form-row">
+			<div class="form-group">
+				<label for="juiceType">Recipe</label>
+				<select id="juiceType">
+					<option value="lemon">Lemon (peel-based)</option>
+					<option value="lime">Lime (peel-based)</option>
+					<option value="orange">Orange (peel-based)</option>
+					<option value="grapefruit">Grapefruit (peel-based + MSG)</option>
+					<option value="kumquat">Kumquat (fruit-based)</option>
+				</select>
+				<div class="muted" id="recipeHint"></div>
+			</div>
+
+			<div class="form-group" id="baseWrap">
+				<label id="baseLabel" for="baseGrams">Peel weight (g)</label>
+				<input id="baseGrams" type="number" min="0" step="0.1" value="30.1" />
+			</div>
+
+			<div class="form-group" id="targetWrap" style="display:none">
+				<label for="targetWeight">Target final weight (g / ml, approx)</label>
+				<input id="targetWeight" type="number" min="0" step="1" value="500" />
+				<div class="muted">
+					Approximated as "water added". Classic citrus will yield a little extra from fresh-juiced fruit.
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="invisible">&nbsp;</label>
+				<button id="swapBtn" type="button" class="retro-button retro-button--secondary">Swap Mode</button>
+			</div>
+
+			<div class="form-group">
+				<label class="invisible">&nbsp;</label>
+				<button id="calcBtn" type="button" class="retro-button retro-button--primary">Calculate</button>
+			</div>
+		</div>
+
+		<!-- Hidden input mode for state management -->
+		<input type="hidden" id="inputMode" value="base" />
+	</Window>
+
+	<Window title="Calculated Ingredients" badgeText="RESULTS">
+		<div class="ingredients-table" id="results">
+			<p class="placeholder-text">(Click Calculate)</p>
+		</div>
+	</Window>
+
+	<Window title="Step by Step" badgeText="INSTRUCTIONS">
+		<ol id="steps" class="steps-list"></ol>
+	</Window>
+</BaseLayout>
+
+<style>
+	.tool-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.tool-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+		color: var(--accent);
+	}
+
+	.tool-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.form-row {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		align-items: flex-end;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		flex: 1;
+		min-width: 150px;
+	}
+
+	label {
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--text);
+	}
+
+	input,
+	select {
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		padding: 0.5rem;
+		border: 2px solid var(--border);
+		background: var(--panel-bg);
+		color: var(--text);
+		border-radius: 4px;
+		min-width: 120px;
+	}
+
+	input:focus,
+	select:focus {
+		outline: none;
+		border-color: var(--accent);
+		box-shadow: 0 0 0 2px var(--accent);
+	}
+
+	.muted {
+		color: var(--muted);
+		font-size: 0.9rem;
+		max-width: 30ch;
+		margin-top: 0.25rem;
+	}
+
+	.invisible {
+		visibility: hidden;
+	}
+
+	.retro-button {
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		padding: 0.5rem 1rem;
+		border: 2px solid var(--border);
+		cursor: pointer;
+		background: var(--panel-bg);
+		color: var(--text);
+		border-radius: 4px;
+		box-shadow: 2px 2px 0 var(--shadow);
+		transition: all 0.1s ease;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.retro-button:hover {
+		transform: translate(1px, 1px);
+		box-shadow: 1px 1px 0 var(--shadow);
+	}
+
+	.retro-button:active {
+		transform: translate(2px, 2px);
+		box-shadow: 0 0 0 var(--shadow);
+	}
+
+	.retro-button--primary {
+		background: var(--accent);
+		color: var(--bg);
+		border-color: var(--accent);
+	}
+
+	.retro-button--primary:hover {
+		background: var(--accent);
+		filter: brightness(1.1);
+	}
+
+	.retro-button--secondary {
+		background: var(--panel-bg);
+		border-color: var(--border);
+	}
+
+	.retro-button--secondary:hover {
+		background: var(--muted);
+		color: var(--bg);
+	}
+
+	.ingredients-table {
+		font-family: 'VT323', monospace;
+		background: var(--panel-bg);
+		padding: 1rem;
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		font-size: 1.1rem;
+		line-height: 1.8;
+	}
+
+	.ingredients-table table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.ingredients-table th {
+		text-align: left;
+		padding: 0.5rem;
+		border-bottom: 2px solid var(--border);
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.ingredients-table td {
+		padding: 0.5rem;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.ingredients-table tr:last-child td {
+		border-bottom: none;
+	}
+
+	.ingredients-table .quantity {
+		text-align: right;
+		font-weight: 600;
+		color: var(--accent);
+	}
+
+	.ingredients-table .unit {
+		color: var(--muted);
+		padding-left: 0.25rem;
+	}
+
+	.placeholder-text {
+		color: var(--muted);
+		font-style: italic;
+	}
+
+	.steps-list {
+		padding-left: 1.5rem;
+		line-height: 1.8;
+	}
+
+	.steps-list li {
+		margin: 0.75rem 0;
+		color: var(--text);
+		font-size: 1.05rem;
+	}
+
+	.steps-list strong {
+		font-weight: 700;
+		color: var(--accent);
+	}
+
+	@media (max-width: 768px) {
+		.form-row {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.form-group {
+			min-width: 100%;
+		}
+
+		.tool-hero h1 {
+			font-size: 2.5rem;
+		}
+
+		.tool-subtitle {
+			font-size: 1.1rem;
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		// Fixed constants per published formulas
+		const PEEL_WATER_MULT = 16.66;
+		const kumquatPer100g = { citric: 25.0, water: 416.5 };
+		const kumquatAscorbicFixedPer100g = 0.20;
+
+		// Peel-based ratios (per gram peel). Grapefruit adds MSG.
+		const peelBased = {
+			lemon:      { citric: 1.00, malic: 0.00, msg: 0.00 },
+			lime:       { citric: 0.66, malic: 0.33, msg: 0.00 },
+			orange:     { citric: 0.90, malic: 0.10, msg: 0.00 },
+			grapefruit: { citric: 0.80, malic: 0.20, msg: 0.033 },
+		};
+
+		const fmt = (n, digits=1) => Number.isFinite(n)
+			? n.toFixed(digits).replace(/\.0+$/,'').replace(/(\.\d*[1-9])0+$/,'$1')
+			: '';
+
+		const $ = (id) => document.getElementById(id);
+
+		function currentType() { return $('juiceType').value; }
+		function currentInputMode() { return $('inputMode').value; }
+
+		function nameForType(type) { return type[0].toUpperCase() + type.slice(1); }
+		function pluralize(name) { return name.endsWith('s') ? name : name + 's'; }
+
+		function updateUi() {
+			const type = currentType();
+			const mode = currentInputMode();
+
+			if (type === 'kumquat') {
+				$('baseLabel').textContent = 'Kumquat fruit weight (g)';
+				$('recipeHint').textContent = 'Kumquat uses fruit weight and a different water ratio.';
+			} else {
+				$('baseLabel').textContent = 'Peel weight (g)';
+				$('recipeHint').textContent = `Classic citrus: water is fixed at ${PEEL_WATER_MULT}× peel weight.`;
+			}
+
+			$('baseWrap').style.display = (mode === 'base') ? '' : 'none';
+			$('targetWrap').style.display = (mode === 'target') ? '' : 'none';
+		}
+
+		function computeFromBase(type, base_g) {
+			let peel_g = 0, fruit_g = 0;
+			let citric_g = 0, malic_g = 0, msg_g = 0, ascorbic_g = 0, water_ml = 0;
+
+			if (type === 'kumquat') {
+				fruit_g = base_g;
+				const scale = fruit_g / 100.0;
+				citric_g = kumquatPer100g.citric * scale;
+				water_ml = kumquatPer100g.water * scale;
+				ascorbic_g = kumquatAscorbicFixedPer100g * scale;
+			} else {
+				peel_g = base_g;
+				const r = peelBased[type];
+				citric_g = peel_g * r.citric;
+				malic_g  = peel_g * r.malic;
+				msg_g    = peel_g * r.msg;
+				water_ml = peel_g * PEEL_WATER_MULT;
+			}
+
+			return { type, peel_g, fruit_g, citric_g, malic_g, msg_g, ascorbic_g, water_ml };
+		}
+
+		function baseFromTargetFinalWeight(type, target_g) {
+			if (type === 'kumquat') {
+				return target_g / (kumquatPer100g.water / 100.0);
+			}
+			return target_g / PEEL_WATER_MULT;
+		}
+
+		function getStateFromForm() {
+			const type = currentType();
+			const mode = currentInputMode();
+			const base = Number($('baseGrams').value);
+			const target = Number($('targetWeight').value);
+			return { type, mode, base, target };
+		}
+
+		function applyStateToForm(state) {
+			if (state.type) $('juiceType').value = state.type;
+			if (state.mode) $('inputMode').value = state.mode;
+			if (Number.isFinite(state.base)) $('baseGrams').value = state.base;
+			if (Number.isFinite(state.target)) $('targetWeight').value = state.target;
+			updateUi();
+		}
+
+		function writeQueryParamsFromState(state) {
+			const params = new URLSearchParams(window.location.search);
+			params.set('type', state.type);
+			params.set('mode', state.mode);
+
+			// Store only the active numeric input
+			if (state.mode === 'base') {
+				params.set('base', String(state.base));
+				params.delete('target');
+			} else {
+				params.set('target', String(state.target));
+				params.delete('base');
+			}
+
+			const newUrl = `${window.location.pathname}?${params.toString()}`;
+			history.replaceState(null, '', newUrl);
+		}
+
+		function readQueryParams() {
+			const params = new URLSearchParams(window.location.search);
+			const type = params.get('type');
+			const mode = params.get('mode');
+			const base = params.get('base');
+			const target = params.get('target');
+
+			const state = {};
+			if (type) state.type = type;
+			if (mode) state.mode = mode;
+			if (base !== null) state.base = Number(base);
+			if (target !== null) state.target = Number(target);
+			return state;
+		}
+
+		function renderResults(r) {
+			// Build ingredients table
+			let tableHTML = '<table><thead><tr><th>Ingredient</th><th style="text-align: right;">Quantity</th></tr></thead><tbody>';
+
+			if (r.type === 'kumquat') {
+				if (r.fruit_g > 0) {
+					tableHTML += `<tr><td>Kumquat fruit</td><td class="quantity">${fmt(r.fruit_g, 1)}<span class="unit"> g</span></td></tr>`;
+				}
+				tableHTML += `<tr><td>Citric acid</td><td class="quantity">${fmt(r.citric_g, 2)}<span class="unit"> g</span></td></tr>`;
+				if (r.ascorbic_g > 0) {
+					tableHTML += `<tr><td>Ascorbic acid (vitamin C)</td><td class="quantity">${fmt(r.ascorbic_g, 2)}<span class="unit"> g</span></td></tr>`;
+				}
+			} else {
+				if (r.peel_g > 0) {
+					tableHTML += `<tr><td>${nameForType(r.type)} peel (zest)</td><td class="quantity">${fmt(r.peel_g, 1)}<span class="unit"> g</span></td></tr>`;
+				}
+				tableHTML += `<tr><td>Citric acid</td><td class="quantity">${fmt(r.citric_g, 2)}<span class="unit"> g</span></td></tr>`;
+				if (r.malic_g > 0.0001) {
+					tableHTML += `<tr><td>Malic acid</td><td class="quantity">${fmt(r.malic_g, 2)}<span class="unit"> g</span></td></tr>`;
+				}
+				if (r.msg_g > 0.0001) {
+					tableHTML += `<tr><td>MSG</td><td class="quantity">${fmt(r.msg_g, 2)}<span class="unit"> g</span></td></tr>`;
+				}
+			}
+
+			tableHTML += `<tr><td>Water</td><td class="quantity">${fmt(r.water_ml, 0)}<span class="unit"> ml</span></td></tr>`;
+			tableHTML += '</tbody></table>';
+
+			$('results').innerHTML = tableHTML;
+
+			// Build step-by-step instructions with bold quantities
+			const steps = $('steps');
+			steps.innerHTML = "";
+			const add = (html) => { const li=document.createElement('li'); li.innerHTML=html; steps.appendChild(li); };
+
+			const displayName = nameForType(r.type).toLowerCase();
+			const fruitPlural = pluralize(displayName);
+			const bold = (qty, unit) => `<strong>${qty}${unit}</strong>`;
+
+			if (r.type === 'kumquat') {
+				add(`Weigh ${bold(fmt(r.fruit_g, 1), 'g')} of kumquat fruit.`);
+				add(`Put the kumquats into a container.`);
+				add(`Add ${bold(fmt(r.citric_g, 2), 'g')} of citric acid.`);
+				add(`Add ${bold(fmt(r.ascorbic_g, 2), 'g')} of ascorbic acid (vitamin C).`);
+				add(`Shake to combine. Let it sit for 2 hours.`);
+				add(`Blend with ${bold(fmt(r.water_ml, 0), 'ml/g')} of water until fully pulverized.`);
+				add(`Strain through a cloth filter or fine-mesh strainer into bottles.`);
+				add(`You now have super juice!`);
+				return;
+			}
+
+			add(`Peel ${bold(fmt(r.peel_g, 1), 'g')} of ${displayName} zest.`);
+			add(`Set your peeled ${fruitPlural} aside for later.`);
+			add(`Put the zest into a container.`);
+			add(`Add ${bold(fmt(r.citric_g, 2), 'g')} of citric acid.`);
+			if (r.malic_g > 0.0001) add(`Add ${bold(fmt(r.malic_g, 2), 'g')} of malic acid.`);
+			if (r.msg_g > 0.0001) add(`Add ${bold(fmt(r.msg_g, 2), 'g')} of MSG.`);
+			add(`Shake to coat the peels. Let it sit for 2 hours.`);
+			add(`Transfer everything (including peels) to a blender and add ${bold(fmt(r.water_ml, 0), 'ml/g')} of water.`);
+			add(`Juice the peeled ${fruitPlural} and add the juice into the blender as well (slightly increases yield).`);
+			add(`Blend briefly, then strain through a cloth filter or fine-mesh strainer into bottles.`);
+			add(`You now have super juice!`);
+		}
+
+		// The one true action: calculate -> render -> sync URL
+		function calculateAndSyncUrl() {
+			updateUi();
+
+			const state = getStateFromForm();
+			let r;
+
+			if (state.mode === 'base') {
+				r = computeFromBase(state.type, state.base);
+			} else {
+				const base_g = baseFromTargetFinalWeight(state.type, state.target);
+				r = computeFromBase(state.type, base_g);
+			}
+
+			renderResults(r);
+
+			// Normalize stored values so URL always represents visible mode + input
+			if (state.mode === 'base') state.base = Number(fmt(state.base, 2));
+			else state.target = Math.round(state.target);
+
+			writeQueryParamsFromState(state);
+		}
+
+		function swapMode() {
+			// Swap without calculating from partial inputs; swap based on last calculated
+			calculateAndSyncUrl();
+
+			const type = currentType();
+			const mode = currentInputMode();
+
+			if (mode === 'base') {
+				const base_g = Number($('baseGrams').value);
+				const r = computeFromBase(type, base_g);
+				$('inputMode').value = 'target';
+				$('targetWeight').value = Math.round(r.water_ml);
+			} else {
+				const target = Number($('targetWeight').value);
+				const base_g = baseFromTargetFinalWeight(type, target);
+				$('inputMode').value = 'base';
+				$('baseGrams').value = fmt(base_g, 1);
+			}
+
+			updateUi();
+			calculateAndSyncUrl();
+		}
+
+		// Only update UI visibility on input changes; do NOT auto-calc or touch URL
+		['juiceType','inputMode','baseGrams','targetWeight'].forEach(id => {
+			$(id).addEventListener('input', updateUi);
+			$(id).addEventListener('change', updateUi);
+		});
+
+		$('calcBtn').addEventListener('click', calculateAndSyncUrl);
+		$('swapBtn').addEventListener('click', swapMode);
+
+		// Init from query params, then calculate once
+		applyStateToForm(readQueryParams());
+		calculateAndSyncUrl();
+	});
+</script>
