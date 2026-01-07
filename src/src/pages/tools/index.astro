@@ -17,6 +17,7 @@ import Badge from '../../components/Badge.astro';
 		<a href="#investment" class="category-link">Investment Analysis</a>
 		<a href="#tax" class="category-link">Tax & Strategy</a>
 		<a href="#visualization" class="category-link">Visualization</a>
+		<a href="#images" class="category-link">Image Tools</a>
 		<a href="#gaming" class="category-link">Video Games</a>
 	</nav>
 
@@ -232,6 +233,35 @@ import Badge from '../../components/Badge.astro';
 					</ul>
 					<RetroButton href="/tools/rune-calculator" variant="primary">
 						Calculate Runes
+					</RetroButton>
+				</div>
+			</Window>
+		</div>
+	</section>
+
+	<!-- Image Tools Section -->
+	<section id="images" class="tool-category">
+		<h2 class="category-title">Image Tools</h2>
+		<p class="category-description">Process and analyze images with privacy-focused browser tools.</p>
+
+		<div class="tools-grid">
+			<Window title="EXIF Explorer & Marker Tool" badgeText="IMAGE TOOL">
+				<div class="tool-card">
+					<p class="tool-description">
+						Explore raw EXIF metadata and add custom overlays to your photos. View timestamp, GPS location, camera settings, and all embedded metadata. Create visual metadata overlays with customizable positioning and sizing.
+					</p>
+					<ul class="tool-features">
+						<li>✓ View raw EXIF data (categorized display)</li>
+						<li>✓ Add metadata overlay to images</li>
+						<li>✓ Customizable corner position</li>
+						<li>✓ Adjustable text size (small/medium/large)</li>
+						<li>✓ Toggle timestamp, location, camera info</li>
+						<li>✓ Download overlayed image</li>
+						<li>✓ Privacy-first (runs in browser)</li>
+						<li>✓ HEIC format support</li>
+					</ul>
+					<RetroButton href="/tools/exif-marker" variant="primary">
+						Explore & Mark Images
 					</RetroButton>
 				</div>
 			</Window>

@@ -1,0 +1,715 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<BaseLayout title="EXIF Explorer & Marker Tool - ARGUELLES.ME">
+	<div class="tools-hero">
+		<h1>EXIF Explorer & Marker Tool</h1>
+		<p class="tools-subtitle">View raw EXIF data and add metadata overlays to your photos</p>
+	</div>
+
+	<Window title="Image Upload & Configuration" badgeText="IMAGE TOOL">
+		<div class="controls">
+			<div class="form-group">
+				<label for="imageInput">Select Image:</label>
+				<div class="file-input-wrapper">
+					<input type="file" id="imageInput" accept="image/*,image/heic">
+					<label for="imageInput" class="file-input-label">Choose File</label>
+					<span id="fileName" class="file-name">No file selected</span>
+				</div>
+				<div id="errorMsg" class="error-message"></div>
+			</div>
+
+			<div class="form-group">
+				<label for="cornerSelect">Corner Position:</label>
+				<select id="cornerSelect">
+					<option value="bottom-left">Bottom Left</option>
+					<option value="bottom-right">Bottom Right</option>
+					<option value="top-left">Top Left</option>
+					<option value="top-right">Top Right</option>
+				</select>
+			</div>
+
+			<div class="form-group">
+				<label for="sizeSelect">Text Size:</label>
+				<select id="sizeSelect">
+					<option value="small">Small</option>
+					<option value="medium" selected>Medium</option>
+					<option value="large">Large</option>
+				</select>
+			</div>
+
+			<div class="checkbox-group">
+				<label>
+					<input type="checkbox" id="timestampCheck" checked>
+					Include Timestamp
+				</label>
+			</div>
+
+			<div class="checkbox-group">
+				<label>
+					<input type="checkbox" id="locationCheck" checked>
+					Include Location
+				</label>
+			</div>
+
+			<div class="checkbox-group">
+				<label>
+					<input type="checkbox" id="cameraCheck" checked>
+					Include Camera Info
+				</label>
+			</div>
+
+			<div class="button-group">
+				<button id="processBtn" class="retro-button retro-button--primary">Process Image</button>
+				<button id="downloadBtn" class="retro-button retro-button--secondary">Download</button>
+			</div>
+		</div>
+	</Window>
+
+	<Window title="Result" badgeText="PREVIEW">
+		<div class="canvas-container">
+			<canvas id="canvas"></canvas>
+		</div>
+	</Window>
+
+	<Window title="Raw EXIF Data" badgeText="EXPLORER">
+		<div id="exifData" class="exif-data">
+			<p class="exif-placeholder">Upload and process an image to view raw EXIF data</p>
+		</div>
+	</Window>
+
+	<!-- Load EXIFReader and heic2any from CDN -->
+	<script is:inline src="https://cdn.jsdelivr.net/npm/exifreader@4.23.5/dist/exif-reader.min.js"></script>
+	<script is:inline src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			let currentImage = null;
+			let processedCanvas = null;
+			let originalFile = null;
+
+			// Handle image upload
+			document.getElementById('imageInput').addEventListener('change', async function(e) {
+				const file = e.target.files[0];
+				if (!file) return;
+
+				// Update file name display
+				document.getElementById('fileName').textContent = file.name;
+
+				originalFile = file;
+				const errorMsg = document.getElementById('errorMsg');
+				errorMsg.textContent = '';
+
+				try {
+					// Convert HEIC to JPEG if needed
+					let processedFile = file;
+					if (file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic') {
+						errorMsg.textContent = 'Converting HEIC to JPEG...';
+						const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg' });
+						processedFile = new File([convertedBlob], file.name.replace('.heic', '.jpg'), { type: 'image/jpeg' });
+						errorMsg.textContent = 'HEIC converted to JPEG';
+					}
+
+					// Load and display image
+					const reader = new FileReader();
+					reader.onload = function(event) {
+						currentImage = new Image();
+						currentImage.onload = function() {
+							const canvas = document.getElementById('canvas');
+							canvas.width = currentImage.width;
+							canvas.height = currentImage.height;
+							const ctx = canvas.getContext('2d');
+							ctx.drawImage(currentImage, 0, 0);
+						};
+						currentImage.src = event.target.result;
+					};
+					reader.readAsDataURL(processedFile);
+
+					// Store the processed file for EXIF extraction
+					originalFile = processedFile;
+
+				} catch (error) {
+					errorMsg.textContent = 'Error processing image: ' + error.message;
+					console.error('Error:', error);
+				}
+			});
+
+			// Process image button
+			document.getElementById('processBtn').addEventListener('click', async function() {
+				if (!currentImage || !originalFile) {
+					alert('Please select an image first');
+					return;
+				}
+
+				const config = {
+					corner: document.getElementById('cornerSelect').value,
+					size: document.getElementById('sizeSelect').value,
+					includeTimestamp: document.getElementById('timestampCheck').checked,
+					includeLocation: document.getElementById('locationCheck').checked,
+					includeCamera: document.getElementById('cameraCheck').checked,
+					textStyle: {
+						color: 'white',
+						fontSize: getFontSize(document.getElementById('sizeSelect').value),
+						backgroundColor: 'rgba(0, 0, 0, 0.7)',
+						padding: 10
+					}
+				};
+
+				try {
+					// Extract EXIF data
+					const tags = await ExifReader.load(originalFile);
+					const errorMsg = document.getElementById('errorMsg');
+					errorMsg.textContent = '';
+
+					// Display raw EXIF data
+					displayRawExifData(tags);
+
+					// Build metadata text
+					let metadataText = [];
+
+					// Parse timestamp
+					if (config.includeTimestamp && tags.DateTimeOriginal) {
+						const dateValue = tags.DateTimeOriginal.value;
+						const dateStr = typeof dateValue === 'string' ? dateValue : String(dateValue);
+						const parsedDate = parseExifDate(dateStr);
+						if (parsedDate && !isNaN(parsedDate.getTime())) {
+							metadataText.push(`Date: ${parsedDate.toLocaleString()}`);
+						} else {
+							metadataText.push(`Date: ${dateStr} (raw)`);
+						}
+					}
+
+					// Parse GPS coordinates
+					if (config.includeLocation && tags.GPSLatitude && tags.GPSLongitude) {
+						try {
+							const lat = convertGPSToDecimal(tags.GPSLatitude, tags.GPSLatitudeRef);
+							const lon = convertGPSToDecimal(tags.GPSLongitude, tags.GPSLongitudeRef);
+
+							if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
+								metadataText.push(`Location: ${lat.toFixed(6)}°, ${lon.toFixed(6)}°`);
+							} else {
+								metadataText.push('Location: GPS data invalid');
+							}
+						} catch (gpsError) {
+							console.warn('GPS parsing error:', gpsError);
+							metadataText.push('Location: GPS data unavailable');
+						}
+					}
+
+					// Parse camera info
+					if (config.includeCamera && tags.Make && tags.Model) {
+						metadataText.push(`Camera: ${tags.Make.value} ${tags.Model.value}`);
+					}
+
+					// Draw image and overlay text
+					const canvas = document.getElementById('canvas');
+					const ctx = canvas.getContext('2d');
+
+					// Redraw original image
+					ctx.drawImage(currentImage, 0, 0);
+
+					// Draw metadata overlay
+					if (metadataText.length > 0) {
+						drawTextOverlay(ctx, metadataText, config, canvas.width, canvas.height);
+					} else {
+						errorMsg.textContent = 'No EXIF metadata found in image';
+					}
+
+					processedCanvas = canvas;
+
+				} catch (error) {
+					console.error('Error processing image:', error);
+					document.getElementById('errorMsg').textContent = 'Error reading EXIF data: ' + error.message;
+				}
+			});
+
+			// Download button
+			document.getElementById('downloadBtn').addEventListener('click', function() {
+				if (!processedCanvas) {
+					alert('Please process an image first');
+					return;
+				}
+
+				const link = document.createElement('a');
+				link.download = 'image_with_metadata.jpg';
+				link.href = processedCanvas.toDataURL('image/jpeg', 0.9);
+				link.click();
+			});
+
+			// Helper function to get font size based on selection
+			function getFontSize(size) {
+				switch(size) {
+					case 'small': return 16;
+					case 'medium': return 24;
+					case 'large': return 36;
+					default: return 24;
+				}
+			}
+
+			// Helper function to display raw EXIF data
+			function displayRawExifData(tags) {
+				const exifContainer = document.getElementById('exifData');
+
+				// Group tags by category
+				const categories = {
+					'Basic': [],
+					Image: [],
+					'GPS': [],
+					'Camera': [],
+					'Other': []
+				};
+
+				// Categorize tags
+				for (const [key, tag] of Object.entries(tags)) {
+					const tagInfo = {
+						name: key,
+						description: tag.description || String(tag.value),
+						value: formatTagValue(tag.value)
+					};
+
+					// Categorize based on tag name
+					if (key.startsWith('GPS')) {
+						categories.GPS.push(tagInfo);
+					} else if (['Make', 'Model', 'LensModel', 'Software'].includes(key)) {
+						categories.Camera.push(tagInfo);
+					} else if (['ImageWidth', 'ImageHeight', 'Orientation', 'XResolution', 'YResolution'].includes(key)) {
+						categories.Image.push(tagInfo);
+					} else if (['DateTime', 'DateTimeOriginal', 'ModifyDate'].includes(key)) {
+						categories.Basic.push(tagInfo);
+					} else if (key === 'Thumbnail') {
+						// Skip thumbnail
+						continue;
+					} else {
+						categories.Other.push(tagInfo);
+					}
+				}
+
+				// Build HTML
+				let html = '';
+
+				for (const [category, tags] of Object.entries(categories)) {
+					if (tags.length === 0) continue;
+
+					html += `<div class="exif-category">
+						<h3 class="exif-category-title">${category}</h3>
+						<div class="exif-tags">`;
+
+					for (const tag of tags) {
+						html += `
+							<div class="exif-tag">
+								<span class="exif-tag-name">${tag.name}</span>
+								<span class="exif-tag-value">${tag.value}</span>
+							</div>`;
+					}
+
+					html += `</div></div>`;
+				}
+
+				exifContainer.innerHTML = html || '<p class="exif-placeholder">No EXIF data found in image</p>';
+			}
+
+			// Helper function to format tag values for display
+			function formatTagValue(value) {
+				if (value === null || value === undefined) {
+					return 'N/A';
+				}
+
+				// Handle arrays
+				if (Array.isArray(value)) {
+					return value.map(v => formatTagValue(v)).join(', ');
+				}
+
+				// Handle objects with numerator/denominator (GPS coordinates)
+				if (typeof value === 'object' && value.numerator !== undefined) {
+					return `${value.numerator}/${value.denominator}`;
+				}
+
+				// Handle objects (like GPS arrays)
+				if (typeof value === 'object') {
+					try {
+						return JSON.stringify(value);
+					} catch (e) {
+						return String(value);
+					}
+				}
+
+				// Handle strings, numbers, etc.
+				return String(value);
+			}
+
+			// Helper function to parse EXIF date format
+			function parseExifDate(exifDateStr) {
+				if (!exifDateStr) return null;
+
+				// EXIF format: "YYYY:MM:DD HH:mm:ss"
+				// Replace colons with hyphens in date part
+				const parts = exifDateStr.split(' ');
+				if (parts.length === 2) {
+					const datePart = parts[0].replace(/:/g, '-');
+					const timePart = parts[1];
+					return new Date(`${datePart}T${timePart}`);
+				}
+				return new Date(exifDateStr);
+			}
+
+			// Helper function to convert GPS coordinates to decimal degrees
+			function convertGPSToDecimal(gpsArray, gpsRef) {
+				if (!gpsArray || !gpsRef) {
+					return NaN;
+				}
+
+				try {
+					let degrees, minutes, seconds;
+					const value = gpsArray.value;
+
+					// Handle different EXIF library formats
+					// Format 1: Array of array objects [[num, den], [num, den], [num, den]]
+					if (Array.isArray(value) && value.length >= 3) {
+						// Check if first element is an array (Format 1)
+						if (Array.isArray(value[0]) && value[0].length >= 2) {
+							degrees = value[0][0] / value[0][1];
+							minutes = value[1][0] / value[1][1];
+							seconds = value[2][0] / value[2][1];
+						}
+						// Format 2: Array of fraction objects [{numerator: X, denominator: Y}, ...]
+						else if (value[0]?.numerator !== undefined) {
+							degrees = value[0].numerator / value[0].denominator;
+							minutes = value[1].numerator / value[1].denominator;
+							seconds = value[2].numerator / value[2].denominator;
+						}
+						// Format 3: Array of plain numbers [number, number, number]
+						else if (typeof value[0] === 'number') {
+							degrees = value[0];
+							minutes = value[1];
+							seconds = value[2];
+						}
+						// Format 4: Array of mixed objects (common in some EXIF libraries)
+						else if (typeof value[0] === 'object') {
+							degrees = (value[0]?.numerator || 0) / (value[0]?.denominator || 1);
+							minutes = (value[1]?.numerator || 0) / (value[1]?.denominator || 1);
+							seconds = (value[2]?.numerator || 0) / (value[2]?.denominator || 1);
+						}
+						else {
+							return NaN;
+						}
+					}
+					// Format 5: Flat array of numbers [deg_num, deg_den, min_num, min_den, sec_num, sec_den]
+					else if (Array.isArray(value) && value.length === 6) {
+						degrees = value[0] / value[1];
+						minutes = value[2] / value[3];
+						seconds = value[4] / value[5];
+					}
+					else {
+						return NaN;
+					}
+
+					// Validate values
+					if (isNaN(degrees) || isNaN(minutes) || isNaN(seconds)) {
+						return NaN;
+					}
+
+					let decimal = degrees + minutes/60 + seconds/3600;
+
+					// Apply direction reference
+					const refValue = gpsRef.value || gpsRef;
+					// Handle array format for ref (e.g., ['N'])
+					if (Array.isArray(refValue)) {
+						if (refValue[0] === 'S' || refValue[0] === 'W') {
+							decimal = -decimal;
+						}
+					} else if (refValue === 'S' || refValue === 'W') {
+						decimal = -decimal;
+					}
+
+					return decimal;
+				} catch (error) {
+					console.warn('GPS conversion error:', error);
+					return NaN;
+				}
+			}
+
+			// Helper function to draw text overlay
+			function drawTextOverlay(ctx, textLines, config, canvasWidth, canvasHeight) {
+				const { corner, textStyle } = config;
+				const { color, fontSize, backgroundColor, padding } = textStyle;
+
+				// Set font
+				ctx.font = `${fontSize}px Arial`;
+
+				// Calculate text dimensions
+				const lineHeight = fontSize + 5;
+				const maxWidth = Math.max(...textLines.map(line => ctx.measureText(line).width));
+				const textHeight = textLines.length * lineHeight;
+
+				// Determine position based on corner
+				let x, y;
+				const margin = 20;
+
+				switch(corner) {
+					case 'top-left':
+						x = margin;
+						y = margin + fontSize;
+						break;
+					case 'top-right':
+						x = canvasWidth - maxWidth - margin - padding * 2;
+						y = margin + fontSize;
+						break;
+					case 'bottom-left':
+						x = margin;
+						y = canvasHeight - textHeight - margin + fontSize;
+						break;
+					case 'bottom-right':
+						x = canvasWidth - maxWidth - margin - padding * 2;
+						y = canvasHeight - textHeight - margin + fontSize;
+						break;
+				}
+
+				// Draw background rectangle
+				ctx.fillStyle = backgroundColor;
+				ctx.fillRect(
+					x - padding,
+					y - fontSize - padding + 5,
+					maxWidth + padding * 2,
+					textHeight + padding * 2
+				);
+
+				// Draw text
+				ctx.fillStyle = color;
+				textLines.forEach((line, index) => {
+					ctx.fillText(line, x, y + index * lineHeight);
+				});
+			}
+		});
+	</script>
+</BaseLayout>
+
+<style>
+	.tools-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.tools-hero h1 {
+		font-size: 2.5rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.tools-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.controls {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-weight: bold;
+		color: var(--text);
+	}
+
+	.form-group input[type="file"] {
+		display: none;
+	}
+
+	.file-input-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.file-input-label {
+		padding: 0.5rem 1rem;
+		background: var(--panel-bg);
+		color: var(--text);
+		border: 2px solid var(--border);
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		cursor: pointer;
+		transition: all 0.1s ease;
+		display: inline-block;
+		box-shadow: 2px 2px 0 var(--shadow);
+	}
+
+	.file-input-label:hover {
+		background: var(--accent);
+		color: var(--bg);
+		transform: translate(1px, 1px);
+		box-shadow: 1px 1px 0 var(--shadow);
+	}
+
+	.file-name {
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		color: var(--muted);
+		font-style: italic;
+	}
+
+	.form-group select {
+		padding: 0.5rem;
+		border: 2px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+	}
+
+	.checkbox-group {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.checkbox-group label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+	}
+
+	.checkbox-group input[type="checkbox"] {
+		width: 1.2rem;
+		height: 1.2rem;
+		cursor: pointer;
+	}
+
+	.error-message {
+		margin-top: 0.5rem;
+		padding: 0.5rem;
+		background: var(--panel-bg);
+		border: 2px solid var(--border);
+		color: var(--text);
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		min-height: 1.5rem;
+	}
+
+	.button-group {
+		display: flex;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+
+	.retro-button {
+		flex: 1;
+		padding: 0.75rem 1.5rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		border: 2px solid;
+		cursor: pointer;
+		text-transform: uppercase;
+		transition: all 0.1s ease;
+	}
+
+	.retro-button--primary {
+		background: var(--accent);
+		color: var(--bg);
+		border-color: var(--accent);
+	}
+
+	.retro-button--primary:hover {
+		background: var(--bg);
+		color: var(--accent);
+	}
+
+	.retro-button--secondary {
+		background: var(--panel-bg);
+		color: var(--text);
+		border-color: var(--border);
+	}
+
+	.retro-button--secondary:hover {
+		background: var(--text);
+		color: var(--bg);
+	}
+
+	.canvas-container {
+		width: 100%;
+		overflow-x: auto;
+	}
+
+	#canvas {
+		max-width: 100%;
+		height: auto;
+		border: 2px solid var(--border);
+		background: var(--panel-bg);
+	}
+
+	.exif-data {
+		max-height: 600px;
+		overflow-y: auto;
+	}
+
+	.exif-placeholder {
+		text-align: center;
+		color: var(--muted);
+		font-style: italic;
+		padding: 2rem;
+	}
+
+	.exif-category {
+		margin-bottom: 1.5rem;
+	}
+
+	.exif-category-title {
+		font-size: 1.5rem;
+		color: var(--accent);
+		border-bottom: 2px solid var(--border);
+		padding-bottom: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.exif-tags {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.exif-tag {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		padding: 0.5rem;
+		background: var(--panel-bg);
+		border: 1px solid var(--border);
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+	}
+
+	.exif-tag-name {
+		color: var(--muted);
+		font-weight: bold;
+	}
+
+	.exif-tag-value {
+		color: var(--text);
+		word-break: break-all;
+	}
+
+	@media (max-width: 768px) {
+		.tools-hero h1 {
+			font-size: 2rem;
+		}
+
+		.button-group {
+			flex-direction: column;
+		}
+
+		.exif-tag {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
