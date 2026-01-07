@@ -81,9 +81,9 @@ import RetroButton from '../../components/RetroButton.astro';
 		</div>
 	</Window>
 
-	<!-- Load EXIFReader and heic2any from CDN -->
+	<!-- Load EXIFReader and heic-to from CDN -->
 	<script is:inline src="https://cdn.jsdelivr.net/npm/exifreader@4.23.5/dist/exif-reader.min.js"></script>
-	<script is:inline src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+	<script is:inline src="https://cdn.jsdelivr.net/npm/heic-to@1.3.0/dist/iife/heic-to.js"></script>
 
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
@@ -104,13 +104,17 @@ import RetroButton from '../../components/RetroButton.astro';
 				errorMsg.textContent = '';
 
 				try {
-					// Convert HEIC to JPEG if needed
+					// Convert HEIC to JPEG if needed for display
 					let processedFile = file;
 					if (file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic') {
-						errorMsg.textContent = 'Converting HEIC to JPEG...';
-						const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg' });
+						errorMsg.textContent = 'Converting HEIC to JPEG for display...';
+						const convertedBlob = await HeicTo({
+							blob: file,
+							type: 'image/jpeg',
+							quality: 0.9
+						});
 						processedFile = new File([convertedBlob], file.name.replace('.heic', '.jpg'), { type: 'image/jpeg' });
-						errorMsg.textContent = 'HEIC converted to JPEG';
+						errorMsg.textContent = 'HEIC converted to JPEG (original file preserved for EXIF)';
 					}
 
 					// Load and display image
@@ -128,8 +132,8 @@ import RetroButton from '../../components/RetroButton.astro';
 					};
 					reader.readAsDataURL(processedFile);
 
-					// Store the processed file for EXIF extraction
-					originalFile = processedFile;
+					// Keep original file for EXIF extraction (HEIC files have EXIF data)
+					// Don't overwrite originalFile with processedFile
 
 				} catch (error) {
 					errorMsg.textContent = 'Error processing image: ' + error.message;
