@@ -16,7 +16,7 @@ import Badge from '../../components/Badge.astro';
 		<a href="#retirement" class="category-link">Retirement Planning</a>
 		<a href="#investment" class="category-link">Investment Analysis</a>
 		<a href="#tax" class="category-link">Tax & Strategy</a>
-		<a href="#credit-cards" class="category-link">Credit Cards</a>
+		<a href="#finance" class="category-link">Finance</a>
 		<a href="#visualization" class="category-link">Visualization</a>
 		<a href="#text" class="category-link">Text Manipulation</a>
 		<a href="#images" class="category-link">Image Tools</a>
@@ -191,12 +191,30 @@ import Badge from '../../components/Badge.astro';
 		</div>
 	</section>
 
-	<!-- Credit Cards Section -->
-	<section id="credit-cards" class="tool-category">
-		<h2 class="category-title">Credit Cards</h2>
-		<p class="category-description">Analyze credit card rewards, break-even points, and maximize your benefits.</p>
+	<!-- Finance Section -->
+	<section id="finance" class="tool-category">
+		<h2 class="category-title">Finance</h2>
+		<p class="category-description">Credit card rewards analysis, expense splitting, and personal finance tools.</p>
 
 		<div class="tools-grid">
+			<Window title="SplitCheck" badgeText="FINANCE">
+				<div class="tool-card">
+					<p class="tool-description">
+						Split expenses with friends and calculate who owes who. Track shared expenses for trips, dinners, or group activities with automatic settlement calculations.
+					</p>
+					<ul class="tool-features">
+						<li>✓ Add people and track expenses</li>
+						<li>✓ Even split or custom amounts</li>
+						<li>✓ Automatic balance calculations</li>
+						<li>✓ Optimized settlement suggestions</li>
+						<li>✓ Shareable view/manage links</li>
+					</ul>
+					<RetroButton href="/tools/splitcheck" variant="primary">
+						Split Expenses
+					</RetroButton>
+				</div>
+			</Window>
+
 			<Window title="Bilt 2.0 Break-Even Calculator" badgeText="PYTHON">
 				<div class="tool-card">
 					<p class="tool-description">
