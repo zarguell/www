@@ -1,0 +1,9 @@
+{
+  "packages": [
+    "matplotlib",
+    "numpy",
+    "plotly"
+  ],
+  "terminal": false,
+  "splashscreen": false
+}
