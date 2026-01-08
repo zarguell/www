@@ -1,0 +1,367 @@
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<PythonToolLayout title="Bilt 2.0 Break-Even Calculator - ARGUELLES.ME">
+	<div class="tool-header">
+		<h1>Bilt 2.0 Break-Even Calculator</h1>
+		<p class="tool-subtitle">Analyze the rumored Bilt Card 2.0 point structure (PyScript Powered)</p>
+	</div>
+
+	<div class="tool-content">
+		<form id="biltForm">
+			<script>
+				document.getElementById("biltForm").addEventListener("submit", (e) => e.preventDefault());
+			</script>
+
+			<Window title="Housing Costs" badgeText="RENT">
+				<div class="form-group">
+					<label for="monthly-rent">
+						Monthly Rent/Mortgage
+						<small>(dollars)</small>
+					</label>
+					<input type="number" id="monthly-rent" value="2000" min="0" step="100" required />
+					<small>Your monthly housing payment</small>
+				</div>
+
+				<div class="form-group">
+					<label for="transaction-fee">
+						Rumored Transaction Fee (Bilt 2.0)
+						<small>(percent)</small>
+					</label>
+					<input type="number" id="transaction-fee" value="3" min="0" max="10" step="0.1" required />
+					<small>Rumored fee for rent/mortgage payments (e.g., 3%)</small>
+				</div>
+			</Window>
+
+			<Window title="Bilt Rewards" badgeText="BILT 2.0">
+				<div class="form-group">
+					<label for="bilt-cash-rate">
+						Bilt Cash Rate
+						<small>(percent)</small>
+					</label>
+					<input type="number" id="bilt-cash-rate" value="4" min="0" max="10" step="0.5" required />
+					<small>4% cash back on non-housing spending (can waive fees)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="everyday-points-rate">
+						Everyday Points Multiplier
+						<small>(points per dollar)</small>
+					</label>
+					<input type="number" id="everyday-points-rate" value="2" min="0" max="10" step="0.5" required />
+					<small>Points earned on non-housing spending (rumored: 2x)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="point-value">
+						Bilt Points Value
+						<small>(cents per point)</small>
+					</label>
+					<input type="number" id="point-value" value="1.8" min="0" max="5" step="0.1" required />
+					<small>Your redemption value (1.8¢ = $1.80 per 100 points)</small>
+				</div>
+			</Window>
+
+			<Window title="Card Comparison" badgeText="ALTERNATIVES">
+				<div class="form-group">
+					<label for="alternative-rate">
+						Alternative Card Return Rate
+						<small>(percent)</small>
+					</label>
+					<input type="number" id="alternative-rate" value="3" min="0" max="10" step="0.5" required />
+					<small>Alternative cash back on ALL spending (e.g., 3%)</small>
+				</div>
+			</Window>
+
+			<div class="button-group">
+				<button type="button" class="retro-button retro-button-primary" py-click="calculate_breakeven">
+					Calculate Break-Even
+				</button>
+			</div>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<h3 style="text-align: center; color: var(--accent); margin-bottom: 1rem;">Static Image (Click to Zoom)</h3>
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="plotly-container" class="chart-container">
+			<h3 style="text-align: center; color: var(--accent); margin-bottom: 1rem;">Interactive Chart (Hover, Zoom, Export)</h3>
+			<div id="plotlyChart"></div>
+		</div>
+
+		<div id="summary-container" class="summary-container">
+			<Window title="Break-Even Analysis Results" badgeText="RESULTS">
+				<div id="summary"></div>
+			</Window>
+		</div>
+	</div>
+
+	<script type="py" src="/tools/bilt-breakeven/main.py" config="/tools/bilt-breakeven/config.json"></script>
+</PythonToolLayout>
+
+<style>
+	.tool-header {
+		text-align: center;
+		margin-bottom: 2rem;
+	}
+
+	.tool-header h1 {
+		font-size: 2.5rem;
+		margin: 0 0 0.5rem 0;
+		color: var(--accent);
+	}
+
+	.tool-subtitle {
+		font-size: 1.2rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.tool-content {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.form-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.form-group label {
+		display: block;
+		font-weight: bold;
+		margin-bottom: 0.5rem;
+		color: var(--text);
+	}
+
+	.form-group label small {
+		font-weight: normal;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+
+	.form-group input {
+		width: 100%;
+		padding: 0.75rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		border: 2px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
+		box-sizing: border-box;
+	}
+
+	.form-group input:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.form-group small {
+		display: block;
+		margin-top: 0.5rem;
+		color: var(--muted);
+		font-size: 0.95rem;
+	}
+
+	.button-group {
+		display: flex;
+		gap: 1rem;
+		margin-top: 1rem;
+	}
+
+	.retro-button {
+		flex: 1;
+		padding: 1rem 2rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		border: 3px solid var(--border);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-transform: uppercase;
+		font-weight: bold;
+	}
+
+	.retro-button-primary {
+		background: var(--accent);
+		color: var(--bg);
+		box-shadow: 4px 4px 0 var(--shadow);
+	}
+
+	.retro-button-primary:hover {
+		transform: translate(2px, 2px);
+		box-shadow: 2px 2px 0 var(--shadow);
+	}
+
+	.retro-button-primary:active {
+		transform: translate(4px, 4px);
+		box-shadow: none;
+	}
+
+	.chart-container {
+		width: 100%;
+		overflow-x: hidden;
+		border: 3px solid var(--border);
+		background: var(--panel-bg);
+		padding: 1rem;
+		box-shadow: 4px 4px 0 var(--shadow);
+		margin-bottom: 2rem;
+	}
+
+	.summary-container {
+		margin-top: 2rem;
+	}
+
+	:global(#chart img) {
+		max-width: 100% !important;
+		height: auto !important;
+		display: block !important;
+	}
+
+	:global(#plotlyChart) {
+		min-height: 500px;
+		height: 90vh;
+	}
+
+	:global(.click-zoom input[type="checkbox"]) {
+		display: none;
+	}
+
+	:global(.click-zoom input:checked + .zoom-label) {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.95);
+		z-index: 9999;
+		cursor: zoom-out;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem;
+	}
+
+	:global(.click-zoom input:checked + .zoom-label img) {
+		max-width: 95vw !important;
+		max-height: 95vh !important;
+		object-fit: contain;
+	}
+
+	:global(#summary) {
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		line-height: 1.6;
+	}
+
+	:global(.results-grid) {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+	}
+
+	:global(.result-card) {
+		padding: 1.5rem;
+		background: var(--panel-bg);
+		border: 2px solid var(--border);
+		box-shadow: 3px 3px 0 var(--shadow);
+	}
+
+	:global(.result-label) {
+		font-size: 1.1rem;
+		color: var(--muted);
+		margin-bottom: 0.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	:global(.result-value) {
+		font-size: 2rem;
+		font-weight: bold;
+		color: var(--accent);
+	}
+
+	:global(.result-value.positive) {
+		color: #27ae60;
+	}
+
+	:global(.result-value.negative) {
+		color: #e74c3c;
+	}
+
+	:global(.insights-box) {
+		padding: 1.5rem;
+		background: var(--bg);
+		border: 2px dashed var(--border);
+		line-height: 1.6;
+	}
+
+	:global(.insights-box p) {
+		margin: 0 0 1rem 0;
+	}
+
+	:global(.insights-box ul) {
+		margin: 0;
+		padding-left: 1.5rem;
+	}
+
+	:global(.insights-box li) {
+		margin-bottom: 0.5rem;
+	}
+
+	@media (max-width: 768px) {
+		.tool-header h1 {
+			font-size: 2rem;
+		}
+
+		.tool-subtitle {
+			font-size: 1rem;
+		}
+
+		.button-group {
+			flex-direction: column;
+		}
+
+		:global(.results-grid) {
+			grid-template-columns: 1fr;
+		}
+
+		:global(.result-value) {
+			font-size: 1.5rem;
+		}
+	}
+</style>
+
+<script define:vars={{}}>
+	// Click-to-zoom functionality for dynamically generated charts
+	const initZoomableChart = (imgId, checkboxId) => {
+		const chartImg = document.getElementById(imgId);
+		if (chartImg && !chartImg.dataset.zoomInitialized) {
+			chartImg.dataset.zoomInitialized = 'true';
+
+			const clickZoom = document.createElement('div');
+			clickZoom.className = 'click-zoom';
+
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.id = checkboxId;
+
+			const label = document.createElement('label');
+			label.htmlFor = checkboxId;
+			label.className = 'zoom-label';
+
+			chartImg.parentNode.insertBefore(clickZoom, chartImg);
+			clickZoom.appendChild(checkbox);
+			clickZoom.appendChild(label);
+			label.appendChild(chartImg);
+		}
+	};
+
+	// Watch for chart generation
+	const observer = new MutationObserver(() => {
+		if (document.getElementById('chartImg')) {
+			initZoomableChart('chartImg', 'zoom-checkbox-chart');
+		}
+	});
+	observer.observe(document.getElementById('chart'), { childList: true });
+</script>
