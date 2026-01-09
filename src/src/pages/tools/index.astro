@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
-import Badge from '../../components/Badge.astro';
+import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 ---
 
 <BaseLayout title="Tools - ARGUELLES.ME">
@@ -11,401 +11,110 @@ import Badge from '../../components/Badge.astro';
 		<p class="tools-subtitle">Calculators and utilities for your digital life</p>
 	</div>
 
-	<!-- Category Navigation -->
-	<nav class="category-nav">
-		<a href="#retirement" class="category-link">Retirement Planning</a>
-		<a href="#investment" class="category-link">Investment Analysis</a>
-		<a href="#tax" class="category-link">Tax & Strategy</a>
-		<a href="#finance" class="category-link">Finance</a>
-		<a href="#visualization" class="category-link">Visualization</a>
-		<a href="#text" class="category-link">Text Manipulation</a>
-		<a href="#images" class="category-link">Image Tools</a>
-		<a href="#food" class="category-link">Food & Drinks</a>
-		<a href="#gaming" class="category-link">Video Games</a>
-	</nav>
-
-	<!-- Retirement Planning Section -->
-	<section id="retirement" class="tool-category">
-		<h2 class="category-title">Retirement Planning</h2>
-		<p class="category-description">Plan your financial independence with sophisticated projections and withdrawal strategies.</p>
-
-		<div class="tools-grid">
-			<Window title="401(k) Calculator" badgeText="RETIREMENT">
-				<div class="tool-card">
-					<p class="tool-description">
-						Plan your retirement with our compound interest calculator. See how your contributions grow over time.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Salary-based contributions</li>
-						<li>✓ Employer match included</li>
-						<li>✓ Annual return projections</li>
-						<li>✓ Multi-year growth charts</li>
-					</ul>
-					<RetroButton href="/tools/401k-calculator" variant="primary">
-						Calculate Now
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Monte Carlo Retirement Lab" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						Simulate thousands of retirement scenarios to see sequence-of-returns risk in action. Understand the probability of success and see worst-case outcomes.
-					</p>
-					<ul class="tool-features">
-						<li>✓ 1,000+ simulation paths</li>
-						<li>✓ Correlated stock/bond returns</li>
-						<li>✓ Success rate at age 95</li>
-						<li>✓ Median & percentile projections</li>
-						<li>✓ Dual charts: paths + histogram</li>
-					</ul>
-					<RetroButton href="/tools/monte-carlo" variant="primary">
-						Run Simulation
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Safe Withdrawal Rate Comparison" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						Compare three withdrawal strategies: constant dollar, percentage of portfolio, and dynamic guardrails. See which approach balances stability and flexibility.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Constant $ withdrawal (inflation-adjusted)</li>
-						<li>✓ Percentage of portfolio method</li>
-						<li>✓ Guardrails with +/- 20% bands</li>
-						<li>✓ Success rate comparison</li>
-						<li>✓ Withdrawal volatility analysis</li>
-					</ul>
-					<RetroButton href="/tools/safe-withdrawal" variant="primary">
-						Compare Strategies
-					</RetroButton>
-				</div>
-			</Window>
+	<!-- View Toggle & Search -->
+	<div class="tools-controls">
+		<div class="view-toggle">
+			<button id="categoryViewBtn" class="view-toggle-btn active" data-view="category">
+				Category View
+			</button>
+			<button id="dateViewBtn" class="view-toggle-btn" data-view="date">
+				Date View (Newest)
+			</button>
 		</div>
-	</section>
 
-	<!-- Investment Analysis Section -->
-	<section id="investment" class="tool-category">
-		<h2 class="category-title">Investment Analysis</h2>
-		<p class="category-description">Understand how costs, timing, and asset allocation impact long-term wealth building.</p>
-
-		<div class="tools-grid">
-			<Window title="Expense Ratio Impact Visualizer" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						See the long-term cost of high expense ratios. Compare two funds side-by-side and watch how fees compound over decades.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Side-by-side fund comparison</li>
-						<li>✓ 30-year fee projections</li>
-						<li>✓ Cumulative fee bar chart</li>
-						<li>✓ Wealth lost percentage</li>
-						<li>✓ Annotated insights</li>
-					</ul>
-					<RetroButton href="/tools/expense-ratio" variant="primary">
-						Compare Funds
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Sequence of Returns Explorer" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						Demonstrate how early retirement returns matter more than late returns. Compare good-early vs bad-early scenarios with identical average returns.
-					</p>
-					<ul class="tool-features">
-						<li>✓ 4 return sequence scenarios</li>
-						<li>✓ Good early vs bad early</li>
-						<li>✓ Steady vs random walk</li>
-						<li>✓ Final wealth comparison table</li>
-						<li>✓ Visual sequence impact</li>
-					</ul>
-					<RetroButton href="/tools/sequence-risk" variant="primary">
-						Explore Sequences
-					</RetroButton>
-				</div>
-			</Window>
+		<div class="search-container">
+			<input
+				type="text"
+				id="searchInput"
+				placeholder="Search tools..."
+				class="search-input"
+				aria-label="Search tools"
+			/>
 		</div>
-	</section>
+	</div>
 
-	<!-- Tax & Strategy Section -->
-	<section id="tax" class="tool-category">
-		<h2 class="category-title">Tax & Contribution Strategy</h2>
-		<p class="category-description">Optimize your tax-advantaged accounts and find your path to financial independence.</p>
+	<!-- Category View -->
+	<div id="categoryView" class="view-content">
+		<!-- Category Navigation -->
+		<nav class="category-nav" id="categoryNav">
+			{toolsData.map((category) => (
+				<a href={`#${category.id}`} class="category-link" data-category={category.id}>
+					{category.name}
+				</a>
+			))}
+		</nav>
 
-		<div class="tools-grid">
-			<Window title="Roth vs Taxable Calculator" badgeText="RETIREMENT">
-				<div class="tool-card">
-					<p class="tool-description">
-						Compare Backdoor Roth, Taxable Brokerage, and Cash side-by-side with realistic tax modeling. See which strategy delivers the most spendable wealth at retirement, with Python-powered calculations running directly in your browser.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Three-scenario comparison (Roth/Taxable/Cash)</li>
-						<li>✓ Tax drag + capital gains modeling</li>
-						<li>✓ Pro-rata rule warnings</li>
-						<li>✓ Dual charts: balances & taxes paid</li>
-						<li>✓ Auto-generated insights</li>
-					</ul>
-					<RetroButton href="/tools/roth-calculator" variant="primary">
-						Compare Strategies
-					</RetroButton>
+		{toolsData.map((category) => (
+			<section id={category.id} class="tool-category" data-category={category.id}>
+				<h2 class="category-title">{category.name}</h2>
+				<p class="category-description">{category.description}</p>
+
+				<div class="tools-grid">
+					{category.tools.map((tool) => (
+						<Window
+							title={tool.title}
+							badgeText={tool.badge}
+							data-tool-title={tool.title.toLowerCase()}
+							data-tool-desc={tool.description.toLowerCase()}
+							data-date={tool.lastModified}
+						>
+							<div class="tool-card">
+								<p class="tool-description">{tool.description}</p>
+								<ul class="tool-features">
+									{tool.features.map((feature) => <li>{feature}</li>)}
+								</ul>
+								<div class="tool-footer">
+									<RetroButton href={`/tools/${tool.slug}`} variant="primary">
+										Open Tool
+									</RetroButton>
+									<span class="tool-date">Updated: {new Date(tool.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+								</div>
+							</div>
+						</Window>
+					))}
 				</div>
-			</Window>
+			</section>
+		))}
+	</div>
 
-			<Window title="Traditional vs Roth Analyzer" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						Compare Traditional and Roth IRA outcomes across different future tax rates. See the break-even point and make informed decisions.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Tax rate sensitivity analysis</li>
-						<li>✓ Side-by-side comparison</li>
-						<li>✓ Break-even visualization</li>
-						<li>✓ Shaded win regions</li>
-						<li>✓ Clear decision framework</li>
-					</ul>
-					<RetroButton href="/tools/trad-vs-roth" variant="primary">
-						Compare Accounts
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Savings Rate to FI Calculator" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						See the powerful relationship between savings rate and time to financial independence. Small changes in savings rate dramatically accelerate FI.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Savings rate vs years to FI</li>
-						<li>✓ Your rate highlighted</li>
-						<li>✓ FI target calculation</li>
-						<li>✓ Interactive-style plot</li>
-						<li>✓ Goal tracking insights</li>
-					</ul>
-					<RetroButton href="/tools/savings-rate-fi" variant="primary">
-						Calculate Years to FI
-					</RetroButton>
-				</div>
-			</Window>
+	<!-- Date View -->
+	<div id="dateView" class="view-content" style="display: none;">
+		<h2 class="view-title">All Tools (Newest First)</h2>
+		<div class="tools-grid" id="dateViewGrid">
+			{getToolsSortedByDate('newest').map((tool) => (
+				<Window
+					title={tool.title}
+					badgeText={tool.badge}
+					data-tool-title={tool.title.toLowerCase()}
+					data-tool-desc={tool.description.toLowerCase()}
+					data-date={tool.lastModified}
+				>
+					<div class="tool-card">
+						<p class="tool-description">{tool.description}</p>
+						<ul class="tool-features">
+							{tool.features.map((feature) => <li>{feature}</li>)}
+						</ul>
+						<div class="tool-footer">
+							<RetroButton href={`/tools/${tool.slug}`} variant="primary">
+								Open Tool
+							</RetroButton>
+							<span class="tool-date">
+								<span class="tool-category-badge">{tool.category}</span>
+								Updated: {new Date(tool.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+							</span>
+						</div>
+					</div>
+				</Window>
+			))}
 		</div>
-	</section>
+	</div>
 
-	<!-- Finance Section -->
-	<section id="finance" class="tool-category">
-		<h2 class="category-title">Finance</h2>
-		<p class="category-description">Credit card rewards analysis, expense splitting, and personal finance tools.</p>
-
-		<div class="tools-grid">
-			<Window title="SplitCheck" badgeText="FINANCE">
-				<div class="tool-card">
-					<p class="tool-description">
-						Split expenses with friends and calculate who owes who. Track shared expenses for trips, dinners, or group activities with automatic settlement calculations.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Add people and track expenses</li>
-						<li>✓ Even split or custom amounts</li>
-						<li>✓ Automatic balance calculations</li>
-						<li>✓ Optimized settlement suggestions</li>
-						<li>✓ Shareable view/manage links</li>
-					</ul>
-					<RetroButton href="/tools/splitcheck" variant="primary">
-						Split Expenses
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Bilt 2.0 Break-Even Calculator" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						Analyze the rumored Bilt Card 2.0 point structure. Calculate break-even spending levels, net annual value, and compare against alternative cards with Python-powered visualizations.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Transaction fee vs rewards analysis</li>
-						<li>✓ Annual points cap modeling</li>
-						<li>✓ Break-even spending calculation</li>
-						<li>✓ Net value vs alternatives comparison</li>
-						<li>✓ Interactive break-even chart</li>
-					</ul>
-					<RetroButton href="/tools/bilt-breakeven" variant="primary">
-						Calculate Break-Even
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
-
-	<!-- Visualization Tools Section -->
-	<section id="visualization" class="tool-category">
-		<h2 class="category-title">Visualization Tools</h2>
-		<p class="category-description">Create visual representations of your financial flows and understand where your money goes.</p>
-
-		<div class="tools-grid">
-			<Window title="Cash Flow Sankey Builder" badgeText="PYTHON">
-				<div class="tool-card">
-					<p class="tool-description">
-						Create beautiful Sankey diagrams from simple text input. Visualize income, taxes, savings, and expenses in an elegant flow chart.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Simple text input format</li>
-						<li>✓ Auto-generate Sankey diagram</li>
-						<li>✓ Color-coded flows</li>
-						<li>✓ Flow validation warnings</li>
-						<li>✓ Savings rate calculation</li>
-					</ul>
-					<RetroButton href="/tools/sankey-builder" variant="primary">
-						Build Diagram
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
-
-	<!-- Text Manipulation Section -->
-	<section id="text" class="tool-category">
-		<h2 class="category-title">Text Manipulation</h2>
-		<p class="category-description">Transform, sanitize, and process text with privacy-focused browser tools.</p>
-
-		<div class="tools-grid">
-			<Window title="Sanitext" badgeText="TEXT TOOL">
-				<div class="tool-card">
-					<p class="tool-description">
-						Privacy-focused, client-side text sanitization tool. Redact sensitive information like emails, phone numbers, SSNs, credit cards, and IP addresses using customizable regex or string replacement rules.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Pre-built rules for common PII (emails, phones, SSNs)</li>
-						<li>✓ Custom regex and string replacement rules</li>
-						<li>✓ Import/export rule configurations</li>
-						<li>✓ Real-time sanitization as you type</li>
-						<li>✓ 100% client-side (your text never leaves your browser)</li>
-					</ul>
-					<RetroButton href="/tools/sanitext" variant="primary">
-						Sanitize Text
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
-
-	<!-- Video Games Section -->
-	<section id="gaming" class="tool-category">
-		<h2 class="category-title">Video Games</h2>
-		<p class="category-description">Game utilities and calculators to enhance your gameplay experience.</p>
-
-		<div class="tools-grid">
-			<Window title="Rune Calculator" badgeText="GAMING">
-				<div class="tool-card">
-					<p class="tool-description">
-						Elden Ring golden runes are super helpful for quickly leveling your character up, especially when you only need a few more runes to get to the next level. I got tired of doing the mental math in my head, calculating how many runes I needed, etc. So I made this quick and dirty calculator by asking chatGPT to make it for me.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Current to target level</li>
-						<li>✓ Optimize number of golden runes</li>
-						<li>✓ Planning made easy</li>
-						<li>✓ No spoilers included</li>
-					</ul>
-					<RetroButton href="/tools/rune-calculator" variant="primary">
-						Calculate Runes
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
-
-	<!-- Image Tools Section -->
-	<section id="images" class="tool-category">
-		<h2 class="category-title">Image Tools</h2>
-		<p class="category-description">Process and analyze images with privacy-focused browser tools.</p>
-
-		<div class="tools-grid">
-			<Window title="EXIF Explorer & Marker Tool" badgeText="IMAGE TOOL">
-				<div class="tool-card">
-					<p class="tool-description">
-						Explore raw EXIF metadata and add custom overlays to your photos. View timestamp, GPS location, camera settings, and all embedded metadata. Create visual metadata overlays with customizable positioning and sizing.
-					</p>
-					<ul class="tool-features">
-						<li>✓ View raw EXIF data (categorized display)</li>
-						<li>✓ Add metadata overlay to images</li>
-						<li>✓ Customizable corner position</li>
-						<li>✓ Adjustable text size (small/medium/large)</li>
-						<li>✓ Toggle timestamp, location, camera info</li>
-						<li>✓ Download overlayed image</li>
-						<li>✓ Privacy-first (runs in browser)</li>
-						<li>✓ HEIC format support</li>
-					</ul>
-					<RetroButton href="/tools/exif-marker" variant="primary">
-						Explore & Mark Images
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="HEIC to JPG/PNG Converter" badgeText="IMAGE TOOL">
-				<div class="tool-card">
-					<p class="tool-description">
-						Convert HEIC images to standard JPG or PNG formats. HEIC is Apple's default photo format but isn't widely supported. Convert your photos locally with complete privacy.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Batch convert multiple files</li>
-						<li>✓ Output to JPG or PNG</li>
-						<li>✓ Adjustable JPG quality (high/medium/low)</li>
-						<li>✓ Automatic download after conversion</li>
-						<li>✓ Validates HEIC format before converting</li>
-						<li>✓ Privacy-first (runs in browser)</li>
-						<li>✓ Progress tracking per file</li>
-					</ul>
-					<RetroButton href="/tools/heic-converter" variant="primary">
-						Convert Images
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
-
-	<!-- Food & Drinks Section -->
-	<section id="food" class="tool-category">
-		<h2 class="category-title">Food & Drinks</h2>
-		<p class="category-description">Culinary calculators and recipe tools for your kitchen experiments.</p>
-
-		<div class="tools-grid">
-			<Window title="Cocktail Batch Calculator" badgeText="FOOD & DRINKS">
-				<div class="tool-card">
-					<p class="tool-description">
-						Build single-serving recipes and scale them to batch sizes with precise ABV and dilution calculations. Export beautiful recipe cards as PNG images for your next party.
-					</p>
-					<ul class="tool-features">
-						<li>✓ Scale recipes by target volume or servings</li>
-						<li>✓ Automatic ABV calculation per ingredient</li>
-						<li>✓ Dilution: stirred, shaken, or custom %</li>
-						<li>✓ Freezer storage warnings based on ABV</li>
-						<li>✓ Export batch recipe card as PNG</li>
-						<li>✓ Save/load recipes to browser storage</li>
-					</ul>
-					<RetroButton href="/tools/cocktail-batch" variant="primary">
-						Build Batches
-					</RetroButton>
-				</div>
-			</Window>
-
-			<Window title="Super Juice Calculator" badgeText="FOOD & DRINKS">
-				<div class="tool-card">
-					<p class="tool-description">
-						Calculate citrus juice extraction with acid-infused peels. Create concentrated "super juice" from lemon, lime, orange, grapefruit, or kumquat using scientific ratios of citric and malic acids.
-					</p>
-					<ul class="tool-features">
-						<li>✓ 5 recipes: Lemon, Lime, Orange, Grapefruit, Kumquat</li>
-						<li>✓ Peel-based and fruit-based calculations</li>
-						<li>✓ Target weight reverse calculation</li>
-						<li>✓ Step-by-step instructions</li>
-						<li>✓ URL state preservation (shareable links)</li>
-						<li>✓ MSG for grapefruit (Umami boost)</li>
-					</ul>
-					<RetroButton href="/tools/super-juice" variant="primary">
-						Calculate Recipe
-					</RetroButton>
-				</div>
-			</Window>
-		</div>
-	</section>
+	<!-- No Results Message -->
+	<div id="noResults" class="no-results" style="display: none;">
+		<Window title="No Tools Found">
+			<p>No tools match your search. Try different keywords.</p>
+		</Window>
+	</div>
 
 	<Window title="More Coming Soon" badgeText="WIP">
 		<div class="prose">
@@ -433,6 +142,91 @@ import Badge from '../../components/Badge.astro';
 		margin: 0;
 	}
 
+	.tools-controls {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 2rem;
+		padding: 1.5rem 0;
+		margin-bottom: 2rem;
+		flex-wrap: wrap;
+	}
+
+	.view-toggle {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.view-toggle-btn {
+		padding: 0.6em 1.2em;
+		background: var(--bg2);
+		border: 3px solid var(--border);
+		color: var(--text);
+		font-family: VT323, monospace;
+		font-size: 1.1rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: 2px 2px 0 var(--shadow);
+	}
+
+	.view-toggle-btn:hover {
+		background: var(--bg);
+		transform: translate(1px, 1px);
+		box-shadow: 1px 1px 0 var(--shadow);
+	}
+
+	.view-toggle-btn.active {
+		background: var(--accent);
+		color: var(--sticker-text);
+		border-color: var(--accent);
+	}
+
+	.search-container {
+		flex: 1;
+		max-width: 400px;
+	}
+
+	.search-input {
+		width: 100%;
+		padding: 0.6em 1em;
+		background: var(--bg);
+		border: 3px solid var(--border);
+		color: var(--text);
+		font-family: VT323, monospace;
+		font-size: 1.1rem;
+		box-shadow: 2px 2px 0 var(--shadow);
+		transition: all 0.2s ease;
+	}
+
+	.search-input:focus {
+		outline: none;
+		border-color: var(--accent);
+		box-shadow: 3px 3px 0 var(--shadow);
+	}
+
+	.view-content {
+		animation: fadeIn 0.3s ease;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.view-title {
+		font-size: 2rem;
+		margin: 0 0 1.5rem 0;
+		color: var(--accent);
+		border-bottom: 3px solid var(--border);
+		padding-bottom: 0.5rem;
+	}
+
 	.category-nav {
 		display: flex;
 		justify-content: center;
@@ -445,7 +239,7 @@ import Badge from '../../components/Badge.astro';
 
 	.category-link {
 		padding: 0.5rem 1rem;
-		background: var(--panel-bg);
+		background: var(--bg2);
 		border: 2px solid var(--border);
 		color: var(--text);
 		text-decoration: none;
@@ -516,7 +310,51 @@ import Badge from '../../components/Badge.astro';
 		padding: 0.25rem 0;
 	}
 
+	.tool-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		margin-top: auto;
+		flex-wrap: wrap;
+	}
+
+	.tool-date {
+		font-size: 0.9rem;
+		color: var(--muted);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.tool-category-badge {
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		padding: 0.2em 0.6em;
+		font-size: 0.85rem;
+		border-radius: 3px;
+	}
+
+	.no-results {
+		text-align: center;
+		padding: 2rem;
+	}
+
 	@media (max-width: 768px) {
+		.tools-controls {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.search-container {
+			max-width: 100%;
+		}
+
+		.view-toggle {
+			justify-content: center;
+		}
+
 		.tools-grid {
 			grid-template-columns: 1fr;
 		}
@@ -537,5 +375,81 @@ import Badge from '../../components/Badge.astro';
 		.category-title {
 			font-size: 2rem;
 		}
+
+		.tool-footer {
+			flex-direction: column;
+			align-items: stretch;
+		}
 	}
 </style>
+
+<script>
+	const categoryViewBtn = document.getElementById('categoryViewBtn');
+	const dateViewBtn = document.getElementById('dateViewBtn');
+	const categoryView = document.getElementById('categoryView');
+	const dateView = document.getElementById('dateView');
+	const searchInput = document.getElementById('searchInput');
+	const noResults = document.getElementById('noResults');
+	const categoryNav = document.getElementById('categoryNav');
+
+	// View toggle functionality
+	function switchView(view: 'category' | 'date') {
+		if (view === 'category') {
+			categoryView.style.display = 'block';
+			dateView.style.display = 'none';
+			categoryViewBtn.classList.add('active');
+			dateViewBtn.classList.remove('active');
+			categoryNav.style.display = 'flex';
+		} else {
+			categoryView.style.display = 'none';
+			dateView.style.display = 'block';
+			categoryViewBtn.classList.remove('active');
+			dateViewBtn.classList.add('active');
+			categoryNav.style.display = 'none';
+		}
+		// Reapply search filter
+		filterTools(searchInput.value);
+	}
+
+	categoryViewBtn?.addEventListener('click', () => switchView('category'));
+	dateViewBtn?.addEventListener('click', () => switchView('date'));
+
+	// Search functionality
+	function filterTools(searchTerm: string) {
+		const term = searchTerm.toLowerCase().trim();
+		const toolWindows = document.querySelectorAll('[data-tool-title]');
+
+		let hasResults = false;
+
+		toolWindows.forEach((window) => {
+			const title = window.getAttribute('data-tool-title') || '';
+			const desc = window.getAttribute('data-tool-desc') || '';
+			const matches = title.includes(term) || desc.includes(term);
+
+			if (matches || term === '') {
+				(window as HTMLElement).style.display = '';
+				hasResults = true;
+			} else {
+				(window as HTMLElement).style.display = 'none';
+			}
+		});
+
+		// Show/hide categories based on visible tools in category view
+		if (categoryView.style.display !== 'none') {
+			const categories = document.querySelectorAll('.tool-category');
+			categories.forEach((category) => {
+				const visibleTools = category.querySelectorAll('[data-tool-title]:not([style*="display: none"])');
+				(category as HTMLElement).style.display = visibleTools.length > 0 ? '' : 'none';
+			});
+		}
+
+		// Show no results message
+		if (noResults) {
+			noResults.style.display = !hasResults && term !== '' ? 'block' : 'none';
+		}
+	}
+
+	searchInput?.addEventListener('input', (e) => {
+		filterTools((e.target as HTMLInputElement).value);
+	});
+</script>
