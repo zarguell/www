@@ -26,6 +26,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalURL} />
 
+		<!-- RSS Feed -->
+		<link rel="alternate" type="application/rss+xml" title={title} href="/rss.xml" />
+
 		<!-- VT323 Font Embed -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

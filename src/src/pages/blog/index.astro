@@ -24,6 +24,12 @@ const formatDate = (date: Date) => {
 	<div class="blog-hero">
 		<h1>Blog</h1>
 		<p class="blog-subtitle">Fashion, coding, and the intersection of both</p>
+		<div class="rss-link">
+			<a href="/rss.xml" class="rss-button">
+				<span class="rss-icon">≡</span>
+				Subscribe via RSS
+			</a>
+		</div>
 	</div>
 
 	<div class="posts-grid">
@@ -64,6 +70,42 @@ const formatDate = (date: Date) => {
 		font-size: 1.3rem;
 		color: var(--muted);
 		margin: 0;
+	}
+
+	.rss-link {
+		margin-top: 1.5rem;
+	}
+
+	.rss-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.6em 1.2em;
+		background: var(--bg2);
+		color: var(--text);
+		text-decoration: none;
+		border: 3px solid var(--accent);
+		border-radius: 4px;
+		font-family: VT323, monospace;
+		font-size: 1.2rem;
+		box-shadow: 3px 3px 0 var(--shadow);
+		transition: all 0.1s ease;
+	}
+
+	.rss-button:hover {
+		transform: translate(1px, 1px);
+		box-shadow: 2px 2px 0 var(--shadow);
+		background: var(--bg);
+	}
+
+	.rss-button:active {
+		transform: translate(3px, 3px);
+		box-shadow: none;
+	}
+
+	.rss-icon {
+		font-size: 1.5rem;
+		color: var(--accent);
 	}
 
 	.posts-grid {
