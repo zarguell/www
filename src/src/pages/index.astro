@@ -166,13 +166,27 @@ import Sticker from '../components/Sticker.astro';
 		if (aimChatWindow) {
 			aimChatWindow.style.setProperty('display', 'flex');
 			localStorage.setItem('aimChatOpen', 'true');
+			// Hide the launch button after opening
+			launchChatBtn.parentElement?.style.setProperty('display', 'none');
 		}
 	});
 
-	// Hide launch button if chat is already open
+	// Show/hide launch button based on chat state
 	const aimChatWindow = document.getElementById('aimChatWindow');
 	const chatOpenState = localStorage.getItem('aimChatOpen');
-	if (aimChatWindow && chatOpenState !== 'false') {
-		launchChatBtn?.parentElement?.style.setProperty('display', 'none');
+	if (aimChatWindow) {
+		if (chatOpenState !== 'false') {
+			// Chat is open, hide launch button
+			launchChatBtn?.parentElement?.style.setProperty('display', 'none');
+		} else {
+			// Chat is closed, show launch button
+			launchChatBtn?.parentElement?.style.setProperty('display', 'block');
+		}
 	}
+
+	// Watch for chat close button clicks to show launch button again
+	const closeBtn = document.getElementById('closeBtn');
+	closeBtn?.addEventListener('click', () => {
+		launchChatBtn?.parentElement?.style.setProperty('display', 'block');
+	});
 </script>
