@@ -1295,7 +1295,15 @@ import RetroButton from '../../components/RetroButton.astro';
 
 	@media (max-width: 1000px) {
 		.batch-settings-grid {
-			grid-template-columns: 1fr;
+			display: grid;
+			grid-template-columns: 1fr !important;
+			gap: 1.5rem;
+		}
+
+		.settings-column,
+		.export-column {
+			grid-column: 1 / -1;
+			width: 100%;
 		}
 	}
 
@@ -1497,10 +1505,6 @@ import RetroButton from '../../components/RetroButton.astro';
 
 	@media (max-width: 768px) {
 		.batch-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.batch-settings-grid {
 			grid-template-columns: 1fr;
 		}
 
