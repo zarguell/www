@@ -1351,8 +1351,6 @@ import RetroButton from '../../components/RetroButton.astro';
 		padding: 1.5rem;
 		border: 3px solid rgba(0, 0, 0, 0.9);
 		font-family: system-ui, -apple-system, sans-serif;
-		max-width: 100%;
-		overflow: hidden;
 	}
 
 	.card-header {
@@ -1504,20 +1502,10 @@ import RetroButton from '../../components/RetroButton.astro';
 
 		.batch-settings-grid {
 			grid-template-columns: 1fr;
-			gap: 1.5rem;
 		}
 
 		.tool-hero h1 {
 			font-size: 2rem;
-		}
-
-		.hero-header {
-			flex-direction: column;
-			align-items: stretch;
-		}
-
-		.header-actions {
-			justify-content: center;
 		}
 
 		.cocktail-name-row {
@@ -1532,98 +1520,14 @@ import RetroButton from '../../components/RetroButton.astro';
 		.export-header {
 			flex-direction: column;
 			align-items: stretch;
-			gap: 0.75rem;
-		}
-
-		.export-header .status-pill {
-			align-self: flex-start;
-		}
-
-		.export-header .retro-button {
-			width: 100%;
 		}
 
 		.card-header {
 			flex-direction: column;
-			gap: 0.75rem;
 		}
 
 		.card-stats {
 			flex-direction: column;
-			gap: 0.5rem;
-		}
-
-		/* Recipe card mobile optimizations */
-		.recipe-card {
-			padding: 1rem;
-			font-size: 0.9rem;
-		}
-
-		.card-title-section h3 {
-			font-size: 1.25rem;
-		}
-
-		.card-meta {
-			font-size: 0.8rem;
-		}
-
-		.card-table th,
-		.card-table td {
-			padding: 0.4rem 0.3rem;
-			font-size: 0.85rem;
-		}
-
-		.card-note {
-			font-size: 0.8rem;
-			padding: 0.5rem;
-		}
-
-		.card-footer {
-			font-size: 0.7rem;
-		}
-
-		/* Settings column mobile */
-		.settings-column {
-			gap: 0.5rem;
-		}
-
-		.form-group {
-			margin-bottom: 0.75rem;
-		}
-
-		.button-row {
-			flex-wrap: wrap;
-		}
-
-		.button-row .retro-button {
-			flex: 1;
-			min-width: 120px;
-		}
-
-		.input-row {
-			flex-direction: column;
-			gap: 0.5rem;
-		}
-
-		.input-row input,
-		.input-row select {
-			width: 100%;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.recipe-card {
-			padding: 0.75rem;
-		}
-
-		.card-title-section h3 {
-			font-size: 1.1rem;
-		}
-
-		.card-table th,
-		.card-table td {
-			padding: 0.3rem 0.2rem;
-			font-size: 0.8rem;
 		}
 	}
 </style>
