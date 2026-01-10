@@ -1,0 +1,477 @@
+---
+/**
+ * Retro AIM Chat Window Component
+ * A nostalgic AIM-style chat window with dummy messages
+ * Can be minimized and positioned anywhere on the page
+ */
+
+interface ChatMessage {
+	sender: 'me' | 'them';
+	text: string;
+	time: string;
+}
+
+const messages: ChatMessage[] = [
+	{ sender: 'them', text: 'hey!', time: '3:42 PM' },
+	{ sender: 'me', text: 'yo whats up', time: '3:42 PM' },
+	{ sender: 'them', text: 'nm just chillen, u?', time: '3:43 PM' },
+	{ sender: 'me', text: 'same. u going to the movies later?', time: '3:43 PM' },
+	{ sender: 'them', text: 'yeah!! tony stewart too?', time: '3:43 PM' },
+	{ sender: 'me', text: 'word', time: '3:44 PM' },
+	{ sender: 'them', text: 'brb mom needs phone', time: '3:44 PM' },
+	{ sender: 'me', text: 'k', time: '3:44 PM' },
+	{ sender: 'them', text: 'back', time: '3:52 PM' },
+	{ sender: 'me', text: 'wb', time: '3:52 PM' },
+	{ sender: 'them', text: 'so what time we meeting?', time: '3:53 PM' },
+	{ sender: 'me', text: '7ish?', time: '3:53 PM' },
+	{ sender: 'them', text: 'sounds good :-)', time: '3:53 PM' },
+	{ sender: 'them', text: 'away message: doing homework :-*', time: '3:54 PM' },
+];
+
+const buddyName = 'SkaterBoi2003';
+const buddyStatus = 'away';
+const myStatus = 'available';
+---
+
+<div class="aim-chat-window" id="aimChatWindow">
+	<!-- Title Bar -->
+	<div class="aim-title-bar" id="aimTitleBar">
+		<div class="aim-title-left">
+			<span class="aim-icon">😊</span>
+			<span class="aim-buddy-name">{buddyName}</span>
+		</div>
+		<div class="aim-title-controls">
+			<button class="aim-control-btn minimize-btn" id="minimizeBtn" aria-label="Minimize">_</button>
+			<button class="aim-control-btn maximize-btn" id="maximizeBtn" aria-label="Maximize">□</button>
+			<button class="aim-control-btn close-btn" id="closeBtn" aria-label="Close">×</button>
+		</div>
+	</div>
+
+	<!-- Menu Bar -->
+	<div class="aim-menu-bar">
+		<span class="aim-menu-item">File</span>
+		<span class="aim-menu-item">Edit</span>
+		<span class="aim-menu-item">View</span>
+		<span class="aim-menu-item">Buddies</span>
+		<span class="aim-menu-item">Help</span>
+	</div>
+
+	<!-- Chat Content -->
+	<div class="aim-chat-content" id="aimChatContent">
+		<div class="aim-connection-message">
+			<span class="aim-buddy-name-text">{buddyName}</span> has been signed on since {messages[0].time}
+		</div>
+
+		{messages.map((msg) => (
+			<div class={`aim-message aim-message-${msg.sender}`}>
+				{msg.sender === 'them' && (
+					<span class="aim-sender-name">{buddyName}:</span>
+				)}
+				<span class="aim-message-text">{msg.text}</span>
+				{msg.sender === 'me' && (
+					<span class="aim-message-time">
+						<!-- Auto-message from {buddyName}: -->
+					</span>
+				)}
+				<span class="aim-message-time">{msg.time}</span>
+			</div>
+		))}
+	</div>
+
+	<!-- Input Area -->
+	<div class="aim-input-area">
+		<textarea
+			class="aim-input"
+			placeholder="Enter message here..."
+			id="aimInput"
+			readonly
+		></textarea>
+		<div class="aim-input-footer">
+			<button class="aim-send-btn">Send</button>
+			<span class="aim-typing-status">
+				<span class="aim-buddy-name-text">{buddyName}</span> has an idle message: away
+			</span>
+		</div>
+	</div>
+
+	<!-- Status Bar -->
+	<div class="aim-status-bar">
+		<span class="aim-status-indicator {buddyStatus === 'away' ? 'away' : 'available'}"></span>
+		<span class="aim-status-text">
+			<span class="aim-buddy-name-text">{buddyName}</span> is {buddyStatus}
+		</span>
+	</div>
+</div>
+
+<style>
+	.aim-chat-window {
+		position: fixed;
+		bottom: 20px;
+		right: 20px;
+		width: 400px;
+		background: #e4dadd;
+		border: 2px solid #000;
+		box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12px;
+		z-index: 9999;
+		max-height: 500px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Title Bar - Classic AIM Blue */
+	.aim-title-bar {
+		background: linear-gradient(180deg, #0066cc 0%, #004080 100%);
+		color: white;
+		padding: 4px 8px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		cursor: move;
+		user-select: none;
+		border-bottom: 1px solid #00264d;
+	}
+
+	.aim-title-left {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-weight: bold;
+		font-size: 13px;
+	}
+
+	.aim-icon {
+		font-size: 14px;
+	}
+
+	.aim-buddy-name {
+		font-size: 13px;
+	}
+
+	.aim-title-controls {
+		display: flex;
+		gap: 4px;
+	}
+
+	.aim-control-btn {
+		background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+		border: 1px solid #808080;
+		border-radius: 2px;
+		width: 18px;
+		height: 18px;
+		font-size: 14px;
+		font-weight: bold;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		line-height: 1;
+	}
+
+	.aim-control-btn:hover {
+		background: linear-gradient(180deg, #f0f0f0 0%, #d0d0d0 100%);
+	}
+
+	.aim-control-btn:active {
+		background: #c0c0c0;
+	}
+
+	/* Menu Bar */
+	.aim-menu-bar {
+		background: #e4dadd;
+		padding: 2px 8px;
+		display: flex;
+		gap: 12px;
+		border-bottom: 1px solid #c0b0a0;
+	}
+
+	.aim-menu-item {
+		cursor: pointer;
+	}
+
+	.aim-menu-item:hover {
+		text-decoration: underline;
+	}
+
+	/* Chat Content Area */
+	.aim-chat-content {
+		background: #ffffff;
+		padding: 10px;
+		overflow-y: auto;
+		flex: 1;
+		max-height: 280px;
+		border-top: 1px solid #c0c0c0;
+		border-bottom: 1px solid #c0c0c0;
+		display: block;
+		transition: max-height 0.3s ease;
+	}
+
+	.aim-chat-window.minimized .aim-chat-content {
+		max-height: 0;
+		padding: 0 10px;
+		overflow: hidden;
+	}
+
+	.aim-connection-message {
+		color: #808080;
+		font-style: italic;
+		font-size: 11px;
+		padding: 5px 0;
+		border-bottom: 1px solid #e0e0e0;
+		margin-bottom: 10px;
+	}
+
+	/* Messages */
+	.aim-message {
+		margin-bottom: 8px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 4px;
+	}
+
+	.aim-message-them {
+		color: #000;
+	}
+
+	.aim-message-me {
+		color: #000080; /* Navy blue for own messages */
+		flex-direction: row-reverse;
+		justify-content: flex-start;
+	}
+
+	.aim-sender-name {
+		font-weight: bold;
+		color: #000080;
+		font-size: 12px;
+	}
+
+	.aim-buddy-name-text {
+		font-weight: bold;
+		color: #000080;
+	}
+
+	.aim-message-text {
+		flex: 1;
+		word-break: break-word;
+	}
+
+	.aim-message-time {
+		font-size: 10px;
+		color: #808080;
+		font-style: italic;
+	}
+
+	/* Input Area */
+	.aim-input-area {
+		background: #e4dadd;
+		padding: 8px;
+		border-top: 1px solid #c0c0c0;
+	}
+
+	.aim-input {
+		width: 100%;
+		min-height: 50px;
+		padding: 6px;
+		border: 2px inset #c0c0c0;
+		background: #ffffff;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12px;
+		resize: none;
+		box-sizing: border-box;
+	}
+
+	.aim-input:focus {
+		outline: none;
+	}
+
+	.aim-input-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 6px;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	.aim-send-btn {
+		background: linear-gradient(180deg, #f0f0f0 0%, #d0d0d0 100%);
+		border: 2px outset #e0e0e0;
+		padding: 4px 16px;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 12px;
+		cursor: pointer;
+		font-weight: bold;
+	}
+
+	.aim-send-btn:active {
+		border-style: inset;
+	}
+
+	.aim-typing-status {
+		font-size: 11px;
+		color: #808080;
+		font-style: italic;
+	}
+
+	/* Status Bar */
+	.aim-status-bar {
+		background: #e4dadd;
+		padding: 4px 8px;
+		border-top: 1px solid #c0c0c0;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 11px;
+	}
+
+	.aim-status-indicator {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: #00cc00;
+		border: 1px solid #009900;
+	}
+
+	.aim-status-indicator.away {
+		background: #ffcc00;
+		border-color: #cc9900;
+	}
+
+	.aim-status-text {
+		color: #000;
+	}
+
+	/* Minimized State */
+	.aim-chat-window.minimized {
+		max-height: auto;
+	}
+
+	.aim-chat-window.minimized .aim-input-area,
+	.aim-chat-window.minimized .aim-status-bar {
+		display: none;
+	}
+
+	/* Scrollbar Styling */
+	.aim-chat-content::-webkit-scrollbar {
+		width: 16px;
+	}
+
+	.aim-chat-content::-webkit-scrollbar-track {
+		background: #f0f0f0;
+		border-left: 1px solid #c0c0c0;
+	}
+
+	.aim-chat-content::-webkit-scrollbar-thumb {
+		background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
+		border: 1px solid #808080;
+	}
+
+	.aim-chat-content::-webkit-scrollbar-thumb:hover {
+		background: linear-gradient(180deg, #d0d0d0 0%, #b0b0b0 100%);
+	}
+
+	/* Mobile Responsive */
+	@media (max-width: 480px) {
+		.aim-chat-window {
+			right: 10px;
+			left: 10px;
+			width: auto;
+			bottom: 10px;
+		}
+	}
+</style>
+
+<script>
+	const aimChatWindow = document.getElementById('aimChatWindow');
+	const minimizeBtn = document.getElementById('minimizeBtn');
+	const maximizeBtn = document.getElementById('maximizeBtn');
+	const closeBtn = document.getElementById('closeBtn');
+
+	// Make window draggable
+	const titleBar = document.getElementById('aimTitleBar');
+	let isDragging = false;
+	let currentX;
+	let currentY;
+	let initialX;
+	let initialY;
+	let xOffset = 0;
+	let yOffset = 0;
+
+	titleBar?.addEventListener('mousedown', dragStart);
+	document.addEventListener('mousemove', drag);
+	document.addEventListener('mouseup', dragEnd);
+
+	// Touch support for mobile
+	titleBar?.addEventListener('touchstart', dragStart, { passive: false });
+	document.addEventListener('touchmove', drag, { passive: false });
+	document.addEventListener('touchend', dragEnd);
+
+	function dragStart(e: MouseEvent | TouchEvent) {
+		if (e.type === 'touchstart') {
+			initialX = (e as TouchEvent).touches[0].clientX - xOffset;
+			initialY = (e as TouchEvent).touches[0].clientY - yOffset;
+		} else {
+			initialX = (e as MouseEvent).clientX - xOffset;
+			initialY = (e as MouseEvent).clientY - yOffset;
+		}
+
+		if (e.target === titleBar || (titleBar as HTMLElement).contains(e.target as Node)) {
+			isDragging = true;
+		}
+	}
+
+	function drag(e: MouseEvent | TouchEvent) {
+		if (isDragging) {
+			e.preventDefault();
+
+			if (e.type === 'touchmove') {
+				currentX = (e as TouchEvent).touches[0].clientX - initialX;
+				currentY = (e as TouchEvent).touches[0].clientY - initialY;
+			} else {
+				currentX = (e as MouseEvent).clientX - initialX;
+				currentY = (e as MouseEvent).clientY - initialY;
+			}
+
+			xOffset = currentX;
+			yOffset = currentY;
+
+			setTranslate(currentX, currentY, aimChatWindow);
+		}
+	}
+
+	function setTranslate(xPos: number, yPos: number, el: Element | null) {
+		if (el) {
+			el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+		}
+	}
+
+	function dragEnd() {
+		initialX = currentX;
+		initialY = currentY;
+		isDragging = false;
+	}
+
+	// Minimize functionality
+	minimizeBtn?.addEventListener('click', () => {
+		aimChatWindow?.classList.toggle('minimized');
+	});
+
+	// Maximize functionality (toggle minimized)
+	maximizeBtn?.addEventListener('click', () => {
+		aimChatWindow?.classList.remove('minimized');
+	});
+
+	// Close functionality (hide window)
+	closeBtn?.addEventListener('click', () => {
+		aimChatWindow?.style.setProperty('display', 'none');
+	});
+
+	// Scroll to bottom of chat
+	const chatContent = document.getElementById('aimChatContent');
+	if (chatContent) {
+		chatContent.scrollTop = chatContent.scrollHeight;
+	}
+</script>

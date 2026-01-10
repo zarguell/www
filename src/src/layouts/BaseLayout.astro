@@ -1,6 +1,7 @@
 ---
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import AimChat from '../components/AimChat.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -42,6 +43,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			<slot />
 		</main>
 		<SiteFooter />
+		<AimChat />
 	</body>
 </html>
 
