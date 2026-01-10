@@ -145,6 +145,12 @@ import RetroButton from '../../components/RetroButton.astro';
 					<button id="calcBtn" class="retro-button retro-button--primary">Recalculate</button>
 				</div>
 
+				<div class="form-group">
+					<label for="cardNoteInput">Recipe card note (optional)</label>
+					<textarea id="cardNoteInput" rows="2" placeholder="Add a custom note for your recipe card..."></textarea>
+					<div class="muted">This note appears on the exported PNG image.</div>
+				</div>
+
 				<div class="button-row">
 					<button id="saveBtn" class="retro-button retro-button--secondary">Save to Browser</button>
 					<button id="loadBtn" class="retro-button retro-button--secondary">Load</button>
@@ -189,6 +195,10 @@ import RetroButton from '../../components/RetroButton.astro';
 
 						<div class="card-note" id="cardNotes">
 							Notes: If guests will pour over fresh ice, consider lowering added water since the glass ice will keep diluting.
+						</div>
+
+						<div class="card-footer">
+							Made on <a href="https://www.arguelles.me/tools/cocktail-batch/" target="_blank" rel="noopener">www.arguelles.me/tools/cocktail-batch/</a>
 						</div>
 					</div>
 				</div>
@@ -526,8 +536,13 @@ import RetroButton from '../../components/RetroButton.astro';
 			});
 
 			// Card notes
-			el("cardNotes").textContent =
-				"Notes: If guests will pour the batch over fresh ice, consider aiming a bit lower on added water since the glass ice will keep diluting.";
+			const noteInput = el("cardNoteInput").value.trim();
+			if (noteInput) {
+				el("cardNotes").textContent = `Notes: ${noteInput}`;
+				el("cardNotes").style.display = "block";
+			} else {
+				el("cardNotes").style.display = "none";
+			}
 
 			// Headline
 			if (getScaleMode() === "servings") {
@@ -562,6 +577,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		});
 
 		el("cocktailName").addEventListener("input", () => calculateAndRenderCard());
+		el("cardNoteInput").addEventListener("input", () => calculateAndRenderCard());
 
 		document.querySelectorAll('input[name="scaleMode"]').forEach(r => {
 			r.addEventListener("change", () => {
@@ -617,6 +633,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		el("saveBtn").addEventListener("click", () => {
 			const payload = {
 				cocktailName: el("cocktailName").value || "",
+				cardNote: el("cardNoteInput").value || "",
 				recipe,
 				scaleMode: getScaleMode(),
 				targetTotal: el("targetTotal").value,
@@ -636,6 +653,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			try {
 				const p = JSON.parse(raw);
 				el("cocktailName").value = p.cocktailName || "Batch Cocktail";
+				el("cardNoteInput").value = p.cardNote || "";
 				recipe = Array.isArray(p.recipe) ? p.recipe : [];
 				document.querySelector(`input[name="scaleMode"][value="${p.scaleMode || "total"}"]`).checked = true;
 				el("targetTotal").value = p.targetTotal ?? "750";
@@ -787,7 +805,8 @@ import RetroButton from '../../components/RetroButton.astro';
 	}
 
 	input:not(.icon-button),
-	select {
+	select,
+	textarea {
 		font-family: 'VT323', monospace;
 		font-size: 1.2rem;
 		padding: 0.75rem;
@@ -799,9 +818,15 @@ import RetroButton from '../../components/RetroButton.astro';
 	}
 
 	input:focus,
-	select:focus {
+	select:focus,
+	textarea:focus {
 		border-color: var(--focus);
 		box-shadow: 0 0 0 3px var(--focus);
+	}
+
+	textarea {
+		min-height: 3rem;
+		resize: vertical;
 	}
 
 	.input-row {
@@ -1148,6 +1173,24 @@ import RetroButton from '../../components/RetroButton.astro';
 		font-size: 0.85rem;
 		color: rgba(0, 0, 0, 0.72);
 		line-height: 1.4;
+	}
+
+	.card-footer {
+		margin-top: 1rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid rgba(0, 0, 0, 0.12);
+		font-size: 0.75rem;
+		color: rgba(0, 0, 0, 0.5);
+		text-align: center;
+	}
+
+	.card-footer a {
+		color: rgba(0, 0, 0, 0.6);
+		text-decoration: none;
+	}
+
+	.card-footer a:hover {
+		text-decoration: underline;
 	}
 
 	/* Toast */
