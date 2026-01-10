@@ -109,9 +109,9 @@ const myStatus = 'available';
 		bottom: 20px;
 		right: 20px;
 		width: 400px;
-		background: #e4dadd;
-		border: 2px solid #000;
-		box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		box-shadow: 4px 4px 0 var(--shadow);
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: 12px;
 		z-index: 9999;
@@ -120,17 +120,17 @@ const myStatus = 'available';
 		flex-direction: column;
 	}
 
-	/* Title Bar - Classic AIM Blue */
+	/* Title Bar - Theme adaptive */
 	.aim-title-bar {
-		background: linear-gradient(180deg, #0066cc 0%, #004080 100%);
-		color: white;
+		background: linear-gradient(180deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, black) 100%);
+		color: var(--sticker-text);
 		padding: 4px 8px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		cursor: move;
 		user-select: none;
-		border-bottom: 1px solid #00264d;
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 50%, black);
 	}
 
 	.aim-title-left {
@@ -180,15 +180,16 @@ const myStatus = 'available';
 
 	/* Menu Bar */
 	.aim-menu-bar {
-		background: #e4dadd;
+		background: var(--bg2);
 		padding: 2px 8px;
 		display: flex;
 		gap: 12px;
-		border-bottom: 1px solid #c0b0a0;
+		border-bottom: 1px solid var(--border);
 	}
 
 	.aim-menu-item {
 		cursor: pointer;
+		color: var(--text);
 	}
 
 	.aim-menu-item:hover {
@@ -197,13 +198,13 @@ const myStatus = 'available';
 
 	/* Chat Content Area */
 	.aim-chat-content {
-		background: #ffffff;
+		background: var(--panel);
 		padding: 10px;
 		overflow-y: auto;
 		flex: 1;
 		max-height: 280px;
-		border-top: 1px solid #c0c0c0;
-		border-bottom: 1px solid #c0c0c0;
+		border-top: 1px solid var(--border);
+		border-bottom: 1px solid var(--border);
 		display: block;
 		transition: max-height 0.3s ease;
 	}
@@ -215,11 +216,11 @@ const myStatus = 'available';
 	}
 
 	.aim-connection-message {
-		color: #808080;
+		color: var(--muted);
 		font-style: italic;
 		font-size: 11px;
 		padding: 5px 0;
-		border-bottom: 1px solid #e0e0e0;
+		border-bottom: 1px solid var(--border);
 		margin-bottom: 10px;
 	}
 
@@ -233,24 +234,24 @@ const myStatus = 'available';
 	}
 
 	.aim-message-them {
-		color: #000;
+		color: var(--text);
 	}
 
 	.aim-message-me {
-		color: #000080; /* Navy blue for own messages */
+		color: var(--accent);
 		flex-direction: row-reverse;
 		justify-content: flex-start;
 	}
 
 	.aim-sender-name {
 		font-weight: bold;
-		color: #000080;
+		color: var(--link);
 		font-size: 12px;
 	}
 
 	.aim-buddy-name-text {
 		font-weight: bold;
-		color: #000080;
+		color: var(--link);
 	}
 
 	.aim-message-text {
@@ -260,23 +261,24 @@ const myStatus = 'available';
 
 	.aim-message-time {
 		font-size: 10px;
-		color: #808080;
+		color: var(--muted);
 		font-style: italic;
 	}
 
 	/* Input Area */
 	.aim-input-area {
-		background: #e4dadd;
+		background: var(--bg2);
 		padding: 8px;
-		border-top: 1px solid #c0c0c0;
+		border-top: 1px solid var(--border);
 	}
 
 	.aim-input {
 		width: 100%;
 		min-height: 50px;
 		padding: 6px;
-		border: 2px inset #c0c0c0;
-		background: #ffffff;
+		border: 2px solid var(--border);
+		background: var(--panel);
+		color: var(--text);
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: 12px;
 		resize: none;
@@ -312,15 +314,15 @@ const myStatus = 'available';
 
 	.aim-typing-status {
 		font-size: 11px;
-		color: #808080;
+		color: var(--muted);
 		font-style: italic;
 	}
 
 	/* Status Bar */
 	.aim-status-bar {
-		background: #e4dadd;
+		background: var(--bg2);
 		padding: 4px 8px;
-		border-top: 1px solid #c0c0c0;
+		border-top: 1px solid var(--border);
 		display: flex;
 		align-items: center;
 		gap: 6px;
@@ -331,17 +333,17 @@ const myStatus = 'available';
 		width: 10px;
 		height: 10px;
 		border-radius: 50%;
-		background: #00cc00;
-		border: 1px solid #009900;
+		background: var(--accent);
+		border: 1px solid color-mix(in srgb, var(--accent) 70%, black);
 	}
 
 	.aim-status-indicator.away {
-		background: #ffcc00;
-		border-color: #cc9900;
+		background: var(--focus);
+		border-color: color-mix(in srgb, var(--focus) 70%, black);
 	}
 
 	.aim-status-text {
-		color: #000;
+		color: var(--text);
 	}
 
 	/* Minimized State */
@@ -360,17 +362,17 @@ const myStatus = 'available';
 	}
 
 	.aim-chat-content::-webkit-scrollbar-track {
-		background: #f0f0f0;
-		border-left: 1px solid #c0c0c0;
+		background: var(--bg);
+		border-left: 1px solid var(--border);
 	}
 
 	.aim-chat-content::-webkit-scrollbar-thumb {
-		background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
-		border: 1px solid #808080;
+		background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+		border: 1px solid var(--border);
 	}
 
 	.aim-chat-content::-webkit-scrollbar-thumb:hover {
-		background: linear-gradient(180deg, #d0d0d0 0%, #b0b0b0 100%);
+		background: linear-gradient(180deg, color-mix(in srgb, var(--bg2) 80%, var(--accent)) 0%, var(--bg2) 100%);
 	}
 
 	/* Mobile Responsive */
@@ -464,10 +466,17 @@ const myStatus = 'available';
 		aimChatWindow?.classList.remove('minimized');
 	});
 
-	// Close functionality (hide window)
+	// Close functionality (hide window and persist state)
 	closeBtn?.addEventListener('click', () => {
 		aimChatWindow?.style.setProperty('display', 'none');
+		localStorage.setItem('aimChatOpen', 'false');
 	});
+
+	// Restore window state from localStorage
+	const chatOpenState = localStorage.getItem('aimChatOpen');
+	if (chatOpenState === 'false') {
+		aimChatWindow?.style.setProperty('display', 'none');
+	}
 
 	// Scroll to bottom of chat
 	const chatContent = document.getElementById('aimChatContent');

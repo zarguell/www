@@ -20,15 +20,18 @@ import Sticker from '../components/Sticker.astro';
 
 	<div class="intro">
 		<p>
-			This is my personal website, published on the <strong>world wide web</strong>! It's loud, nostalgic, 
-			and unapologetically maximalist. Built with Astro and Claude Code, with the goal that even 
+			This is my personal website, published on the <strong>world wide web</strong>! It's loud, nostalgic,
+			and unapologetically maximalist. Built with Astro and Claude Code, with the goal that even
 			AI-assisted code doesn't have to look like every other generic Tailwind template.
 		</p>
 		<p>
-			Explore the blog, play with some tiny tools, or check out the links. 
-			Everything is designed to be static first (with some 
+			Explore the blog, play with some tiny tools, or check out the links.
+			Everything is designed to be static first (with some
 			Cloudflare worker serverless compute if necessary).
 		</p>
+		<div class="chat-launcher">
+			<RetroButton id="launchChatBtn">Launch Chat</RetroButton>
+		</div>
 	</div>
 
 
@@ -148,4 +151,28 @@ import Sticker from '../components/Sticker.astro';
 			min-width: auto;
 		}
 	}
+
+	.chat-launcher {
+		margin-top: 1.5rem;
+		text-align: center;
+	}
 </style>
+
+<script>
+	// Handle Launch Chat button
+	const launchChatBtn = document.getElementById('launchChatBtn');
+	launchChatBtn?.addEventListener('click', () => {
+		const aimChatWindow = document.getElementById('aimChatWindow');
+		if (aimChatWindow) {
+			aimChatWindow.style.setProperty('display', 'flex');
+			localStorage.setItem('aimChatOpen', 'true');
+		}
+	});
+
+	// Hide launch button if chat is already open
+	const aimChatWindow = document.getElementById('aimChatWindow');
+	const chatOpenState = localStorage.getItem('aimChatOpen');
+	if (aimChatWindow && chatOpenState !== 'false') {
+		launchChatBtn?.parentElement?.style.setProperty('display', 'none');
+	}
+</script>
