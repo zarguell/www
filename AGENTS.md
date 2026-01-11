@@ -1,125 +1,109 @@
 # AGENTS.md
 
-Single source of truth for AI agents working on this codebase.
+Single source of truth for AI agents working on this codebase. Streamlined for efficient context delivery.
 
-**🚨 READ THIS FIRST**: Check for `CONTINUE.md` in the repo root. If it exists, read it for current project status before starting work. CONTINUE.md has up-to-date information about what's been completed and what remains.
-
-## Project Structure
+## Quick Start
 
 **IMPORTANT**: The Astro application is located in `./src` (not at the repository root).
 
+```bash
+cd src
+npm run dev      # Start dev server (http://localhost:4321)
+npm run build    # Build for production
+npm run test:run # Run tests
 ```
-/workspaces/www/
-├── PRD.md                  # Product requirements document
+
+## Project Structure
+
+```
+/Users/zach/localcode/www/
 ├── AGENTS.md              # This file (agent instructions)
 ├── CLAUDE.md              # Symlink to AGENTS.md
 ├── GEMINI.md              # Symlink to AGENTS.md
 ├── README.md              # Human-friendly documentation
+├── docs/                  # Additional documentation
+│   ├── mistakes.md        # Mistakes & lessons learned
+│   ├── theme.md           # Theme tokens and styling
+│   ├── content.md         # Content structure
+│   └── tool-dev-guide.md  # Tool development guide (JavaScript + PyScript)
 └── src/                   # Astro project root
-    ├── astro.config.mjs   # Astro configuration
-    ├── package.json       # Dependencies
-    └── src/               # Source code
-        ├── pages/         # File-based routing
-        ├── components/    # Astro components
-        ├── layouts/       # Layout components
-        ├── styles/        # Global CSS
-        ├── content/       # Content collections
-        │   └── blog/      # Blog posts (collection name: "blog")
-        ├── data/          # Data files (links, etc.)
-        └── scripts/       # Client-side scripts
-```
-
-## Commands
-
-All commands must be run from the `./src` directory:
-
-```bash
-cd src
-npm run dev      # Start development server (http://localhost:4321)
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run astro    # Run Astro CLI commands
+    ├── src/
+    │   ├── pages/         # File-based routing
+    │   ├── components/    # Astro components
+    │   ├── layouts/       # Layout components (BaseLayout, PythonToolLayout)
+    │   ├── styles/        # Global CSS
+    │   ├── content/       # Content collections
+    │   │   └── blog/      # Blog posts (collection name: "blog")
+    │   ├── data/          # Data files
+    │   └── scripts/       # Client-side scripts
+    └── public/tools/      # Python tool files (main.py, config.json)
 ```
 
 ## File Placement Rules
 
-### Pages (File-based routing)
-- Location: `./src/src/pages/`
-- Pattern: `filename.astro` creates route at `/filename`
-- Dynamic routes: `[slug].astro` or `[...slug].astro`
-- Index: `index.astro` in any directory creates route at that path
+| Type | Location | Notes |
+|------|----------|-------|
+| Pages | `./src/src/pages/` | `filename.astro` → `/filename` |
+| Components | `./src/src/components/` | PascalCase naming |
+| Layouts | `./src/src/layouts/` | BaseLayout, PythonToolLayout, BlogPost |
+| Blog Posts | `./src/src/content/blog/` | Collection name is `"blog"` not `"posts"` |
+| Styles | `./src/src/styles/global.css` | Check here before adding component styles |
+| Data Files | `./src/src/data/` | Export TypeScript data structures |
+| Python Tools | `./src/public/tools/<tool>/` | `main.py`, `config.json` |
+| Tool Pages | `./src/src/pages/tools/<tool>.astro` | Use PythonToolLayout for PyScript |
 
-### Components
-- Location: `./src/src/components/`
-- Naming: PascalCase (e.g., `Window.astro`, `RetroButton.astro`)
-- Usage: Import in pages or other components
+## Tool Development
 
-### Layouts
-- Location: `./src/src/layouts/`
-- Base layout: `BaseLayout.astro` (includes global head, header, footer - no PyScript)
-- Python tool layout: `PythonToolLayout.astro` (includes PyScript for Python tools)
-- Post layout: `BlogPost.astro` (or `PostLayout.astro`)
+**CRITICAL**: When developing a new tool, `docs/tool-dev-guide.md` is the source of truth.
 
-### Content Collections
-- Config: `./src/src/content.config.ts`
-- Blog posts: `./src/src/content/blog/`
-- **⚠️ COLLECTION NAME IS "blog"** (not "posts" - this is intentional historical naming)
-- When using `getCollection('blog')` - use 'blog' not 'posts'
-- File format: `.md` or `.mdx`
+Quick reference:
+- **JavaScript tools**: Use `BaseLayout`, add client-side `<script>` tag
+- **Python tools**: Use `PythonToolLayout`, add PyScript script tag, create files in `public/tools/<tool>/`
+- **Always**: Add new tools to `./src/src/pages/tools/index.astro`
 
-### Styles
-- Global CSS: `./src/src/styles/global.css`
-- Import in layouts, not in components (usually)
+See `docs/tool-dev-guide.md` for detailed patterns and examples.
 
-### Data Files
-- Location: `./src/src/data/`
-- Export TypeScript data structures
-- Example: `links.ts` exports array of link objects
+## Test Harnesses
 
-### Scripts
-- Location: `./src/src/scripts/`
-- Client-side TypeScript/JavaScript
-- Import in components with `<script>` tags
+When implementing new features, create test harnesses to verify functionality:
 
-### Python Tools (PyScript)
-- Location: `./src/public/tools/<tool-name>/`
-- Structure:
-  - `main.py` - Python logic
-  - `config.json` - PyScript package dependencies
-- Use `PythonToolLayout.astro` (NOT `BaseLayout.astro`)
-- Astro page: `./src/src/pages/tools/<tool-name>.astro`
-- See [TOOL-DEV-GUIDE.md](../TOOL-DEV-GUIDE.md) for detailed PyScript patterns
+### For Data Structure Changes
+- Add/update tests in `./src/src/data/__tests__/`
+- Follow the pattern in `links.test.ts`
+- Validate structure, types, and constraints
+
+### For Component Changes
+- Create test files in `./src/src/components/__tests__/`
+- Test props, rendering, and user interactions
+- Use vitest framework
+
+### For Tools
+- Create test files in `./src/src/pages/tools/__tests__/`
+- Test core calculation/logic functions
+- For JavaScript tools, test exported functions
+- For Python tools, document test cases in comments (PyScript testing is limited)
+
+### Running Tests
+```bash
+cd src
+npm run test           # Watch mode
+npm run test:run       # Single run
+```
 
 ## Coding Conventions
 
 ### Dependencies
-- Keep dependencies minimal
-- Prefer vanilla Astro over frameworks (React, Vue, etc.)
-- Use custom CSS + design tokens over component libraries
+- Keep minimal
+- Prefer vanilla Astro over frameworks
+- Custom CSS + design tokens over component libraries
 - Avoid unnecessary client-side hydration
 
 ### CSS and Styling
 - Use CSS custom properties (design tokens) for all values
 - All styling must be themeable via tokens
 - Define tokens in `[data-theme="..."]` selectors
-- Prefer custom CSS effects (gradients, shadows, bevels) over images
-- Respect `prefers-reduced-motion` - disable animations when set
-- **Avoid CSS duplication** - Check `./src/src/styles/global.css` before adding component-specific styles
-  - Global styles exist for: `.retro-button`, `.form-group`, `.calculator-hero`, `.tool-hero`, `.calculator-form`, etc.
-  - If a style appears in 3+ components, move it to global CSS instead
-  - This prevents code duplication and ensures consistency across the site
-
-### Components
-- Keep components small and reusable
-- Use props for configuration
-- Use TypeScript interfaces for props
-- Include accessibility attributes (ARIA labels, keyboard navigation)
-
-### Content
-- Blog posts use frontmatter schema defined in `content.config.ts`
-- Required fields: title, description, pubDate, tags
-- Optional fields: draft (boolean), heroImage
-- Draft posts are filtered out in production
+- **Check `./src/src/styles/global.css` before adding component-specific styles** - global styles exist for: `.retro-button`, `.form-group`, `.calculator-hero`, `.tool-hero`, `.calculator-form`, etc.
+- If a style appears in 3+ components, move it to global CSS
 
 ### JavaScript
 - Use TypeScript for type safety
@@ -127,16 +111,16 @@ npm run astro    # Run Astro CLI commands
 - Use for: theme toggle, form validation, simple calculators
 - Avoid: analytics, trackers, heavy frameworks
 
-## How to Modify
+## Common Tasks
 
 ### Add a New Page
-1. Create file in `./src/src/pages/` (e.g., `newpage.astro`)
-2. Import `BaseLayout` if needed
+1. Create `./src/src/pages/newpage.astro`
+2. Import `BaseLayout`
 3. Add content
-4. Link to it in `SiteHeader.astro` navigation
+4. Link in `SiteHeader.astro` navigation
 
 ### Add a Blog Post
-1. Create `.md` or `.mdx` file in `./src/src/content/blog/`
+1. Create `.md` or `.mdx` in `./src/src/content/blog/`
 2. Add frontmatter:
 ```yaml
 title: "Post Title"
@@ -146,38 +130,13 @@ tags: ["tag1", "tag2"]
 draft: false
 # optional: heroImage: ./image.jpg
 ```
-3. Write markdown content
-4. Post automatically appears in blog index (if draft: false)
-
-### Add a Tool
-
-#### For JavaScript-based tools:
-1. Create page in `./src/src/pages/tools/` (e.g., `my-tool.astro`)
-2. Use `BaseLayout` (NOT `PythonToolLayout`)
-3. Add interactive form using `RetroButton` and `Window` components
-4. Add client-side script with `<script>` tag for logic
-5. Add entry to tools index (`./src/src/pages/tools/index.astro`)
-
-#### For Python-based tools (PyScript):
-1. Create `./src/public/tools/<tool>/main.py` - Python logic
-2. Create `./src/public/tools/<tool>/config.json` - Package dependencies (e.g., numpy, matplotlib)
-3. Create page in `./src/src/pages/tools/<tool>.astro`
-4. Use `PythonToolLayout` (NOT `BaseLayout`)
-5. Include PyScript script tag: `<script type="py" src="/tools/<tool>/main.py" config="/tools/<tool>/config.json"></script>`
-6. See [TOOL-DEV-GUIDE.md](../TOOL-DEV-GUIDE.md) for detailed PyScript patterns
-7. Add entry to tools index if needed
+3. Post automatically appears in blog index (if draft: false)
 
 ### Modify Theme Tokens
 1. Edit `./src/src/styles/global.css`
 2. Add/modify tokens in `[data-theme="neon-night"]` or `[data-theme="mall-pastel"]`
 3. Test changes in both themes
-4. Document new tokens in `docs/THEME.md`
-
-### Add a New Theme
-1. Define new theme tokens in `./src/src/styles/global.css`
-2. Add theme option to `SiteHeader.astro` theme toggle
-3. Update `./src/src/scripts/theme.ts` with new theme name
-4. Document in `docs/THEME.md`
+4. Document new tokens in `docs/theme.md`
 
 ## Guardrails
 
@@ -195,77 +154,22 @@ draft: false
 - Respect `prefers-reduced-motion` in CSS
 - Test both themes (neon-night, mall-pastel)
 - Keep blog collection named "blog" (not "posts")
-- Use VT323 font globally (via Google Fonts embed)
+- Use VT323 font globally
 - Make all interactive elements keyboard accessible
 - Persist theme choice in localStorage
 - Use `PythonToolLayout` ONLY for Python/PyScript tools
 - Keep PyScript isolated to tool pages (never add to BaseLayout)
-- **Add new tools to `./src/src/pages/tools/index.astro` so they're discoverable**
+- Add new tools to `./src/src/pages/tools/index.astro`
 
-### Project Constraints
-- Static output only (deployable to Netlify or any static host)
-- No external API calls or services
-- No authentication or user accounts
-- No database or CMS
-- Minimal JavaScript (only for tools and theme toggle)
-
-## Mistakes and Lessons Learned
-
-*This section tracks mistakes encountered during development and their solutions. Keep it slim and actionable.*
-
-### [2025-01-06] PyScript Integration - Roth Calculator
-- **Issue**: Chart accumulation, auto-run on load, timing errors with addEventListener, mobile overflow, need zoom functionality
-- **Solution**: Use `py-click` attribute, clear chart container, remove auto-run call, proper responsive chart sizing, add click-to-zoom functionality
-- **Agent**: Claude (Sonnet 4.5)
-- **Key Lessons**:
-  - Use `py-click="function_name"` (no parentheses) - `py-click="function()"` fails
-  - Always `chart_element.innerHTML = ""` before displaying new chart (prevents accumulation)
-  - Remove function call at bottom of `.py` file if you want user input first
-  - **For responsive charts**:
-    - Set `plt.rcParams['figure.figsize'] = [10, 6]` and `plt.rcParams['figure.autolayout'] = True` at module level
-    - Use `fig, ax = plt.subplots(dpi=200)` for high-DPI zoom functionality
-    - PyScript renders matplotlib as `<img>` tag, not canvas or figure
-    - CSS must target `#chart img` with `max-width: 100% !important; height: auto !important; display: block !important`
-    - Add `overflow-x: hidden` on chart container to prevent mobile overflow
-    - Viewport meta tag must include `initial-scale=1.0` for proper mobile scaling
-  - **For click-to-zoom fullscreen**:
-    - Export matplotlib to base64 PNG: `fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')`
-    - Use CSS checkbox hack for fullscreen modal (no JS modal logic needed)
-    - For dynamic PyScript content, use MutationObserver to wrap image when generated
-    - Pattern: `<div class="click-zoom"><input type="checkbox"><label><img></label></div>`
-    - CSS: `input:checked + label` becomes fullscreen fixed overlay
-
-### [2025-01-06] Initial Development - Build Success
-- **Issue**: None encountered during phases 1-10
-- **Solution**: N/A
-- **Agent**: Claude (Sonnet 4.5)
-- **Note**: First build test will happen in Phase 11. No issues found in implementation so far.
-
----
-
-## Additional Documentation
-
-- **README.md** - Human-friendly project overview
-- **TOOL-DEV-GUIDE.md** - Guide for building interactive tools (JavaScript + PyScript)
-  - JavaScript patterns for simple tools
-  - PyScript integration for Python tools (numpy, matplotlib, etc.)
-- **docs/THEME.md** - Theme tokens and styling guidelines
-- **docs/CONTENT.md** - Content structure and writing guidelines
-- **PRD.md** - Original product requirements document
-
-## Design System
+## Design System Reference
 
 ### Typography
 - Font: VT323 (Google Fonts embed)
 - Size: Large, retro terminal style
-- Use `.vt323-regular` utility class if needed
-
-### Colors (Theme Tokens)
-See `docs/THEME.md` for complete token list.
 
 ### Key Components
 - `Window` - Retro panel wrapper with title bar
-- `RetroButton` - Beveled buttons (primary/secondary/danger variants)
+- `RetroButton` - Beveled buttons (primary/secondary/danger)
 - `Badge` - Small inline badges (NEW, HOT, WIP)
 - `Sticker` - Loud callout labels
 - `Tag` - Blog post tag links
@@ -276,3 +180,21 @@ See `docs/THEME.md` for complete token list.
 - Beveled panels, chunky borders, drop shadows
 - Neon night (dark) and mall pastel (light) themes
 - CSS-only effects (no GIFs in v1)
+
+## Additional Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `README.md` | Human-friendly project overview |
+| `docs/tool-dev-guide.md` | **Source of truth for tool development** (JavaScript + PyScript) |
+| `docs/mistakes.md` | Mistakes encountered and lessons learned |
+| `docs/theme.md` | Theme tokens and styling guidelines |
+| `docs/content.md` | Content structure and writing guidelines |
+
+## Project Constraints
+
+- Static output only (deployable to Netlify or any static host)
+- No external API calls or services
+- No authentication or user accounts
+- No database or CMS
+- Minimal JavaScript (only for tools and theme toggle)

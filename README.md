@@ -49,11 +49,15 @@ The built site will be in `src/dist/` and can be deployed to any static host (Ne
 
 ```
 /workspaces/www/
-├── PRD.md              # Product requirements document
 ├── AGENTS.md           # Agent instructions (single source of truth)
 ├── CLAUDE.md           # Symlink to AGENTS.md
 ├── GEMINI.md           # Symlink to AGENTS.md
 ├── README.md           # This file (human-friendly documentation)
+├── docs/               # Additional documentation
+│   ├── mistakes.md     # Mistakes & lessons learned
+│   ├── theme.md        # Theme tokens and styling
+│   ├── content.md      # Content structure
+│   └── tool-dev-guide.md # Tool development guide
 └── src/                # Astro project root
     ├── astro.config.mjs    # Astro configuration
     ├── package.json        # Dependencies
@@ -158,7 +162,7 @@ Theme tokens are defined in `src/src/styles/global.css`. Edit the token values i
 }
 ```
 
-See `docs/THEME.md` for the complete token list and usage guidelines.
+See `docs/theme.md` for the complete token list and usage guidelines.
 
 ### Adding a New Page
 
@@ -286,9 +290,10 @@ Build the site locally and deploy the `src/dist/` folder to any static hosting s
 ## Documentation
 
 - **[AGENTS.md](./AGENTS.md)** - Single source of truth for AI agents working on this codebase
-- **[docs/THEME.md](./src/docs/THEME.md)** - Complete theme token reference and styling guidelines
-- **[docs/CONTENT.md](./src/docs/CONTENT.md)** - Content structure and writing guidelines
-- **[PRD.md](./PRD.md)** - Original product requirements document
+- **[docs/tool-dev-guide.md](./docs/tool-dev-guide.md)** - Tool development guide (JavaScript + PyScript)
+- **[docs/mistakes.md](./docs/mistakes.md)** - Mistakes encountered and lessons learned
+- **[docs/theme.md](./src/docs/theme.md)** - Complete theme token reference and styling guidelines
+- **[docs/content.md](./src/docs/content.md)** - Content structure and writing guidelines
 
 ## Contributing
 
