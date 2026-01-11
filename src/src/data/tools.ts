@@ -275,9 +275,9 @@ export const toolsData: ToolCategory[] = [
 		description: "Culinary calculators and recipe tools for your kitchen experiments.",
 		tools: [
 			{
-				title: "Cocktail Batch Calculator",
-				slug: "cocktail-batch",
-				description: "Build single-serving recipes and scale them to batch sizes with precise ABV and dilution calculations. Export beautiful recipe cards as PNG images for your next party.",
+				title: "Cocktail Recipe Maker",
+				slug: "cocktail-recipe",
+				description: "Build and share cocktail recipes with optional batch calculations",
 				badge: "FOOD & DRINKS",
 				features: [
 					"Scale recipes by target volume or servings",
