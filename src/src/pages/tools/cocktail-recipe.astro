@@ -228,9 +228,35 @@ import RetroButton from '../../components/RetroButton.astro';
 
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
+		// -------- Type Definitions --------
+		interface Ingredient {
+			emoji: string;
+			name: string;
+			amount: number;
+			unit: string;
+			abv: number;
+		}
+
+		interface Recipe {
+			name: string;
+			ingredients: Ingredient[];
+			createdAt: number;
+		}
+
 		// -------- App Mode --------
 		const app = {
-			mode: 'manage', // 'manage' | 'view'
+			mode: 'manage' as 'manage' | 'view',
+			batchMode: false,
+			recipe: {
+				name: '',
+				ingredients: [] as Ingredient[],
+				createdAt: Date.now()
+			},
+			batchSettings: {
+				scaleMode: 'servings' as 'servings' | 'volume',
+				targetValue: 1,
+				dilution: 0.2
+			},
 			lastURLWriteOk: true
 		};
 
@@ -288,7 +314,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		];
 
 		// -------- App state --------
-		const STORAGE_KEY = "cocktail_batch_tool_v1";
+		const STORAGE_KEY = "cocktail_recipe_tool_v1";
 
 		let recipe = [
 			{ emoji: "🍸", name: "Gin", amount: 2, unit: "oz", abv: 40 },
