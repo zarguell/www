@@ -924,6 +924,12 @@ import RetroButton from '../../components/RetroButton.astro';
 				if (recipeNameInput && app.recipe.name) {
 					recipeNameInput.value = app.recipe.name;
 				}
+
+				// Sync batch toggle immediately to reflect loaded state
+				const batchToggle = document.getElementById('batch-mode-toggle') as HTMLInputElement;
+				if (batchToggle) {
+					batchToggle.checked = app.batchMode;
+				}
 			}
 		}
 
@@ -1518,6 +1524,16 @@ import RetroButton from '../../components/RetroButton.astro';
 		width: 1.5rem;
 		height: 1.5rem;
 		cursor: pointer;
+	}
+
+	.toggle-label input[type="checkbox"]:focus-visible {
+		outline: 2px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	.toggle-label input[type="checkbox"]:disabled {
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 
 	.batch-mode-section {
