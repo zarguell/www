@@ -361,36 +361,30 @@ import RetroButton from '../../components/RetroButton.astro';
 
 		function getParams() {
 			const sp = new URLSearchParams(window.location.search);
-			return { e: sp.get('e'), d: sp.get('d') };
+			return { v: sp.get('v'), e: sp.get('e') };
 		}
 
 		function buildLink(kind) {
-			// kind: 'view' => e=, 'manage' => d=
+			// kind: 'view' => v=, 'manage' => e=
 			const url = new URL(window.location.origin + window.location.pathname);
 			const state = getStateForEncoding();
 			const encoded = encodeState(state);
-			if (kind === 'view') url.searchParams.set('e', encoded);
-			else url.searchParams.set('d', encoded);
+			if (kind === 'view') url.searchParams.set('v', encoded);
+			else url.searchParams.set('e', encoded);
 			return url.toString();
 		}
 
 		function getStateForEncoding() {
 			return {
-				rn: app.recipe.name || "",
-				n: el("cocktailName").value || "",
+				n: app.recipe.name || "",
+				i: recipe.map(ing => ({
+					e: ing.emoji,
+					n: ing.name,
+					a: ing.amount,
+					u: ing.unit,
+					ab: ing.abv
+				})),
 				no: el("cardNoteInput").value || "",
-				r: recipe.map(ing => {
-					// Optimize: use preset index if matches, otherwise full object
-					const presetIdx = presets.findIndex(p => p.name === ing.name && p.emoji === ing.emoji && p.abv === ing.abv);
-					if (presetIdx >= 0) {
-						// Preset ingredient: [presetIndex, amount, unit, customAbvOrNull]
-						const customAbv = (ing.abv !== undefined && ing.abv !== presets[presetIdx].abv) ? ing.abv : null;
-						return [presetIdx, ing.amount, ing.unit, customAbv];
-					} else {
-						// Custom ingredient: [null, emoji, name, amount, unit, abv]
-						return [null, ing.emoji, ing.name, ing.amount, ing.unit, ing.abv];
-					}
-				}),
 				sm: getScaleMode(),
 				tt: el("targetTotal").value,
 				tu: el("targetUnit").value,
@@ -405,7 +399,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			if (!state) return false;
 
 			try {
-				app.recipe.name = state.rn || "";
+				app.recipe.name = state.n || "";
 				el("cocktailName").value = state.n || "Batch Cocktail";
 				el("cardNoteInput").value = state.no || "";
 
@@ -415,22 +409,15 @@ import RetroButton from '../../components/RetroButton.astro';
 					recipeNameInput.value = app.recipe.name;
 				}
 
-				// Decode recipe
-				if (Array.isArray(state.r)) {
-					recipe = state.r.map(item => {
-						if (!Array.isArray(item)) return { emoji: "🧪", name: "Unknown", amount: 1, unit: "oz", abv: 0 };
-						if (item[0] === null && item.length >= 6) {
-							// Custom ingredient format: [null, emoji, name, amount, unit, abv]
-							return { emoji: item[1], name: item[2], amount: item[3], unit: item[4], abv: item[5] };
-						} else if (typeof item[0] === 'number') {
-							// Preset ingredient format: [presetIndex, amount, unit, customAbvOrNull]
-							const preset = presets[item[0]];
-							if (!preset) return { emoji: "🧪", name: "Unknown", amount: 1, unit: "oz", abv: 0 };
-							const customAbv = item[3] !== null ? item[3] : preset.abv;
-							return { emoji: preset.emoji, name: preset.name, amount: item[1], unit: item[2], abv: customAbv };
-						}
-						return { emoji: "🧪", name: "Unknown", amount: 1, unit: "oz", abv: 0 };
-					});
+				// Decode recipe from new format
+				if (Array.isArray(state.i)) {
+					recipe = state.i.map(ing => ({
+						emoji: ing.e,
+						name: ing.n,
+						amount: ing.a,
+						unit: ing.u,
+						abv: ing.ab
+					}));
 				}
 
 				document.querySelector(`input[name="scaleMode"][value="${state.sm || "total"}"]`).checked = true;
@@ -454,17 +441,17 @@ import RetroButton from '../../components/RetroButton.astro';
 		}
 
 		function parseURLIntoState() {
-			const { e, d } = getParams();
+			const { v, e } = getParams();
 
-			if (e) {
+			if (v) {
 				app.mode = 'view';
-				const parsed = decodeState(e);
+				const parsed = decodeState(v);
 				if (parsed && decodeStateToApp(parsed)) return true;
 			}
 
-			if (d) {
+			if (e) {
 				app.mode = 'manage';
-				const parsed = decodeState(d);
+				const parsed = decodeState(e);
 				if (parsed && decodeStateToApp(parsed)) return true;
 			}
 
@@ -476,8 +463,8 @@ import RetroButton from '../../components/RetroButton.astro';
 			if (app.mode !== 'manage') return;
 
 			const url = new URL(window.location.href);
-			url.searchParams.delete('e');
-			url.searchParams.set('d', encodeState(getStateForEncoding()));
+			url.searchParams.delete('v');
+			url.searchParams.set('e', encodeState(getStateForEncoding()));
 
 			if (url.toString().length > 2000) {
 				app.lastURLWriteOk = false;
@@ -1028,11 +1015,11 @@ import RetroButton from '../../components/RetroButton.astro';
 		syncAll();
 
 		// Creator flow: if no params, create manage link immediately
-		const { e, d } = getParams();
-		if (!e && !d) {
+		const { v, e } = getParams();
+		if (!v && !e) {
 			app.mode = 'manage';
 			const url = new URL(window.location.origin + window.location.pathname);
-			url.searchParams.set('d', encodeState(getStateForEncoding()));
+			url.searchParams.set('e', encodeState(getStateForEncoding()));
 			history.replaceState({}, '', url);
 			syncAll();
 		}
