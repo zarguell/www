@@ -375,7 +375,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		}
 
 		function getStateForEncoding() {
-			return {
+			const state: any = {
 				n: app.recipe.name || "",
 				i: recipe.map(ing => ({
 					e: ing.emoji,
@@ -385,14 +385,25 @@ import RetroButton from '../../components/RetroButton.astro';
 					ab: ing.abv
 				})),
 				no: el("cardNoteInput").value || "",
-				sm: getScaleMode(),
-				tt: el("targetTotal").value,
-				tu: el("targetUnit").value,
-				sv: el("servings").value,
-				dm: el("dilutionMode").value,
-				cd: el("customDilution").value,
+				bm: app.batchMode,
 				du: el("displayUnit").value
 			};
+
+			// Only include batch settings if batch mode is enabled
+			if (app.batchMode) {
+				state.bs = {
+					sm: getScaleMode(),
+					tv: el(getScaleMode() === "servings" ? "servings" : "targetTotal").value,
+					d: getDilutionPct()
+				};
+
+				// Include target unit only if in volume mode
+				if (getScaleMode() === "total") {
+					state.bs.tu = el("targetUnit").value;
+				}
+			}
+
+			return state;
 		}
 
 		function decodeStateToApp(state) {
@@ -420,13 +431,55 @@ import RetroButton from '../../components/RetroButton.astro';
 					}));
 				}
 
-				document.querySelector(`input[name="scaleMode"][value="${state.sm || "total"}"]`).checked = true;
-				el("targetTotal").value = state.tt ?? "750";
-				el("targetUnit").value = state.tu ?? "ml";
-				el("servings").value = state.sv ?? "10";
-				el("dilutionMode").value = state.dm ?? "stirred";
-				el("customDilution").value = state.cd ?? "20";
+				// Display unit is always present
 				el("displayUnit").value = state.du ?? "ml";
+
+				// Check if this is the new format (with bm field) or old format (with sm field)
+				if (state.bm !== undefined) {
+					// NEW FORMAT: Hierarchical batch mode and settings
+					app.batchMode = state.bm;
+
+					if (state.bs && app.batchMode) {
+						// Restore batch settings
+						app.batchSettings = {
+							scaleMode: state.bs.sm || 'servings',
+							targetValue: state.bs.tv || 1,
+							dilution: state.bs.d || 0.2
+						};
+
+						// Apply settings to DOM
+						document.querySelector(`input[name="scaleMode"][value="${state.bs.sm || "servings"}"]`).checked = true;
+
+						if (state.bs.sm === "servings") {
+							el("servings").value = state.bs.tv || "1";
+						} else {
+							el("targetTotal").value = state.bs.tv || "750";
+							el("targetUnit").value = state.bs.tu || "ml";
+						}
+
+						// Convert dilution decimal to mode and custom value
+						const dilution = state.bs.d || 0.2;
+						if (dilution === 0) {
+							el("dilutionMode").value = "none";
+						} else if (dilution === 0.2) {
+							el("dilutionMode").value = "stirred";
+						} else if (dilution === 0.3) {
+							el("dilutionMode").value = "shaken";
+						} else {
+							el("dilutionMode").value = "custom";
+							el("customDilution").value = String(dilution * 100);
+						}
+					}
+				} else {
+					// OLD FORMAT: Backward compatibility
+					app.batchMode = false; // Default to false for old links
+					document.querySelector(`input[name="scaleMode"][value="${state.sm || "total"}"]`).checked = true;
+					el("targetTotal").value = state.tt ?? "750";
+					el("targetUnit").value = state.tu ?? "ml";
+					el("servings").value = state.sv ?? "10";
+					el("dilutionMode").value = state.dm ?? "stirred";
+					el("customDilution").value = state.cd ?? "20";
+				}
 
 				const mode = getScaleMode();
 				el("totalRow").style.display = mode === "total" ? "" : "none";
