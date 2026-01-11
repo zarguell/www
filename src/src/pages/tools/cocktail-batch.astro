@@ -6,83 +6,95 @@ import RetroButton from '../../components/RetroButton.astro';
 
 <BaseLayout title="Cocktail Batch Calculator - ARGUELLES.ME">
 	<div class="tool-hero">
-		<h1>Cocktail Batch Calculator</h1>
-		<p class="tool-subtitle">Build batch cocktails with precise ABV and dilution calculations</p>
+		<div class="hero-header">
+			<div>
+				<h1>Cocktail Batch Calculator</h1>
+				<p class="tool-subtitle">Build batch cocktails with precise ABV and dilution calculations</p>
+			</div>
+			<div class="header-actions" id="headerActions">
+				<button id="copyLinkBtn" class="retro-button retro-button--secondary retro-button--small">Copy share link</button>
+			</div>
+		</div>
 	</div>
+
+	<div class="mode-notice" id="modeNotice"></div>
 
 	<div class="cocktail-name-row">
 		<input id="cocktailName" class="cocktail-name-input" placeholder="Cocktail name" value="My Batch Cocktail" />
 		<span class="status-pill" id="headlinePill">Ready</span>
 	</div>
 
-	<div class="batch-grid">
-		<!-- Left: Ingredient library -->
-		<Window title="Ingredient Library" badgeText="BUILD">
-			<div class="form-row">
-				<select id="presetSelect" class="preset-select"></select>
-				<button id="addPresetBtn" class="retro-button retro-button--primary">Add</button>
-			</div>
-
-			<details class="custom-ingredient-details">
-				<summary>➕ Add custom ingredient</summary>
+	<!-- Manage UI (hidden in view mode) -->
+	<div id="manageUI">
+		<div class="batch-grid">
+			<!-- Left: Ingredient library -->
+			<Window title="Ingredient Library" badgeText="BUILD">
 				<div class="form-row">
-					<input id="custEmoji" placeholder="🧪" class="emoji-input" />
-					<input id="custName" placeholder="Name" class="name-input" />
+					<select id="presetSelect" class="preset-select"></select>
+					<button id="addPresetBtn" class="retro-button retro-button--primary">Add</button>
 				</div>
-				<div class="form-row">
-					<input id="custAbv" type="number" min="0" max="100" step="0.1" placeholder="Default ABV %" class="abv-input" />
-					<button id="addCustomBtn" class="retro-button retro-button--secondary">Add custom</button>
-				</div>
-				<div class="muted">Set ABV to 0 for juices/syrups/mixers.</div>
-			</details>
 
-			<div class="kpi-container">
-				<div class="kpi-box">
-					<div class="kpi-label">Single serving (undiluted)</div>
-					<div class="kpi-value"><span id="baseTotalMl">0</span> ml</div>
-				</div>
-				<div class="kpi-box">
-					<div class="kpi-label">Single serving ethanol</div>
-					<div class="kpi-value"><span id="baseEthanolMl">0</span> ml</div>
-				</div>
-			</div>
-		</Window>
+				<details class="custom-ingredient-details">
+					<summary>➕ Add custom ingredient</summary>
+					<div class="form-row">
+						<input id="custEmoji" placeholder="🧪" class="emoji-input" />
+						<input id="custName" placeholder="Name" class="name-input" />
+					</div>
+					<div class="form-row">
+						<input id="custAbv" type="number" min="0" max="100" step="0.1" placeholder="Default ABV %" class="abv-input" />
+						<button id="addCustomBtn" class="retro-button retro-button--secondary">Add custom</button>
+					</div>
+					<div class="muted">Set ABV to 0 for juices/syrups/mixers.</div>
+				</details>
 
-		<!-- Right: Recipe builder -->
-		<Window title="Recipe Builder (Single Serving)" badgeText="RECIPE">
-			<div class="recipe-header">
-				<div class="recipe-controls">
-					<button id="clearBtn" class="retro-button retro-button--secondary retro-button--small">Clear</button>
-					<button id="exampleBtn" class="retro-button retro-button--secondary retro-button--small">Load Example</button>
+				<div class="kpi-container">
+					<div class="kpi-box">
+						<div class="kpi-label">Single serving (undiluted)</div>
+						<div class="kpi-value"><span id="baseTotalMl">0</span> ml</div>
+					</div>
+					<div class="kpi-box">
+						<div class="kpi-label">Single serving ethanol</div>
+						<div class="kpi-value"><span id="baseEthanolMl">0</span> ml</div>
+					</div>
 				</div>
-			</div>
+			</Window>
 
-			<div class="recipe-table-wrapper">
-				<table class="recipe-table">
-					<thead>
-						<tr>
-							<th>Ingredient</th>
-							<th class="right">Amount</th>
-							<th>Unit</th>
-							<th class="right">ABV%</th>
-							<th class="center">Move</th>
-							<th class="center">Remove</th>
-						</tr>
-					</thead>
-					<tbody id="recipeTbody"></tbody>
-				</table>
-			</div>
+			<!-- Right: Recipe builder -->
+			<Window title="Recipe Builder (Single Serving)" badgeText="RECIPE">
+				<div class="recipe-header">
+					<div class="recipe-controls">
+						<button id="clearBtn" class="retro-button retro-button--secondary retro-button--small">Clear</button>
+						<button id="exampleBtn" class="retro-button retro-button--secondary retro-button--small">Load Example</button>
+					</div>
+				</div>
 
-			<div class="muted">
-				ABV is editable per ingredient (useful for overproof spirits or specific brands).
-			</div>
-		</Window>
+				<div class="recipe-table-wrapper">
+					<table class="recipe-table">
+						<thead>
+							<tr>
+								<th>Ingredient</th>
+								<th class="right">Amount</th>
+								<th>Unit</th>
+								<th class="right">ABV%</th>
+								<th class="center">Move</th>
+								<th class="center">Remove</th>
+							</tr>
+						</thead>
+						<tbody id="recipeTbody"></tbody>
+					</table>
+				</div>
+
+				<div class="muted">
+					ABV is editable per ingredient (useful for overproof spirits or specific brands).
+				</div>
+			</Window>
+		</div>
 	</div>
 
 	<!-- Full width: Settings + output card -->
 	<Window title="Batch Settings & Export" badgeText="CALCULATE">
 		<div class="batch-settings-grid">
-			<div class="settings-column">
+			<div class="settings-column" id="settingsColumn">
 				<div class="batch-mode-section">
 					<div class="radio-group">
 						<label class="radio-label">
@@ -211,9 +223,17 @@ import RetroButton from '../../components/RetroButton.astro';
 
 <!-- html-to-image for PNG export -->
 <script is:inline src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<!-- LZ-String for compression -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
+		// -------- App Mode --------
+		const app = {
+			mode: 'manage', // 'manage' | 'view'
+			lastURLWriteOk: true
+		};
+
 		// -------- Units (volume only) --------
 		// 1 US fl oz = 29.5735 ml; 1 US cup = 236.588 ml
 		function toMl(value, unit) {
@@ -291,6 +311,152 @@ import RetroButton from '../../components/RetroButton.astro';
 			});
 		})();
 
+		// -------- Compression & URL helpers --------
+		function encodeState(obj) {
+			return LZString.compressToEncodedURIComponent(JSON.stringify(obj));
+		}
+
+		function decodeState(str) {
+			const json = LZString.decompressFromEncodedURIComponent(str);
+			if (!json) return null;
+			return JSON.parse(json);
+		}
+
+		function getParams() {
+			const sp = new URLSearchParams(window.location.search);
+			return { e: sp.get('e'), d: sp.get('d') };
+		}
+
+		function buildLink(kind) {
+			// kind: 'view' => e=, 'manage' => d=
+			const url = new URL(window.location.origin + window.location.pathname);
+			const state = getStateForEncoding();
+			const encoded = encodeState(state);
+			if (kind === 'view') url.searchParams.set('e', encoded);
+			else url.searchParams.set('d', encoded);
+			return url.toString();
+		}
+
+		function getStateForEncoding() {
+			return {
+				n: el("cocktailName").value || "",
+				no: el("cardNoteInput").value || "",
+				r: recipe.map(ing => {
+					// Optimize: use preset index if matches, otherwise full object
+					const presetIdx = presets.findIndex(p => p.name === ing.name && p.emoji === ing.emoji && p.abv === ing.abv);
+					if (presetIdx >= 0) {
+						// Preset ingredient: [presetIndex, amount, unit, customAbvOrNull]
+						const customAbv = (ing.abv !== undefined && ing.abv !== presets[presetIdx].abv) ? ing.abv : null;
+						return [presetIdx, ing.amount, ing.unit, customAbv];
+					} else {
+						// Custom ingredient: [null, emoji, name, amount, unit, abv]
+						return [null, ing.emoji, ing.name, ing.amount, ing.unit, ing.abv];
+					}
+				}),
+				sm: getScaleMode(),
+				tt: el("targetTotal").value,
+				tu: el("targetUnit").value,
+				sv: el("servings").value,
+				dm: el("dilutionMode").value,
+				cd: el("customDilution").value,
+				du: el("displayUnit").value
+			};
+		}
+
+		function decodeStateToApp(state) {
+			if (!state) return false;
+
+			try {
+				el("cocktailName").value = state.n || "Batch Cocktail";
+				el("cardNoteInput").value = state.no || "";
+
+				// Decode recipe
+				if (Array.isArray(state.r)) {
+					recipe = state.r.map(item => {
+						if (!Array.isArray(item)) return { emoji: "🧪", name: "Unknown", amount: 1, unit: "oz", abv: 0 };
+						if (item[0] === null && item.length >= 6) {
+							// Custom ingredient format: [null, emoji, name, amount, unit, abv]
+							return { emoji: item[1], name: item[2], amount: item[3], unit: item[4], abv: item[5] };
+						} else if (typeof item[0] === 'number') {
+							// Preset ingredient format: [presetIndex, amount, unit, customAbvOrNull]
+							const preset = presets[item[0]];
+							if (!preset) return { emoji: "🧪", name: "Unknown", amount: 1, unit: "oz", abv: 0 };
+							const customAbv = item[3] !== null ? item[3] : preset.abv;
+							return { emoji: preset.emoji, name: preset.name, amount: item[1], unit: item[2], abv: customAbv };
+						}
+						return { emoji: "🧪", name: "Unknown", amount: 1, unit: "oz", abv: 0 };
+					});
+				}
+
+				document.querySelector(`input[name="scaleMode"][value="${state.sm || "total"}"]`).checked = true;
+				el("targetTotal").value = state.tt ?? "750";
+				el("targetUnit").value = state.tu ?? "ml";
+				el("servings").value = state.sv ?? "10";
+				el("dilutionMode").value = state.dm ?? "stirred";
+				el("customDilution").value = state.cd ?? "20";
+				el("displayUnit").value = state.du ?? "ml";
+
+				const mode = getScaleMode();
+				el("totalRow").style.display = mode === "total" ? "" : "none";
+				el("servingsRow").style.display = mode === "servings" ? "" : "none";
+				el("customDilution").style.display = el("dilutionMode").value === "custom" ? "" : "none";
+
+				return true;
+			} catch (e) {
+				console.error("Failed to decode state:", e);
+				return false;
+			}
+		}
+
+		function parseURLIntoState() {
+			const { e, d } = getParams();
+
+			if (e) {
+				app.mode = 'view';
+				const parsed = decodeState(e);
+				if (parsed && decodeStateToApp(parsed)) return true;
+			}
+
+			if (d) {
+				app.mode = 'manage';
+				const parsed = decodeState(d);
+				if (parsed && decodeStateToApp(parsed)) return true;
+			}
+
+			app.mode = 'manage';
+			return false;
+		}
+
+		function writeManageURL() {
+			if (app.mode !== 'manage') return;
+
+			const url = new URL(window.location.href);
+			url.searchParams.delete('e');
+			url.searchParams.set('d', encodeState(getStateForEncoding()));
+
+			if (url.toString().length > 2000) {
+				app.lastURLWriteOk = false;
+				return;
+			}
+			app.lastURLWriteOk = true;
+			history.replaceState({}, '', url);
+		}
+
+		const writeManageURLDebounced = (() => {
+			let t = null;
+			return () => { clearTimeout(t); t = setTimeout(writeManageURL, 300); };
+		})();
+
+		async function copyLink(kind) {
+			const url = buildLink(kind);
+			try {
+				await navigator.clipboard.writeText(url);
+				toast(kind === 'view' ? 'Copied view link!' : 'Copied manage link!');
+			} catch {
+				toast('Could not copy automatically');
+			}
+		}
+
 		// -------- Helpers --------
 		function toast(msg) {
 			const t = el("toast");
@@ -329,7 +495,6 @@ import RetroButton from '../../components/RetroButton.astro';
 
 		function freezerTag(abvPct) {
 			const a = Number(abvPct || 0);
-			// Rule-of-thumb guidance only
 			if (a <= 15) return { label: "Likely freezes (≤15% ABV)", cls: "danger" };
 			if (a < 25) return { label: "May slush/freeze (~20% ABV)", cls: "warn" };
 			if (a < 35) return { label: "Borderline (~30% ABV)", cls: "warn" };
@@ -372,6 +537,31 @@ import RetroButton from '../../components/RetroButton.astro';
 		}
 
 		// -------- Rendering --------
+		function applyModeUI() {
+			const modeNotice = el("modeNotice");
+			const manageUI = el("manageUI");
+			const settingsColumn = el("settingsColumn");
+			const copyLinkBtn = el("copyLinkBtn");
+
+			if (app.mode === 'view') {
+				modeNotice.textContent = '📖 View-only mode - Recipe is read-only';
+				modeNotice.className = 'mode-notice mode-notice--view';
+				modeNotice.style.display = 'block';
+				manageUI.style.display = 'none';
+
+				// In view mode, hide settings column, only show recipe card
+				settingsColumn.style.display = 'none';
+				copyLinkBtn.textContent = 'Copy link';
+			} else {
+				modeNotice.textContent = '✏️ Edit mode - Share the view link with others';
+				modeNotice.className = 'mode-notice mode-notice--manage';
+				modeNotice.style.display = 'block';
+				manageUI.style.display = 'block';
+				settingsColumn.style.display = 'flex';
+				copyLinkBtn.textContent = 'Copy share link';
+			}
+		}
+
 		function updateBaseKpis() {
 			const { baseTotal, ethanol } = baseTotals();
 			el("baseTotalMl").textContent = fmt(baseTotal, 1);
@@ -382,6 +572,8 @@ import RetroButton from '../../components/RetroButton.astro';
 			const tb = el("recipeTbody");
 			tb.innerHTML = "";
 
+			const canEdit = app.mode === 'manage';
+
 			recipe.forEach((ing, idx) => {
 				const tr = document.createElement("tr");
 
@@ -391,87 +583,109 @@ import RetroButton from '../../components/RetroButton.astro';
 
 				const tdAmt = document.createElement("td");
 				tdAmt.className = "right";
-				const amt = document.createElement("input");
-				amt.type = "number";
-				amt.step = "0.01";
-				amt.min = "0";
-				amt.value = ing.amount;
-				amt.oninput = () => {
-					ing.amount = Number(amt.value || 0);
-					updateBaseKpis();
-					calculateAndRenderCard();
-				};
-				tdAmt.appendChild(amt);
+				if (canEdit) {
+					const amt = document.createElement("input");
+					amt.type = "number";
+					amt.step = "0.01";
+					amt.min = "0";
+					amt.value = ing.amount;
+					amt.oninput = () => {
+						ing.amount = Number(amt.value || 0);
+						updateBaseKpis();
+						calculateAndRenderCard();
+						writeManageURLDebounced();
+					};
+					tdAmt.appendChild(amt);
+				} else {
+					tdAmt.textContent = `${fmt(ing.amount, 2)} ${ing.unit}`;
+				}
 				tr.appendChild(tdAmt);
 
 				const tdUnit = document.createElement("td");
-				const unit = document.createElement("select");
-				["ml", "oz", "cup", "l"].forEach(u => {
-					const o = document.createElement("option");
-					o.value = u;
-					o.textContent = u;
-					if (u === ing.unit) o.selected = true;
-					unit.appendChild(o);
-				});
-				unit.onchange = () => {
-					ing.unit = unit.value;
-					updateBaseKpis();
-					calculateAndRenderCard();
-				};
-				tdUnit.appendChild(unit);
+				if (canEdit) {
+					const unit = document.createElement("select");
+					["ml", "oz", "cup", "l"].forEach(u => {
+						const o = document.createElement("option");
+						o.value = u;
+						o.textContent = u;
+						if (u === ing.unit) o.selected = true;
+						unit.appendChild(o);
+					});
+					unit.onchange = () => {
+						ing.unit = unit.value;
+						updateBaseKpis();
+						calculateAndRenderCard();
+						writeManageURLDebounced();
+					};
+					tdUnit.appendChild(unit);
+				} else {
+					tdUnit.textContent = ing.unit;
+				}
 				tr.appendChild(tdUnit);
 
 				const tdAbv = document.createElement("td");
 				tdAbv.className = "right";
-				const abv = document.createElement("input");
-				abv.type = "number";
-				abv.step = "0.1";
-				abv.min = "0";
-				abv.max = "100";
-				abv.value = ing.abv;
-				abv.oninput = () => {
-					ing.abv = Number(abv.value || 0);
-					updateBaseKpis();
-					calculateAndRenderCard();
-				};
-				tdAbv.appendChild(abv);
+				if (canEdit) {
+					const abv = document.createElement("input");
+					abv.type = "number";
+					abv.step = "0.1";
+					abv.min = "0";
+					abv.max = "100";
+					abv.value = ing.abv;
+					abv.oninput = () => {
+						ing.abv = Number(abv.value || 0);
+						updateBaseKpis();
+						calculateAndRenderCard();
+						writeManageURLDebounced();
+					};
+					tdAbv.appendChild(abv);
+				} else {
+					tdAbv.textContent = `${ing.abv}%`;
+				}
 				tr.appendChild(tdAbv);
 
 				const tdMove = document.createElement("td");
 				tdMove.className = "center";
-				const up = document.createElement("button");
-				up.className = "icon-button";
-				up.textContent = "↑";
-				up.disabled = idx === 0;
-				up.onclick = () => {
-					[recipe[idx - 1], recipe[idx]] = [recipe[idx], recipe[idx - 1]];
-					renderRecipe();
-					calculateAndRenderCard();
-				};
-				const down = document.createElement("button");
-				down.className = "icon-button";
-				down.textContent = "↓";
-				down.disabled = idx === recipe.length - 1;
-				down.onclick = () => {
-					[recipe[idx + 1], recipe[idx]] = [recipe[idx], recipe[idx + 1]];
-					renderRecipe();
-					calculateAndRenderCard();
-				};
-				tdMove.appendChild(up);
-				tdMove.appendChild(down);
+				if (canEdit) {
+					const up = document.createElement("button");
+					up.className = "icon-button";
+					up.textContent = "↑";
+					up.disabled = idx === 0;
+					up.onclick = () => {
+						[recipe[idx - 1], recipe[idx]] = [recipe[idx], recipe[idx - 1]];
+						renderRecipe();
+						calculateAndRenderCard();
+						writeManageURLDebounced();
+					};
+					const down = document.createElement("button");
+					down.className = "icon-button";
+					down.textContent = "↓";
+					down.disabled = idx === recipe.length - 1;
+					down.onclick = () => {
+						[recipe[idx + 1], recipe[idx]] = [recipe[idx], recipe[idx + 1]];
+						renderRecipe();
+						calculateAndRenderCard();
+						writeManageURLDebounced();
+					};
+					tdMove.appendChild(up);
+					tdMove.appendChild(down);
+				}
 				tr.appendChild(tdMove);
 
 				const tdX = document.createElement("td");
 				tdX.className = "center";
-				const x = document.createElement("button");
-				x.className = "icon-button icon-button--danger";
-				x.textContent = "✕";
-				x.onclick = () => {
-					recipe.splice(idx, 1);
-					renderRecipe();
-					calculateAndRenderCard();
-				};
-				tdX.appendChild(x);
+				if (canEdit) {
+					const x = document.createElement("button");
+					x.className = "icon-button icon-button--danger";
+					x.textContent = "✕";
+					x.onclick = () => {
+						recipe.splice(idx, 1);
+						renderRecipe();
+						calculateAndRenderCard();
+						writeManageURLDebounced();
+					};
+					tdX.appendChild(x);
+				}
 				tr.appendChild(tdX);
 
 				tb.appendChild(tr);
@@ -519,7 +733,6 @@ import RetroButton from '../../components/RetroButton.astro';
 			const waterDisp = fromMl(batch.waterMl, dispUnit);
 			el("cardWater").textContent = `${fmt(waterDisp, dispUnit === "ml" ? 0 : 2)} ${dispUnit}`;
 
-			// Ingredients list
 			const body = el("cardBody");
 			body.innerHTML = "";
 			batch.scaled.forEach(i => {
@@ -535,7 +748,6 @@ import RetroButton from '../../components/RetroButton.astro';
 				body.appendChild(tr);
 			});
 
-			// Card notes
 			const noteInput = el("cardNoteInput").value.trim();
 			if (noteInput) {
 				el("cardNotes").textContent = `Notes: ${noteInput}`;
@@ -544,7 +756,6 @@ import RetroButton from '../../components/RetroButton.astro';
 				el("cardNotes").style.display = "none";
 			}
 
-			// Headline
 			if (getScaleMode() === "servings") {
 				setHeadline(`Scaled ×${fmt(batch.scale, 2)} (servings)`);
 			} else {
@@ -553,16 +764,28 @@ import RetroButton from '../../components/RetroButton.astro';
 			}
 		}
 
-		// -------- Events --------
-		el("addPresetBtn").addEventListener("click", () => {
-			const p = presets[Number(el("presetSelect").value)];
-			recipe.push({ ...p, amount: 1, unit: "oz" });
+		function syncAll() {
+			applyModeUI();
 			renderRecipe();
 			calculateAndRenderCard();
+			if (app.mode === 'manage') writeManageURLDebounced();
+		}
+
+		// -------- Events --------
+		el("copyLinkBtn").addEventListener("click", () => {
+			copyLink('view');
+		});
+
+		el("addPresetBtn").addEventListener("click", () => {
+			if (app.mode !== 'manage') return;
+			const p = presets[Number(el("presetSelect").value)];
+			recipe.push({ ...p, amount: 1, unit: "oz" });
+			syncAll();
 			toast("Added ingredient");
 		});
 
 		el("addCustomBtn").addEventListener("click", () => {
+			if (app.mode !== 'manage') return;
 			const emoji = (el("custEmoji").value || "🧪").trim();
 			const name = (el("custName").value || "Custom").trim();
 			const abv = Number(el("custAbv").value || 0);
@@ -571,13 +794,18 @@ import RetroButton from '../../components/RetroButton.astro';
 			el("custEmoji").value = "";
 			el("custName").value = "";
 			el("custAbv").value = "";
-			renderRecipe();
-			calculateAndRenderCard();
+			syncAll();
 			toast("Added custom ingredient");
 		});
 
-		el("cocktailName").addEventListener("input", () => calculateAndRenderCard());
-		el("cardNoteInput").addEventListener("input", () => calculateAndRenderCard());
+		el("cocktailName").addEventListener("input", () => {
+			calculateAndRenderCard();
+			writeManageURLDebounced();
+		});
+		el("cardNoteInput").addEventListener("input", () => {
+			calculateAndRenderCard();
+			writeManageURLDebounced();
+		});
 
 		document.querySelectorAll('input[name="scaleMode"]').forEach(r => {
 			r.addEventListener("change", () => {
@@ -585,37 +813,49 @@ import RetroButton from '../../components/RetroButton.astro';
 				el("totalRow").style.display = mode === "total" ? "" : "none";
 				el("servingsRow").style.display = mode === "servings" ? "" : "none";
 				calculateAndRenderCard();
+				writeManageURLDebounced();
 			});
 		});
 
 		["targetTotal", "targetUnit", "servings", "displayUnit"].forEach(id => {
-			el(id).addEventListener("input", () => calculateAndRenderCard());
-			el(id).addEventListener("change", () => calculateAndRenderCard());
+			el(id).addEventListener("input", () => {
+				calculateAndRenderCard();
+				writeManageURLDebounced();
+			});
+			el(id).addEventListener("change", () => {
+				calculateAndRenderCard();
+				writeManageURLDebounced();
+			});
 		});
 
 		el("dilutionMode").addEventListener("change", () => {
 			const mode = el("dilutionMode").value;
 			el("customDilution").style.display = mode === "custom" ? "" : "none";
-
-			// Set a friendly default when switching into custom
 			if (mode === "custom") el("customDilution").value = "25";
 			if (mode === "stirred") el("customDilution").value = "20";
 			if (mode === "shaken") el("customDilution").value = "30";
-
 			calculateAndRenderCard();
+			writeManageURLDebounced();
 		});
 
-		el("customDilution").addEventListener("input", () => calculateAndRenderCard());
-		el("calcBtn").addEventListener("click", () => calculateAndRenderCard());
+		el("customDilution").addEventListener("input", () => {
+			calculateAndRenderCard();
+			writeManageURLDebounced();
+		});
+		el("calcBtn").addEventListener("click", () => {
+			calculateAndRenderCard();
+			writeManageURLDebounced();
+		});
 
 		el("clearBtn").addEventListener("click", () => {
+			if (app.mode !== 'manage') return;
 			recipe = [];
-			renderRecipe();
-			calculateAndRenderCard();
+			syncAll();
 			toast("Cleared");
 		});
 
 		el("exampleBtn").addEventListener("click", () => {
+			if (app.mode !== 'manage') return;
 			recipe = [
 				{ emoji: "🥃", name: "Bourbon", amount: 2, unit: "oz", abv: 45 },
 				{ emoji: "🍋", name: "Lemon juice", amount: 0.75, unit: "oz", abv: 0 },
@@ -625,12 +865,12 @@ import RetroButton from '../../components/RetroButton.astro';
 			el("cocktailName").value = "Whiskey Sour-ish Batch";
 			el("dilutionMode").value = "shaken";
 			el("customDilution").value = "30";
-			renderRecipe();
-			calculateAndRenderCard();
+			syncAll();
 			toast("Loaded example");
 		});
 
 		el("saveBtn").addEventListener("click", () => {
+			if (app.mode !== 'manage') return;
 			const payload = {
 				cocktailName: el("cocktailName").value || "",
 				cardNote: el("cardNoteInput").value || "",
@@ -648,35 +888,19 @@ import RetroButton from '../../components/RetroButton.astro';
 		});
 
 		el("loadBtn").addEventListener("click", () => {
+			if (app.mode !== 'manage') return;
 			const raw = localStorage.getItem(STORAGE_KEY);
 			if (!raw) return toast("Nothing saved yet");
 			try {
 				const p = JSON.parse(raw);
-				el("cocktailName").value = p.cocktailName || "Batch Cocktail";
-				el("cardNoteInput").value = p.cardNote || "";
-				recipe = Array.isArray(p.recipe) ? p.recipe : [];
-				document.querySelector(`input[name="scaleMode"][value="${p.scaleMode || "total"}"]`).checked = true;
-				el("targetTotal").value = p.targetTotal ?? "750";
-				el("targetUnit").value = p.targetUnit ?? "ml";
-				el("servings").value = p.servings ?? "10";
-				el("dilutionMode").value = p.dilutionMode ?? "stirred";
-				el("customDilution").value = p.customDilution ?? "20";
-				el("displayUnit").value = p.displayUnit ?? "ml";
-
-				const mode = getScaleMode();
-				el("totalRow").style.display = mode === "total" ? "" : "none";
-				el("servingsRow").style.display = mode === "servings" ? "" : "none";
-				el("customDilution").style.display = el("dilutionMode").value === "custom" ? "" : "none";
-
-				renderRecipe();
-				calculateAndRenderCard();
+				decodeStateToApp(p);
+				syncAll();
 				toast("Loaded");
 			} catch (e) {
 				toast("Load failed (bad data)");
 			}
 		});
 
-		// Export card to PNG via html-to-image
 		el("exportBtn").addEventListener("click", async () => {
 			const node = el("card");
 			try {
@@ -698,9 +922,24 @@ import RetroButton from '../../components/RetroButton.astro';
 			}
 		});
 
+		window.addEventListener('popstate', () => {
+			parseURLIntoState();
+			syncAll();
+		});
+
 		// -------- Init --------
-		renderRecipe();
-		calculateAndRenderCard();
+		parseURLIntoState();
+		syncAll();
+
+		// Creator flow: if no params, create manage link immediately
+		const { e, d } = getParams();
+		if (!e && !d) {
+			app.mode = 'manage';
+			const url = new URL(window.location.origin + window.location.pathname);
+			url.searchParams.set('d', encodeState(getStateForEncoding()));
+			history.replaceState({}, '', url);
+			syncAll();
+		}
 	});
 </script>
 
@@ -708,6 +947,14 @@ import RetroButton from '../../components/RetroButton.astro';
 	.tool-hero {
 		text-align: center;
 		padding: 2rem 0;
+	}
+
+	.hero-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+		flex-wrap: wrap;
 	}
 
 	.tool-hero h1 {
@@ -720,6 +967,35 @@ import RetroButton from '../../components/RetroButton.astro';
 		font-size: 1.3rem;
 		color: var(--muted);
 		margin: 0;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 0.5rem;
+		align-items: flex-start;
+	}
+
+	.mode-notice {
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		border: 2px solid var(--border);
+		margin-bottom: 1rem;
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		text-align: center;
+		display: none;
+	}
+
+	.mode-notice--view {
+		background: rgba(59, 130, 246, 0.1);
+		border-color: #3b82f6;
+		color: #60a5fa;
+	}
+
+	.mode-notice--manage {
+		background: rgba(16, 185, 129, 0.1);
+		border-color: #10b981;
+		color: #34d399;
 	}
 
 	.cocktail-name-row {
@@ -1017,9 +1293,28 @@ import RetroButton from '../../components/RetroButton.astro';
 		align-items: start;
 	}
 
+	.settings-column {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.export-column {
+		display: flex;
+		flex-direction: column;
+	}
+
 	@media (max-width: 1000px) {
 		.batch-settings-grid {
-			grid-template-columns: 1fr;
+			display: grid;
+			grid-template-columns: 1fr !important;
+			gap: 1.5rem;
+		}
+
+		.settings-column,
+		.export-column {
+			grid-column: 1 / -1;
+			width: 100%;
 		}
 	}
 
@@ -1224,12 +1519,18 @@ import RetroButton from '../../components/RetroButton.astro';
 			grid-template-columns: 1fr;
 		}
 
-		.batch-settings-grid {
-			grid-template-columns: 1fr;
-		}
-
 		.tool-hero h1 {
 			font-size: 2rem;
+		}
+
+		.hero-header {
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.header-actions {
+			justify-content: center;
+			width: 100%;
 		}
 
 		.cocktail-name-row {
@@ -1239,6 +1540,10 @@ import RetroButton from '../../components/RetroButton.astro';
 
 		.status-pill {
 			align-self: flex-start;
+		}
+
+		.input-row {
+			flex-direction: column;
 		}
 
 		.export-header {
