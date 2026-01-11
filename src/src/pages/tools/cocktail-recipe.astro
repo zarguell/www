@@ -579,6 +579,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			const manageUI = el("manageUI");
 			const settingsColumn = el("settingsColumn");
 			const copyLinkBtn = el("copyLinkBtn");
+			const recipeNameInput = el("recipe-name");
 
 			if (app.mode === 'view') {
 				modeNotice.textContent = '📖 View-only mode - Recipe is read-only';
@@ -589,6 +590,9 @@ import RetroButton from '../../components/RetroButton.astro';
 				// In view mode, hide settings column, only show recipe card
 				settingsColumn.style.display = 'none';
 				copyLinkBtn.textContent = 'Copy link';
+
+				// Disable recipe name input in view mode
+				if (recipeNameInput) recipeNameInput.disabled = true;
 			} else {
 				modeNotice.textContent = '✏️ Edit mode - Share the view link with others';
 				modeNotice.className = 'mode-notice mode-notice--manage';
@@ -596,6 +600,9 @@ import RetroButton from '../../components/RetroButton.astro';
 				manageUI.style.display = 'block';
 				settingsColumn.style.display = 'flex';
 				copyLinkBtn.textContent = 'Copy share link';
+
+				// Enable recipe name input in manage mode
+				if (recipeNameInput) recipeNameInput.disabled = false;
 			}
 		}
 
