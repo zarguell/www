@@ -12,7 +12,8 @@ import RetroButton from '../../components/RetroButton.astro';
 				<p class="tool-subtitle">Build and share custom cocktail recipes with optional batch calculations</p>
 			</div>
 			<div class="header-actions" id="headerActions">
-				<button id="copyLinkBtn" class="retro-button retro-button--secondary retro-button--small">Copy share link</button>
+				<button id="share-recipe-btn" class="retro-button retro-button-primary">Share Recipe</button>
+				<button id="copy-to-edit-btn" class="retro-button retro-button--secondary retro-button--small" style="display:none;">Copy to Edit</button>
 			</div>
 		</div>
 	</div>
@@ -640,7 +641,8 @@ import RetroButton from '../../components/RetroButton.astro';
 			const modeNotice = el("modeNotice");
 			const manageUI = el("manageUI");
 			const settingsColumn = el("settingsColumn");
-			const copyLinkBtn = el("copyLinkBtn");
+			const shareRecipeBtn = el("share-recipe-btn");
+			const copyToEditBtn = el("copy-to-edit-btn");
 			const recipeNameInput = el("recipe-name");
 			const batchToggle = document.getElementById('batch-mode-toggle') as HTMLInputElement;
 
@@ -652,7 +654,10 @@ import RetroButton from '../../components/RetroButton.astro';
 
 				// In view mode, hide settings column, only show recipe card
 				settingsColumn.style.display = 'none';
-				copyLinkBtn.textContent = 'Copy link';
+
+				// Show "Copy to Edit" button, hide "Share Recipe" button
+				shareRecipeBtn.style.display = 'none';
+				copyToEditBtn.style.display = 'inline-block';
 
 				// Disable recipe name input in view mode
 				if (recipeNameInput) recipeNameInput.disabled = true;
@@ -668,7 +673,10 @@ import RetroButton from '../../components/RetroButton.astro';
 				modeNotice.style.display = 'block';
 				manageUI.style.display = 'block';
 				settingsColumn.style.display = 'flex';
-				copyLinkBtn.textContent = 'Copy share link';
+
+				// Show "Share Recipe" button, hide "Copy to Edit" button
+				shareRecipeBtn.style.display = 'inline-block';
+				copyToEditBtn.style.display = 'none';
 
 				// Enable recipe name input in manage mode
 				if (recipeNameInput) recipeNameInput.disabled = false;
@@ -934,8 +942,19 @@ import RetroButton from '../../components/RetroButton.astro';
 		}
 
 		// -------- Events --------
-		el("copyLinkBtn").addEventListener("click", () => {
-			copyLink('view');
+		// Share recipe button (edit mode)
+		const shareRecipeBtn = el("share-recipe-btn");
+		shareRecipeBtn?.addEventListener("click", () => {
+			const link = buildLink('edit');
+			navigator.clipboard.writeText(link);
+			toast('Recipe link copied!');
+		});
+
+		// Copy to edit button (view mode)
+		const copyToEditBtn = el("copy-to-edit-btn");
+		copyToEditBtn?.addEventListener("click", () => {
+			const link = buildLink('edit');
+			window.location.href = link;
 		});
 
 		el("addPresetBtn").addEventListener("click", () => {
@@ -1159,6 +1178,12 @@ import RetroButton from '../../components/RetroButton.astro';
 		display: flex;
 		gap: 0.5rem;
 		align-items: flex-start;
+	}
+
+	#share-recipe-btn {
+		font-size: 1.3rem;
+		padding: 0.75rem 1.5rem;
+		margin-top: 1rem;
 	}
 
 	.mode-notice {
