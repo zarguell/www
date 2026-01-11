@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
+import RecipeCard from '../../components/RecipeCard.astro';
 ---
 
 <BaseLayout title="Cocktail Recipe Maker - ARGUELLES.ME">
@@ -243,6 +244,17 @@ import RetroButton from '../../components/RetroButton.astro';
 		</div>
 	</Window>
 	</div>
+
+	<!-- Recipe Preview Card -->
+	<RecipeCard
+		recipe={{
+			name: '',
+			ingredients: []
+		}}
+		mode="edit"
+		client:load
+		id="recipe-preview-card"
+	/>
 
 	<div class="toast" id="toast"></div>
 </BaseLayout>
@@ -827,7 +839,68 @@ import RetroButton from '../../components/RetroButton.astro';
 			pill.className = `status-pill status-pill--${kind}`;
 		}
 
+		function updateRecipeCard() {
+			const card = document.getElementById('recipe-card');
+			if (!card) return;
+
+			// Update recipe name
+			const header = card.querySelector('.recipe-card-header h2');
+			if (header) {
+				header.textContent = app.recipe.name || el("cocktailName").value || 'Untitled Recipe';
+			}
+
+			// Update ingredients list
+			const list = card.querySelector('.ingredient-list');
+			if (list) {
+				list.innerHTML = '';
+				recipe.forEach(ing => {
+					const li = document.createElement('li');
+					li.className = 'ingredient-item';
+					li.innerHTML = `
+						<span class="ingredient-emoji">${ing.emoji}</span>
+						<span class="ingredient-name">${ing.name}</span>
+						<span class="ingredient-amount">${ing.amount} ${ing.unit}</span>
+					`;
+					list.appendChild(li);
+				});
+			}
+
+			// Update stats
+			const totalVolume = recipe.reduce((sum, ing) => sum + toMl(ing.amount, ing.unit), 0);
+			const totalAlcohol = recipe.reduce((sum, ing) => sum + (toMl(ing.amount, ing.unit) * ing.abv / 100), 0);
+			const finalABV = totalVolume > 0 ? (totalAlcohol / totalVolume) * 100 : 0;
+
+			const statValues = card.querySelectorAll('.stat-value');
+			if (statValues.length >= 2) {
+				statValues[0].textContent = `${Math.round(totalVolume)} ml`;
+				statValues[1].textContent = `${finalABV.toFixed(1)}% ABV`;
+			}
+
+			// Update mode and buttons
+			const actionsDiv = card.querySelector('.recipe-card-actions');
+			if (actionsDiv) {
+				const isEditMode = app.mode === 'manage';
+				actionsDiv.innerHTML = isEditMode
+					? `
+						<button class="retro-button retro-button-primary" data-action="share-recipe">
+							Share Recipe
+						</button>
+						<button class="retro-button retro-button-secondary" data-action="export-png">
+							Export PNG
+						</button>
+					`
+					: `
+						<button class="retro-button retro-button-secondary" data-action="copy-to-edit">
+							Copy to Edit
+						</button>
+					`;
+			}
+		}
+
 		function calculateAndRenderCard() {
+			// Update the new RecipeCard component
+			updateRecipeCard();
+
 			el("cardTitle").textContent = app.recipe.name || el("cocktailName").value || "Batch Cocktail";
 
 			const batch = computeBatch();
@@ -956,6 +1029,43 @@ import RetroButton from '../../components/RetroButton.astro';
 			const link = buildLink('edit');
 			window.location.href = link;
 		});
+
+		// -------- RecipeCard Event Handlers (exposed globally) --------
+		window.handleRecipeCardShare = function() {
+			const link = buildLink('edit');
+			navigator.clipboard.writeText(link);
+			toast('Recipe link copied!');
+		};
+
+		window.handleRecipeCardCopyToEdit = function() {
+			const link = buildLink('edit');
+			window.location.href = link;
+		};
+
+		window.handleRecipeCardExportPNG = async function() {
+			const card = document.getElementById('recipe-card');
+			if (!card) {
+				toast('Recipe card not found');
+				return;
+			}
+			try {
+				toast("Rendering PNG…");
+				const dataUrl = await htmlToImage.toPng(card, {
+					pixelRatio: 2,
+					cacheBust: true,
+					backgroundColor: "#ffffff"
+				});
+				const a = document.createElement("a");
+				const name = (app.recipe.name || el("cocktailName").value || "recipe").trim().replace(/[^\w\-]+/g, "_");
+				a.download = `${name}.png`;
+				a.href = dataUrl;
+				a.click();
+				toast("Downloaded PNG");
+			} catch (err) {
+				console.error(err);
+				toast("Export failed (try another browser)");
+			}
+		};
 
 		el("addPresetBtn").addEventListener("click", () => {
 			if (app.mode !== 'manage') return;
