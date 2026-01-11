@@ -48,7 +48,7 @@ The built site will be in `src/dist/` and can be deployed to any static host (Ne
 **Important:** The Astro application is located in `./src` (not at the repository root).
 
 ```
-/workspaces/www/
+./
 ├── AGENTS.md           # Agent instructions (single source of truth)
 ├── CLAUDE.md           # Symlink to AGENTS.md
 ├── GEMINI.md           # Symlink to AGENTS.md

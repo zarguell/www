@@ -16,7 +16,7 @@ npm run test:run # Run tests
 ## Project Structure
 
 ```
-/Users/zach/localcode/www/
+./
 ├── AGENTS.md              # This file (agent instructions)
 ├── CLAUDE.md              # Symlink to AGENTS.md
 ├── GEMINI.md              # Symlink to AGENTS.md
