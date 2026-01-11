@@ -68,6 +68,17 @@ import RetroButton from '../../components/RetroButton.astro';
 					</div>
 				</div>
 
+				<div class="form-group" id="recipe-name-group">
+					<label for="recipe-name">Recipe Name</label>
+					<input
+						type="text"
+						id="recipe-name"
+						name="recipe-name"
+						placeholder="e.g., Spicy Margarita"
+						required
+					/>
+				</div>
+
 				<div class="recipe-table-wrapper">
 					<table class="recipe-table">
 						<thead>
@@ -797,6 +808,42 @@ import RetroButton from '../../components/RetroButton.astro';
 			if (app.mode === 'manage') writeManageURLDebounced();
 		}
 
+		// -------- State Persistence --------
+		function saveState() {
+			const state = {
+				recipe: {
+					name: app.recipe.name,
+					ingredients: app.recipe.ingredients,
+					createdAt: app.recipe.createdAt
+				},
+				batchMode: app.batchMode,
+				batchSettings: app.batchSettings
+			};
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		}
+
+		function loadState() {
+			const saved = localStorage.getItem(STORAGE_KEY);
+			if (saved) {
+				const state = JSON.parse(saved);
+				app.recipe.name = state.recipe?.name || '';
+				app.recipe.ingredients = state.recipe?.ingredients || [];
+				app.recipe.createdAt = state.recipe?.createdAt || Date.now();
+				app.batchMode = state.batchMode || false;
+				app.batchSettings = state.batchSettings || {
+					scaleMode: 'servings',
+					targetValue: 1,
+					dilution: 0.2
+				};
+
+				// Update DOM with loaded state
+				const recipeNameInput = document.getElementById('recipe-name');
+				if (recipeNameInput && app.recipe.name) {
+					recipeNameInput.value = app.recipe.name;
+				}
+			}
+		}
+
 		// -------- Events --------
 		el("copyLinkBtn").addEventListener("click", () => {
 			copyLink('view');
@@ -831,6 +878,13 @@ import RetroButton from '../../components/RetroButton.astro';
 		el("cardNoteInput").addEventListener("input", () => {
 			calculateAndRenderCard();
 			writeManageURLDebounced();
+		});
+
+		// Recipe name input listener
+		const recipeNameInput = document.getElementById('recipe-name');
+		recipeNameInput?.addEventListener('input', (e) => {
+			app.recipe.name = e.target.value;
+			saveState();
 		});
 
 		document.querySelectorAll('input[name="scaleMode"]').forEach(r => {
@@ -954,6 +1008,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		});
 
 		// -------- Init --------
+		loadState();
 		parseURLIntoState();
 		syncAll();
 
