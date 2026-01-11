@@ -102,8 +102,21 @@ import RetroButton from '../../components/RetroButton.astro';
 		</div>
 	</div>
 
+	<!-- Batch mode toggle -->
+	<div class="batch-toggle-section" id="batch-toggle">
+		<label class="toggle-label">
+			<input
+				type="checkbox"
+				id="batch-mode-toggle"
+				name="batch-mode"
+			/>
+			<span>Enable Batch Calculator</span>
+		</label>
+	</div>
+
 	<!-- Full width: Settings + output card -->
-	<Window title="Batch Settings & Export" badgeText="CALCULATE">
+	<div id="batch-calculator">
+		<Window title="Batch Settings & Export" badgeText="CALCULATE">
 		<div class="batch-settings-grid">
 			<div class="settings-column" id="settingsColumn">
 				<div class="batch-mode-section">
@@ -228,6 +241,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			</div>
 		</div>
 	</Window>
+	</div>
 
 	<div class="toast" id="toast"></div>
 </BaseLayout>
@@ -628,6 +642,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			const settingsColumn = el("settingsColumn");
 			const copyLinkBtn = el("copyLinkBtn");
 			const recipeNameInput = el("recipe-name");
+			const batchToggle = document.getElementById('batch-mode-toggle') as HTMLInputElement;
 
 			if (app.mode === 'view') {
 				modeNotice.textContent = '📖 View-only mode - Recipe is read-only';
@@ -641,6 +656,12 @@ import RetroButton from '../../components/RetroButton.astro';
 
 				// Disable recipe name input in view mode
 				if (recipeNameInput) recipeNameInput.disabled = true;
+
+				// Disable and sync batch toggle in view mode
+				if (batchToggle) {
+					batchToggle.disabled = true;
+					batchToggle.checked = app.batchMode;
+				}
 			} else {
 				modeNotice.textContent = '✏️ Edit mode - Share the view link with others';
 				modeNotice.className = 'mode-notice mode-notice--manage';
@@ -651,6 +672,12 @@ import RetroButton from '../../components/RetroButton.astro';
 
 				// Enable recipe name input in manage mode
 				if (recipeNameInput) recipeNameInput.disabled = false;
+
+				// Enable and sync batch toggle in manage mode
+				if (batchToggle) {
+					batchToggle.disabled = false;
+					batchToggle.checked = app.batchMode;
+				}
 			}
 		}
 
@@ -858,6 +885,7 @@ import RetroButton from '../../components/RetroButton.astro';
 
 		function syncAll() {
 			applyModeUI();
+			updateBatchVisibility();
 			renderRecipe();
 			calculateAndRenderCard();
 			if (app.mode === 'manage') writeManageURLDebounced();
@@ -941,6 +969,22 @@ import RetroButton from '../../components/RetroButton.astro';
 			app.recipe.name = e.target.value;
 			saveState();
 		});
+
+		// Batch mode toggle listener
+		const batchToggle = document.getElementById('batch-mode-toggle') as HTMLInputElement;
+		batchToggle?.addEventListener('change', (e) => {
+			app.batchMode = (e.target as HTMLInputElement).checked;
+			saveState();
+			updateBatchVisibility();
+			writeManageURLDebounced();
+		});
+
+		function updateBatchVisibility() {
+			const batchSection = document.getElementById('batch-calculator');
+			if (batchSection) {
+				batchSection.style.display = app.batchMode ? 'block' : 'none';
+			}
+		}
 
 		document.querySelectorAll('input[name="scaleMode"]').forEach(r => {
 			r.addEventListener("change", () => {
@@ -1452,6 +1496,28 @@ import RetroButton from '../../components/RetroButton.astro';
 			grid-column: 1 / -1;
 			width: 100%;
 		}
+	}
+
+	.batch-toggle-section {
+		margin: 1.5rem 0;
+		padding: 1rem;
+		background: var(--color-bg-secondary);
+		border: 2px solid var(--color-border);
+		border-radius: 4px;
+	}
+
+	.toggle-label {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		cursor: pointer;
+		font-size: 1.1rem;
+	}
+
+	.toggle-label input[type="checkbox"] {
+		width: 1.5rem;
+		height: 1.5rem;
+		cursor: pointer;
 	}
 
 	.batch-mode-section {
