@@ -376,6 +376,7 @@ import RetroButton from '../../components/RetroButton.astro';
 
 		function getStateForEncoding() {
 			return {
+				rn: app.recipe.name || "",
 				n: el("cocktailName").value || "",
 				no: el("cardNoteInput").value || "",
 				r: recipe.map(ing => {
@@ -404,8 +405,15 @@ import RetroButton from '../../components/RetroButton.astro';
 			if (!state) return false;
 
 			try {
+				app.recipe.name = state.rn || "";
 				el("cocktailName").value = state.n || "Batch Cocktail";
 				el("cardNoteInput").value = state.no || "";
+
+				// Sync recipe name input field
+				const recipeNameInput = el('recipe-name');
+				if (recipeNameInput) {
+					recipeNameInput.value = app.recipe.name;
+				}
 
 				// Decode recipe
 				if (Array.isArray(state.r)) {
@@ -745,7 +753,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		}
 
 		function calculateAndRenderCard() {
-			el("cardTitle").textContent = el("cocktailName").value || "Batch Cocktail";
+			el("cardTitle").textContent = app.recipe.name || el("cocktailName").value || "Batch Cocktail";
 
 			const batch = computeBatch();
 			if (!batch) {
@@ -844,7 +852,7 @@ import RetroButton from '../../components/RetroButton.astro';
 				};
 
 				// Update DOM with loaded state
-				const recipeNameInput = document.getElementById('recipe-name');
+				const recipeNameInput = el('recipe-name');
 				if (recipeNameInput && app.recipe.name) {
 					recipeNameInput.value = app.recipe.name;
 				}
@@ -888,7 +896,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		});
 
 		// Recipe name input listener
-		const recipeNameInput = document.getElementById('recipe-name');
+		const recipeNameInput = el('recipe-name');
 		recipeNameInput?.addEventListener('input', (e) => {
 			app.recipe.name = e.target.value;
 			saveState();
