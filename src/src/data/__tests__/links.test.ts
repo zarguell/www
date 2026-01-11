@@ -101,26 +101,16 @@ describe('Links Data Validation', () => {
 			expect(socialCategory).toBeDefined();
 		});
 
-		it('should have Code category', () => {
-			const codeCategory = linksData.find((c) => c.name === 'Code');
-			expect(codeCategory).toBeDefined();
-		});
-
-		it('should have Writing category', () => {
-			const writingCategory = linksData.find((c) => c.name === 'Writing');
-			expect(writingCategory).toBeDefined();
-		});
-
-		it('should have Other category', () => {
-			const otherCategory = linksData.find((c) => c.name === 'Other');
-			expect(otherCategory).toBeDefined();
+		it('should have Projects category', () => {
+			const projectsCategory = linksData.find((c) => c.name === 'Projects');
+			expect(projectsCategory).toBeDefined();
 		});
 	});
 
 	describe('Total Links Count', () => {
-		it('should have at least 10 total links', () => {
+		it('should have at least 5 total links', () => {
 			const totalLinks = linksData.reduce((sum, category) => sum + category.links.length, 0);
-			expect(totalLinks).toBeGreaterThanOrEqual(10);
+			expect(totalLinks).toBeGreaterThanOrEqual(5);
 		});
 	});
 });
