@@ -10,6 +10,7 @@ interface Props {
 	target?: string;
 	type?: 'button' | 'submit' | 'reset';
 	onClick?: string;
+	id?: string;
 }
 
 const {
@@ -19,6 +20,7 @@ const {
 	target,
 	type = 'button',
 	onClick,
+	id,
 } = Astro.props;
 
 const Tag = href ? 'a' : 'button';
@@ -48,6 +50,7 @@ const variantStyles = {
 		target={target}
 		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
 		aria-disabled={disabled}
+		id={id}
 	>
 		<slot />
 	</a>
@@ -57,6 +60,7 @@ const variantStyles = {
 		disabled={disabled}
 		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
 		onClick={onClick}
+		id={id}
 	>
 		<slot />
 	</button>
