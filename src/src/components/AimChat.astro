@@ -787,6 +787,11 @@ const myStatus = 'available';
 	closeBtn?.addEventListener('click', () => {
 		aimChatWindow?.style.setProperty('display', 'none');
 		localStorage.setItem('aimChatOpen', 'false');
+		// Show the launch button if it exists (for index page)
+		const launchBtn = document.getElementById('launchChatBtn');
+		if (launchBtn && launchBtn.parentElement) {
+			launchBtn.parentElement.style.setProperty('display', 'block');
+		}
 	});
 
 	// Restore window state from localStorage

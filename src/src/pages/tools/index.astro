@@ -1,11 +1,11 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 ---
 
-<BaseLayout title="Tools - ARGUELLES.ME">
+<ToolLayout title="Tools - ARGUELLES.ME">
 	<div class="tools-hero">
 		<h1>Tools</h1>
 		<p class="tools-subtitle">Calculators and utilities for your digital life</p>
@@ -123,7 +123,7 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 			</p>
 		</div>
 	</Window>
-</BaseLayout>
+</ToolLayout>
 
 <style>
 	.tools-hero {

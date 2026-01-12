@@ -183,10 +183,4 @@ import Sticker from '../components/Sticker.astro';
 			launchChatBtn?.parentElement?.style.setProperty('display', 'block');
 		}
 	}
-
-	// Watch for chat close button clicks to show launch button again
-	const closeBtn = document.getElementById('closeBtn');
-	closeBtn?.addEventListener('click', () => {
-		launchChatBtn?.parentElement?.style.setProperty('display', 'block');
-	});
 </script>

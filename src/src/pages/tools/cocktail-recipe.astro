@@ -1,11 +1,11 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
 ---
 
-<BaseLayout title="Cocktail Recipe Maker - ARGUELLES.ME">
+<ToolLayout title="Cocktail Recipe Maker - ARGUELLES.ME">
 	<div class="tool-hero">
 		<div class="hero-header">
 			<div>
@@ -324,7 +324,7 @@ import RecipeCard from '../../components/RecipeCard.astro';
 	/>
 
 	<div class="toast" id="toast"></div>
-</BaseLayout>
+</ToolLayout>
 
 <!-- html-to-image for PNG export -->
 <script is:inline src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
