@@ -14,6 +14,14 @@ export interface LinkCategory {
 	links: Link[];
 }
 
+export interface CoolFind {
+	title: string;
+	url: string;
+	description: string;
+	date: string;
+	tags: string[];
+}
+
 export const linksData: LinkCategory[] = [
 	{
 		name: "Social",
@@ -59,5 +67,38 @@ export const linksData: LinkCategory[] = [
 				description: "Astro based static site for Cooklang recipes. Many recipes scraped via LLM from unstructured Instagram posts.",
 			},
 		],
+	},
+];
+
+export function extractDomain(url: string): string {
+	try {
+		const urlObj = new URL(url);
+		return urlObj.hostname;
+	} catch {
+		return "unknown";
+	}
+}
+
+export const coolFindsData: CoolFind[] = [
+	{
+		title: "Financial Tracking Sheet",
+		url: "https://docs.google.com/spreadsheets/d/example",
+		description: "Personal finance tracker I use for monthly budgeting and expense categorization.",
+		date: "2025-01-10",
+		tags: ["finance", "tools", "google-sheets"],
+	},
+	{
+		title: "Awesome Rust List",
+		url: "https://github.com/rust-unofficial/awesome-rust",
+		description: "Curated list of Rust code and resources.",
+		date: "2025-01-08",
+		tags: ["rust", "programming", "resources"],
+	},
+	{
+		title: "CSS Grid Cheatsheet",
+		url: "https://grid.malven.co/",
+		description: "Interactive CSS Grid cheatsheet for quick reference.",
+		date: "2025-01-05",
+		tags: ["css", "web-dev", "reference"],
 	},
 ];
