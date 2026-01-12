@@ -91,7 +91,11 @@ const coolFindsWithDomains = coolFindsData.map((find) => ({
 	const noResults = document.getElementById('no-results');
 	const clearFiltersBtn = document.getElementById('clear-filters');
 
-	// Extract cool finds data from the DOM
+	// Ensure all required elements exist
+	if (!coolFindsGrid || !searchInput || !tagsContainer || !noResults || !clearFiltersBtn) {
+		console.error('Required DOM elements not found for cool finds filtering');
+	} else {
+		// Extract cool finds data from the DOM
 	function getCoolFindsData() {
 		const cards = Array.from(coolFindsGrid.children);
 		return cards.map(card => ({
@@ -242,6 +246,7 @@ const coolFindsWithDomains = coolFindsData.map((find) => ({
 		document.addEventListener('DOMContentLoaded', restoreFromURL);
 	} else {
 		restoreFromURL();
+	}
 	}
 </script>
 
