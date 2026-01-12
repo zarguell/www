@@ -3,7 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Window from '../components/Window.astro';
 import RetroButton from '../components/RetroButton.astro';
 import Badge from '../components/Badge.astro';
-import { linksData } from '../data/links';
+import CoolFindCard from '../components/CoolFindCard.astro';
+import { linksData, coolFindsData, extractDomain } from '../data/links';
+
+// Add domain to cool finds data
+const coolFindsWithDomains = coolFindsData.map((find) => ({
+	...find,
+	domain: extractDomain(find.url),
+}));
 ---
 
 <BaseLayout title="Links - ARGUELLES.ME">
@@ -27,6 +34,44 @@ import { linksData } from '../data/links';
 				</div>
 			</Window>
 		))}
+	</div>
+
+	<div class="cool-finds-section">
+		<h2 class="section-title">Cool Finds</h2>
+
+		<div class="cool-finds-header">
+			<div class="search-container">
+				<label for="cool-finds-search" class="visually-hidden">Search cool finds</label>
+				<input
+					type="text"
+					id="cool-finds-search"
+					class="search-input"
+					placeholder="Search by title, description, or domain..."
+					aria-label="Search cool finds"
+				/>
+			</div>
+			<div class="tags-container" id="tags-container">
+				<!-- Tag chips will be inserted here by JavaScript -->
+			</div>
+		</div>
+
+		<div class="cool-finds-grid" id="cool-finds-grid">
+			{coolFindsWithDomains.map((find) => (
+				<CoolFindCard
+					title={find.title}
+					url={find.url}
+					description={find.description}
+					date={find.date}
+					tags={find.tags}
+					domain={find.domain}
+				/>
+			))}
+		</div>
+
+		<div class="no-results" id="no-results" hidden>
+			<p>No cool finds match your filters.</p>
+			<button id="clear-filters" class="retro-button retro-button-secondary">Clear filters</button>
+		</div>
 	</div>
 
 	<Window title="Submit a Link" badgeText="OPEN">
