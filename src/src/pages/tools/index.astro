@@ -393,7 +393,7 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 	const categoryNav = document.getElementById('categoryNav');
 
 	// View toggle functionality
-	function switchView(view: 'category' | 'date') {
+	const switchView = (view) => {
 		if (view === 'category') {
 			categoryView.style.display = 'block';
 			dateView.style.display = 'none';
@@ -409,13 +409,13 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		}
 		// Reapply search filter
 		filterTools(searchInput.value);
-	}
+	};
 
 	categoryViewBtn?.addEventListener('click', () => switchView('category'));
 	dateViewBtn?.addEventListener('click', () => switchView('date'));
 
 	// Search functionality
-	function filterTools(searchTerm: string) {
+	const filterTools = (searchTerm) => {
 		const term = searchTerm.toLowerCase().trim();
 		const toolWindows = document.querySelectorAll('[data-tool-title]');
 
@@ -427,10 +427,10 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 			const matches = title.includes(term) || desc.includes(term);
 
 			if (matches || term === '') {
-				(window as HTMLElement).style.display = '';
+				window.style.display = '';
 				hasResults = true;
 			} else {
-				(window as HTMLElement).style.display = 'none';
+				window.style.display = 'none';
 			}
 		});
 
@@ -439,7 +439,7 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 			const categories = document.querySelectorAll('.tool-category');
 			categories.forEach((category) => {
 				const visibleTools = category.querySelectorAll('[data-tool-title]:not([style*="display: none"])');
-				(category as HTMLElement).style.display = visibleTools.length > 0 ? '' : 'none';
+				category.style.display = visibleTools.length > 0 ? '' : 'none';
 			});
 		}
 
@@ -447,9 +447,9 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		if (noResults) {
 			noResults.style.display = !hasResults && term !== '' ? 'block' : 'none';
 		}
-	}
+	};
 
 	searchInput?.addEventListener('input', (e) => {
-		filterTools((e.target as HTMLInputElement).value);
+		filterTools(e.target.value);
 	});
 </script>
