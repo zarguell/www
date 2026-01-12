@@ -418,3 +418,41 @@ a:visited {
 		font-size: 1.5rem;
 	}
 }
+
+/* ============================================================================
+   TAG CHIPS (Cool Finds Filtering)
+   ============================================================================ */
+
+.tag-chip {
+	padding: 0.375rem 0.75rem;
+	font-family: "VT323", monospace;
+	font-size: 1rem;
+	background: var(--bg2);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	color: var(--text);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 1px 1px 0 var(--shadow);
+	position: relative;
+}
+
+.tag-chip:hover {
+	border-color: var(--accent);
+	background: var(--border);
+	transform: translate(0.5px, 0.5px);
+	box-shadow: 0.5px 0.5px 0 var(--shadow);
+}
+
+.tag-chip:focus {
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
+.tag-chip.active {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--sticker-text);
+	box-shadow: 0 0 0 var(--shadow);
+	transform: translate(1px, 1px);
+}
