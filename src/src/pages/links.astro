@@ -390,16 +390,20 @@ const coolFindsWithDomains = coolFindsData.map((find) => ({
 		font-family: "VT323", monospace;
 		font-size: 1rem;
 		background: var(--bg2);
-		border: 2px solid var(--border);
+		border: 1px solid var(--border);
 		border-radius: 4px;
 		color: var(--text);
 		cursor: pointer;
 		transition: all 0.2s ease;
+		box-shadow: 1px 1px 0 var(--shadow);
+		position: relative;
 	}
 
 	.tag-chip:hover {
 		border-color: var(--accent);
 		background: var(--border);
+		transform: translate(0.5px, 0.5px);
+		box-shadow: 0.5px 0.5px 0 var(--shadow);
 	}
 
 	.tag-chip:focus {
@@ -411,6 +415,8 @@ const coolFindsWithDomains = coolFindsData.map((find) => ({
 		background: var(--accent);
 		border-color: var(--accent);
 		color: var(--sticker-text);
+		box-shadow: 0 0 0 var(--shadow);
+		transform: translate(1px, 1px);
 	}
 
 	/* Cool Finds Grid */
