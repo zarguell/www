@@ -3,9 +3,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
+
+const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 ---
 
-<ToolLayout title="Cocktail Recipe Maker - ARGUELLES.ME">
+<ToolLayout title="Cocktail Recipe Maker - ARGUELLES.ME" ogImage={ogImage.href}>
 	<div class="tool-hero">
 		<div class="hero-header">
 			<div>

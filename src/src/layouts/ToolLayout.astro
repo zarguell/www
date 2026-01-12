@@ -6,11 +6,13 @@ import '../styles/global.css';
 interface Props {
 	title?: string;
 	description?: string;
+	ogImage?: string;
 }
 
 const {
 	title = 'Tool',
 	description = 'Interactive tool',
+	ogImage,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -25,6 +27,18 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalURL} />
+
+		<!-- Open Graph meta tags -->
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		{ogImage && (
+			<>
+				<meta property="og:image" content={ogImage} />
+				<meta property="og:image:alt" content="Preview image for this tool" />
+			</>
+		)}
 
 		<!-- VT323 Font Embed -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
