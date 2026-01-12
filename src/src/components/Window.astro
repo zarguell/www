@@ -7,12 +7,18 @@ interface Props {
 	title?: string;
 	badgeText?: string;
 	variant?: 'default' | 'primary' | 'secondary';
+	'data-tool-title'?: string;
+	'data-tool-desc'?: string;
+	'data-date'?: string;
 }
 
 const {
 	title = 'Window',
 	badgeText,
 	variant = 'default',
+	'data-tool-title': dataToolTitle,
+	'data-tool-desc': dataToolDesc,
+	'data-date': dataDate,
 } = Astro.props;
 
 const variantStyles = {
@@ -22,7 +28,7 @@ const variantStyles = {
 };
 ---
 
-<div class={`window window--${variant}`}>
+<div class={`window window--${variant}`} data-tool-title={dataToolTitle} data-tool-desc={dataToolDesc} data-date={dataDate}>
 	<div class="window__title-bar">
 		<span class="window__title">{title}</span>
 		{badgeText && <span class="window__badge">{badgeText}</span>}
