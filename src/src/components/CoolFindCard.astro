@@ -116,20 +116,23 @@ function formatDate(isoDate: string): string {
 .tag {
 	font-size: 0.75rem;
 	padding: 0.25rem 0.5rem;
-	background: var(--bg);
-	border: 1px solid var(--border);
+	background: var(--bg2);
+	border: 2px solid var(--border);
 	border-radius: 4px;
 	cursor: pointer;
 	transition: all 0.2s ease;
+	box-shadow: 2px 2px 0 var(--shadow);
+	position: relative;
 }
 
 .tag:hover {
-	background: var(--accent);
-	color: var(--accent-text);
-	border-color: var(--accent);
+	background: var(--border);
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 var(--shadow);
 }
 
 .tag:active {
-	transform: scale(0.95);
+	transform: translate(2px, 2px);
+	box-shadow: 0 0 0 var(--shadow);
 }
 </style>
