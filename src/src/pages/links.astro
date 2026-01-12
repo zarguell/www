@@ -39,39 +39,47 @@ const coolFindsWithDomains = coolFindsData.map((find) => ({
 	<div class="cool-finds-section">
 		<h2 class="section-title">Cool Finds</h2>
 
-		<div class="cool-finds-header">
-			<div class="search-container">
-				<label for="cool-finds-search" class="visually-hidden">Search cool finds</label>
-				<input
-					type="text"
-					id="cool-finds-search"
-					class="search-input"
-					placeholder="Search by title, description, or domain..."
-					aria-label="Search cool finds"
-				/>
+		{coolFindsWithDomains.length === 0 ? (
+			<div class="no-results">
+				<p>Cool finds coming soon!</p>
 			</div>
-			<div class="tags-container" id="tags-container">
-				<!-- Tag chips will be inserted here by JavaScript -->
-			</div>
-		</div>
+		) : (
+			<>
+				<div class="cool-finds-header">
+					<div class="search-container">
+						<label for="cool-finds-search" class="visually-hidden">Search cool finds</label>
+						<input
+							type="text"
+							id="cool-finds-search"
+							class="search-input"
+							placeholder="Search by title, description, or domain..."
+							aria-label="Search cool finds"
+						/>
+					</div>
+					<div class="tags-container" id="tags-container">
+						<!-- Tag chips will be inserted here by JavaScript -->
+					</div>
+				</div>
 
-		<div class="cool-finds-grid" id="cool-finds-grid">
-			{coolFindsWithDomains.map((find) => (
-				<CoolFindCard
-					title={find.title}
-					url={find.url}
-					description={find.description}
-					date={find.date}
-					tags={find.tags}
-					domain={find.domain}
-				/>
-			))}
-		</div>
+				<div class="cool-finds-grid" id="cool-finds-grid">
+					{coolFindsWithDomains.map((find) => (
+						<CoolFindCard
+							title={find.title}
+							url={find.url}
+							description={find.description}
+							date={find.date}
+							tags={find.tags}
+							domain={find.domain}
+						/>
+					))}
+				</div>
 
-		<div class="no-results" id="no-results" hidden>
-			<p>No cool finds match your filters.</p>
-			<RetroButton id="clear-filters" variant="secondary">Clear filters</RetroButton>
-		</div>
+				<div class="no-results" id="no-results" hidden>
+					<p>No cool finds match your filters.</p>
+					<RetroButton id="clear-filters" variant="secondary">Clear filters</RetroButton>
+				</div>
+			</>
+		)}
 	</div>
 
 	<Window title="Submit a Link" badgeText="OPEN">
