@@ -434,14 +434,31 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 		})();
 
 		// -------- Compression & URL helpers --------
+		// Chunk size for delimiter insertion (helps iMessage URL detection)
+		const CHUNK_SIZE = 120;
+		const DELIMITER = '.';
+
 		function encodeState(obj) {
-			return LZString.compressToEncodedURIComponent(JSON.stringify(obj));
+			const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(obj));
+			// Insert delimiters every CHUNK_SIZE characters to help messaging platforms
+			// iMessage and similar platforms fail URL detection on long uninterrupted strings
+			return chunkString(compressed, CHUNK_SIZE);
 		}
 
 		function decodeState(str) {
-			const json = LZString.decompressFromEncodedURIComponent(str);
+			// Remove delimiters if present (handles both old and new format)
+			const cleaned = str.replaceAll(DELIMITER, '');
+			const json = LZString.decompressFromEncodedURIComponent(cleaned);
 			if (!json) return null;
 			return JSON.parse(json);
+		}
+
+		function chunkString(str, size) {
+			const chunks = [];
+			for (let i = 0; i < str.length; i += size) {
+				chunks.push(str.slice(i, i + size));
+			}
+			return chunks.join(DELIMITER);
 		}
 
 		function getParams() {
