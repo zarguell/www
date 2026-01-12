@@ -100,6 +100,16 @@ import RecipeCard from '../../components/RecipeCard.astro';
 				<div class="muted">
 					ABV is editable per ingredient (useful for overproof spirits or specific brands).
 				</div>
+
+				<div class="form-group">
+					<label for="preparationMethod">Preparation method</label>
+					<select id="preparationMethod">
+						<option value="none">None (build in glass)</option>
+						<option value="stirred">Stirred with ice</option>
+						<option value="shaken">Shaken with ice</option>
+					</select>
+					<div class="muted">How to prepare the cocktail - affects dilution information on the recipe card</div>
+				</div>
 			</Window>
 		</div>
 	</div>
@@ -245,6 +255,63 @@ import RecipeCard from '../../components/RecipeCard.astro';
 	</Window>
 	</div>
 
+	<!-- Normal Mode Recipe Card (hidden when batch mode is enabled) -->
+	<div id="normal-mode-card-section" style="display: none;">
+		<Window title="Single Serving Recipe Card" badgeText="RECIPE">
+			<div class="batch-settings-grid">
+				<div class="settings-column" style="display: none;">
+					<!-- Placeholder for alignment -->
+				</div>
+
+				<div class="export-column">
+					<div class="export-section">
+						<div class="export-header">
+							<span class="status-pill">Single Serving Recipe Card</span>
+							<button id="exportNormalBtn" class="retro-button retro-button--primary">Export PNG</button>
+						</div>
+
+						<!-- Normal Mode Recipe Card -->
+						<div id="normalCard" class="recipe-card">
+							<div class="card-header">
+								<div class="card-title-section">
+									<h3 id="normalCardTitle">My Cocktail</h3>
+									<div class="card-meta" id="normalCardMeta">Single serving</div>
+								</div>
+								<div class="card-tags">
+									<div class="tag" id="normalTagMethod">Method: —</div>
+								</div>
+							</div>
+
+							<div class="card-stats">
+								<div><strong>Total volume:</strong> <span id="normalCardVol">—</span></div>
+								<div><strong>ABV:</strong> <span id="normalCardAbv">—</span></div>
+								<div><strong>Preparation:</strong> <span id="normalCardPrep">—</span></div>
+							</div>
+
+							<table class="card-table">
+								<thead>
+									<tr>
+										<th>Ingredient</th>
+										<th class="right">Amount</th>
+									</tr>
+								</thead>
+								<tbody id="normalCardBody"></tbody>
+							</table>
+
+							<div class="card-note" id="normalCardNotes" style="display: none;">
+								Notes: —
+							</div>
+
+							<div class="card-footer">
+								Made on <a href="https://www.arguelles.me/tools/cocktail-recipe/" target="_blank" rel="noopener">www.arguelles.me/tools/cocktail-recipe/</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</Window>
+	</div>
+
 	<!-- Recipe Preview Card -->
 	<RecipeCard
 		recipe={{
@@ -252,6 +319,7 @@ import RecipeCard from '../../components/RecipeCard.astro';
 			ingredients: []
 		}}
 		mode="edit"
+		preparationMethod="none"
 		id="recipe-preview-card"
 	/>
 
@@ -284,6 +352,7 @@ import RecipeCard from '../../components/RecipeCard.astro';
 		const app = {
 			mode: 'manage' as 'manage' | 'view',
 			batchMode: false,
+			preparationMethod: 'none' as 'none' | 'stirred' | 'shaken',
 			recipe: {
 				name: '',
 				ingredients: [] as Ingredient[],
@@ -412,6 +481,7 @@ import RecipeCard from '../../components/RecipeCard.astro';
 				})),
 				no: el("cardNoteInput").value || "",
 				bm: app.batchMode,
+				pm: app.preparationMethod || 'none',
 				du: el("displayUnit").value
 			};
 
@@ -456,6 +526,10 @@ import RecipeCard from '../../components/RecipeCard.astro';
 						abv: ing.ab
 					}));
 				}
+
+				// Preparation method (defaults to 'none' for backward compatibility)
+				app.preparationMethod = state.pm || 'none';
+				el("preparationMethod").value = app.preparationMethod;
 
 				// Display unit is always present
 				el("displayUnit").value = state.du ?? "ml";
@@ -870,9 +944,12 @@ import RecipeCard from '../../components/RecipeCard.astro';
 			const finalABV = totalVolume > 0 ? (totalAlcohol / totalVolume) * 100 : 0;
 
 			const statValues = card.querySelectorAll('.stat-value');
-			if (statValues.length >= 2) {
+			if (statValues.length >= 3) {
 				statValues[0].textContent = `${Math.round(totalVolume)} ml`;
 				statValues[1].textContent = `${finalABV.toFixed(1)}% ABV`;
+				// Update preparation method label
+				const prepLabels = { 'none': 'Build in glass', 'stirred': 'Stirred', 'shaken': 'Shaken' };
+				statValues[2].textContent = prepLabels[app.preparationMethod] || '—';
 			}
 
 			// Update mode and buttons
@@ -899,6 +976,12 @@ import RecipeCard from '../../components/RecipeCard.astro';
 		function calculateAndRenderCard() {
 			// Update the new RecipeCard component
 			updateRecipeCard();
+
+			// Update normal mode card
+			updateNormalModeCard();
+
+			// Update batch mode card (if batch mode is enabled)
+			if (!app.batchMode) return;
 
 			el("cardTitle").textContent = app.recipe.name || el("cocktailName").value || "Batch Cocktail";
 
@@ -963,6 +1046,48 @@ import RecipeCard from '../../components/RecipeCard.astro';
 			}
 		}
 
+		function updateNormalModeCard() {
+			const name = app.recipe.name || el("cocktailName").value || "My Cocktail";
+			el("normalCardTitle").textContent = name;
+
+			// Calculate totals for single serving
+			const totalVolume = recipe.reduce((sum, ing) => sum + toMl(ing.amount, ing.unit), 0);
+			const totalAlcohol = recipe.reduce((sum, ing) => sum + (toMl(ing.amount, ing.unit) * ing.abv / 100), 0);
+			const finalABV = totalVolume > 0 ? (totalAlcohol / totalVolume) * 100 : 0;
+
+			// Update stats
+			el("normalCardVol").textContent = recipe.length > 0 ? `${Math.round(totalVolume)} ml` : "—";
+			el("normalCardAbv").textContent = recipe.length > 0 ? `${finalABV.toFixed(1)}%` : "—";
+
+			// Update preparation method
+			const prepLabels = { 'none': 'Build in glass', 'stirred': 'Stirred', 'shaken': 'Shaken' };
+			el("normalCardPrep").textContent = prepLabels[app.preparationMethod] || "—";
+			el("normalTagMethod").textContent = `Method: ${prepLabels[app.preparationMethod] || "None"}`;
+
+			// Update ingredients
+			const body = el("normalCardBody");
+			body.innerHTML = "";
+
+			if (recipe.length === 0) {
+				setHeadline("Add ingredients", "danger");
+				return;
+			}
+
+			recipe.forEach(ing => {
+				const tr = document.createElement("tr");
+				const td1 = document.createElement("td");
+				td1.textContent = `${ing.emoji} ${ing.name}`;
+				const td2 = document.createElement("td");
+				td2.className = "right";
+				td2.textContent = `${ing.amount} ${ing.unit}`;
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+				body.appendChild(tr);
+			});
+
+			setHeadline("Ready");
+		}
+
 		function syncAll() {
 			applyModeUI();
 			updateBatchVisibility();
@@ -980,6 +1105,7 @@ import RecipeCard from '../../components/RecipeCard.astro';
 					createdAt: app.recipe.createdAt
 				},
 				batchMode: app.batchMode,
+				preparationMethod: app.preparationMethod,
 				batchSettings: app.batchSettings
 			};
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -993,6 +1119,7 @@ import RecipeCard from '../../components/RecipeCard.astro';
 				app.recipe.ingredients = state.recipe?.ingredients || [];
 				app.recipe.createdAt = state.recipe?.createdAt || Date.now();
 				app.batchMode = state.batchMode || false;
+				app.preparationMethod = state.preparationMethod || 'none';
 				app.batchSettings = state.batchSettings || {
 					scaleMode: 'servings',
 					targetValue: 1,
@@ -1004,6 +1131,9 @@ import RecipeCard from '../../components/RecipeCard.astro';
 				if (recipeNameInput && app.recipe.name) {
 					recipeNameInput.value = app.recipe.name;
 				}
+
+				// Sync preparation method selector
+				el("preparationMethod").value = app.preparationMethod;
 
 				// Sync batch toggle immediately to reflect loaded state
 				const batchToggle = document.getElementById('batch-mode-toggle') as HTMLInputElement;
@@ -1104,6 +1234,14 @@ import RecipeCard from '../../components/RecipeCard.astro';
 			saveState();
 		});
 
+		// Preparation method listener
+		el("preparationMethod").addEventListener("change", (e) => {
+			app.preparationMethod = e.target.value as 'none' | 'stirred' | 'shaken';
+			calculateAndRenderCard();
+			saveState();
+			writeManageURLDebounced();
+		});
+
 		// Batch mode toggle listener
 		const batchToggle = document.getElementById('batch-mode-toggle') as HTMLInputElement;
 		batchToggle?.addEventListener('change', (e) => {
@@ -1115,8 +1253,13 @@ import RecipeCard from '../../components/RecipeCard.astro';
 
 		function updateBatchVisibility() {
 			const batchSection = document.getElementById('batch-calculator');
+			const normalCardSection = document.getElementById('normal-mode-card-section');
+
 			if (batchSection) {
 				batchSection.style.display = app.batchMode ? 'block' : 'none';
+			}
+			if (normalCardSection) {
+				normalCardSection.style.display = app.batchMode ? 'none' : 'block';
 			}
 		}
 
@@ -1225,6 +1368,27 @@ import RecipeCard from '../../components/RecipeCard.astro';
 				});
 				const a = document.createElement("a");
 				const name = (el("cocktailName").value || "batch-recipe").trim().replace(/[^\w\-]+/g, "_");
+				a.download = `${name}.png`;
+				a.href = dataUrl;
+				a.click();
+				toast("Downloaded PNG");
+			} catch (err) {
+				console.error(err);
+				toast("Export failed (try another browser)");
+			}
+		});
+
+		el("exportNormalBtn").addEventListener("click", async () => {
+			const node = el("normalCard");
+			try {
+				toast("Rendering PNG…");
+				const dataUrl = await htmlToImage.toPng(node, {
+					pixelRatio: 2,
+					cacheBust: true,
+					backgroundColor: "#ffffff"
+				});
+				const a = document.createElement("a");
+				const name = (app.recipe.name || el("cocktailName").value || "recipe").trim().replace(/[^\w\-]+/g, "_");
 				a.download = `${name}.png`;
 				a.href = dataUrl;
 				a.click();

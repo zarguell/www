@@ -11,12 +11,23 @@ interface Props {
     }>;
   };
   mode: 'edit' | 'view';
+  preparationMethod?: 'none' | 'stirred' | 'shaken';
   onShare?: () => void;
   onCopyToEdit?: () => void;
   onExportPNG?: () => void;
 }
 
-const { recipe, mode, onShare, onCopyToEdit, onExportPNG } = Astro.props;
+const { recipe, mode, preparationMethod = 'none', onShare, onCopyToEdit, onExportPNG } = Astro.props;
+
+// Helper function for preparation method labels
+function getPreparationLabel(method: string): string {
+  const labels: Record<string, string> = {
+    'none': 'Build in glass',
+    'stirred': 'Stirred',
+    'shaken': 'Shaken'
+  };
+  return labels[method] || '—';
+}
 
 // Calculate stats
 function toMl(amount: number, unit: string): number {
@@ -63,6 +74,10 @@ const finalABV = totalVolume > 0 ? (totalAlcohol / totalVolume) * 100 : 0;
       <div class="stat">
         <span class="stat-label">Alcohol Content:</span>
         <span class="stat-value">{finalABV.toFixed(1)}% ABV</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Preparation:</span>
+        <span class="stat-value">{getPreparationLabel(preparationMethod)}</span>
       </div>
     </div>
   </div>
