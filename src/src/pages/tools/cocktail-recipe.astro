@@ -2,7 +2,6 @@
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
-import RecipeCard from '../../components/RecipeCard.astro';
 
 const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 ---
@@ -313,17 +312,6 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 			</div>
 		</Window>
 	</div>
-
-	<!-- Recipe Preview Card -->
-	<RecipeCard
-		recipe={{
-			name: '',
-			ingredients: []
-		}}
-		mode="edit"
-		preparationMethod="none"
-		id="recipe-preview-card"
-	/>
 
 	<div class="toast" id="toast"></div>
 </ToolLayout>
@@ -914,71 +902,7 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 			pill.className = `status-pill status-pill--${kind}`;
 		}
 
-		function updateRecipeCard() {
-			const card = document.getElementById('recipe-card');
-			if (!card) return;
-
-			// Update recipe name
-			const header = card.querySelector('.recipe-card-header h2');
-			if (header) {
-				header.textContent = app.recipe.name || el("cocktailName").value || 'Untitled Recipe';
-			}
-
-			// Update ingredients list
-			const list = card.querySelector('.ingredient-list');
-			if (list) {
-				list.innerHTML = '';
-				recipe.forEach(ing => {
-					const li = document.createElement('li');
-					li.className = 'ingredient-item';
-					li.innerHTML = `
-						<span class="ingredient-emoji">${ing.emoji}</span>
-						<span class="ingredient-name">${ing.name}</span>
-						<span class="ingredient-amount">${ing.amount} ${ing.unit}</span>
-					`;
-					list.appendChild(li);
-				});
-			}
-
-			// Update stats
-			const totalVolume = recipe.reduce((sum, ing) => sum + toMl(ing.amount, ing.unit), 0);
-			const totalAlcohol = recipe.reduce((sum, ing) => sum + (toMl(ing.amount, ing.unit) * ing.abv / 100), 0);
-			const finalABV = totalVolume > 0 ? (totalAlcohol / totalVolume) * 100 : 0;
-
-			const statValues = card.querySelectorAll('.stat-value');
-			if (statValues.length >= 3) {
-				statValues[0].textContent = `${Math.round(totalVolume)} ml`;
-				statValues[1].textContent = `${finalABV.toFixed(1)}% ABV`;
-				// Update preparation method label
-				const prepLabels = { 'none': 'Build in glass', 'stirred': 'Stirred', 'shaken': 'Shaken' };
-				statValues[2].textContent = prepLabels[app.preparationMethod] || '—';
-			}
-
-			// Update mode and buttons
-			const actionsDiv = card.querySelector('.recipe-card-actions');
-			if (actionsDiv) {
-				const isEditMode = app.mode === 'manage';
-				actionsDiv.innerHTML = isEditMode
-					? `
-						<button class="retro-button retro-button-primary" data-action="share-recipe">
-							Share Recipe
-						</button>
-						<button class="retro-button retro-button-secondary" data-action="export-png">
-							Export PNG
-						</button>
-					`
-					: `
-						<button class="retro-button retro-button-secondary" data-action="copy-to-edit">
-							Copy to Edit
-						</button>
-					`;
-			}
-		}
-
 		function calculateAndRenderCard() {
-			// Update the new RecipeCard component
-			updateRecipeCard();
-
 			// Update normal mode card
 			updateNormalModeCard();
 
@@ -1146,10 +1070,10 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 		}
 
 		// -------- Events --------
-		// Share recipe button (edit mode)
+		// Share recipe button (edit mode) - copies view link
 		const shareRecipeBtn = el("share-recipe-btn");
 		shareRecipeBtn?.addEventListener("click", () => {
-			const link = buildLink('edit');
+			const link = buildLink('view');
 			navigator.clipboard.writeText(link);
 			toast('Recipe link copied!');
 		});
@@ -1163,7 +1087,7 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 
 		// -------- RecipeCard Event Handlers (exposed globally) --------
 		window.handleRecipeCardShare = function() {
-			const link = buildLink('edit');
+			const link = buildLink('view');
 			navigator.clipboard.writeText(link);
 			toast('Recipe link copied!');
 		};
@@ -2075,6 +1999,23 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 
 		.card-stats {
 			flex-direction: column;
+		}
+
+		/* Remove retro theme borders on mobile for more width */
+		:global(.window) {
+			border: none !important;
+			box-shadow: none !important;
+			padding: 0 !important;
+			background: transparent !important;
+		}
+
+		:global(.window-title-bar) {
+			border-radius: 0 !important;
+			margin-bottom: 1rem !important;
+		}
+
+		:global(.window-content) {
+			padding: 0 !important;
 		}
 	}
 </style>
