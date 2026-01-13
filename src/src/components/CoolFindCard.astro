@@ -27,6 +27,7 @@ function formatDate(isoDate: string): string {
 	</a>
 	<span class="domain-badge">{domain}</span>
 	<p class="card-description">{description}</p>
+	<button class="expand-btn" aria-expanded="false" hidden>Show more</button>
 	<div class="card-footer">
 		<time class="card-date">{formatDate(date)}</time>
 		{tags.length > 0 && (
@@ -135,4 +136,46 @@ function formatDate(isoDate: string): string {
 	transform: translate(1px, 1px);
 	box-shadow: 0 0 0 var(--shadow);
 }
+
+.expand-btn {
+	background: none;
+	border: none;
+	color: var(--link);
+	font-family: inherit;
+	font-size: 0.875rem;
+	padding: 0;
+	margin-bottom: 1rem;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.expand-btn:hover {
+	color: var(--accent);
+}
+
+.card-description.expanded {
+	display: block;
+	-webkit-line-clamp: unset;
+}
 </style>
+
+<script>
+document.querySelectorAll('.cool-find-card').forEach(card => {
+	const description = card.querySelector('.card-description');
+	const expandBtn = card.querySelector('.expand-btn');
+	
+	if (description && expandBtn) {
+		// Check if text is truncated
+		if (description.scrollHeight > description.clientHeight) {
+			expandBtn.hidden = false;
+			
+			expandBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				const isExpanded = description.classList.toggle('expanded');
+				expandBtn.textContent = isExpanded ? 'Show less' : 'Show more';
+				expandBtn.setAttribute('aria-expanded', String(isExpanded));
+			});
+		}
+	}
+});
+</script>
