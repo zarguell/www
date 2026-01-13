@@ -108,4 +108,11 @@ export const coolFindsData: CoolFind[] = [
 		date: "2025-01-12",
 		tags: ["llm", "agentic-coding", "claude-code"],
 	},
+	{
+		title: "Amaro/Infusion Recipe Developer",
+		url: "https://docs.google.com/spreadsheets/d/1AhiRiem8g8Quiu_OruYpW2sxqpdqvNajwGk9833c734/edit?gid=287178337#gid=287178337",
+		description: "A Google Sheet for developing Amaro/Infusion recipes.",
+		date: "2025-01-12",
+		tags: ["mixology", "amaro", "food-drink", "google-sheets"],
+	},
 ];
