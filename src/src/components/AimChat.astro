@@ -473,15 +473,11 @@ const myStatus = 'available';
 	const autoResponses = [
 		'lol',
 		'that\'s cool',
-		'brb phone',
 		'so what r u doing?',
 		'omg same',
 		'haha yeah',
-		'word',
 		'sure',
 		'idk maybe',
-		'k',
-		'kk',
 		'yeah totally',
 		'nm u?',
 		'awesome!',
@@ -508,13 +504,9 @@ const myStatus = 'available';
 		'sick',
 		'dope',
 		'legit',
-		'fo sho',
-		'yoooo',
+		'for sure',
 		'hey',
 		'sup?',
-		'chillen',
-		'jus bored',
-		'tired lol',
 		'watcha up to?',
 	];
 
@@ -612,8 +604,8 @@ const myStatus = 'available';
 		if (messages.length === 0) {
 			const defaultMessages = [
 				{ sender: 'them' as const, text: 'hey!', time: '3:42 PM' },
-				{ sender: 'me' as const, text: 'yo whats up', time: '3:42 PM' },
-				{ sender: 'them' as const, text: 'nm just chillen, u?', time: '3:43 PM' },
+				{ sender: 'me' as const, text: 'hey hows it going', time: '3:42 PM' },
+				{ sender: 'them' as const, text: 'good, you?', time: '3:43 PM' },
 			];
 			defaultMessages.forEach(msg => {
 				const msgElement = createMessageElement(msg.sender, msg.text, msg.time);
