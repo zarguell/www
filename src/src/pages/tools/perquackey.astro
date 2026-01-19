@@ -22,6 +22,18 @@ import Badge from '../../components/Badge.astro';
 
 				<div id="players-list"></div>
 
+				<div class="form-group">
+					<label for="round-time">Round Time (seconds)</label>
+					<input type="number" id="round-time" value="180" min="30" max="600" />
+					<small>Default: 180 seconds (3 minutes)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="score-limit">Game End Score</label>
+					<input type="number" id="score-limit" value="5000" min="1000" max="20000" step="500" />
+					<small>Default: 5000 points</small>
+				</div>
+
 				<div id="setup-actions">
 					<button id="start-game-btn" class="retro-button primary" disabled>Start Game</button>
 				</div>
@@ -53,6 +65,9 @@ import Badge from '../../components/Badge.astro';
 					<button id="restart-round-btn" class="retro-button secondary">Restart Round</button>
 					<button id="forfeit-round-btn" class="retro-button danger">Forfeit Round</button>
 				</div>
+				<div class="controls-row">
+					<button id="end-game-btn" class="retro-button danger">End Game</button>
+				</div>
 			</Window>
 		</div>
 
@@ -79,6 +94,48 @@ import Badge from '../../components/Badge.astro';
 				<div id="winner-announcement"></div>
 				<div id="final-scores"></div>
 				<button id="play-again-btn" class="retro-button primary">Play Again</button>
+				<button id="new-game-btn" class="retro-button secondary">New Game</button>
+			</Window>
+		</div>
+
+		<div id="rules-reference" class="rules-reference">
+			<Window title="Perquackey Rules (Quick Reference)">
+				<div class="rules-content">
+					<h4>Objective</h4>
+					<p>First player to reach the score limit wins!</p>
+					
+					<h4>Gameplay</h4>
+					<ul>
+						<li>Create words using letter dice (3-8 letters long)</li>
+						<li>Maximum 5 words per letter length</li>
+						<li>3-letter words disabled when vulnerable (2000+ points)</li>
+					</ul>
+					
+					<h4>Scoring</h4>
+					<div class="scoring-table">
+						<div class="score-row"><span>3-letter words:</span><span>60/70/80/90/100</span></div>
+						<div class="score-row"><span>4-letter words:</span><span>120/140/160/180/200</span></div>
+						<div class="score-row"><span>5-letter words:</span><span>200/250/300/350/400</span></div>
+						<div class="score-row"><span>6-letter words:</span><span>300/400/500/600/700</span></div>
+						<div class="score-row"><span>7-letter words:</span><span>500/650/800/950/1100</span></div>
+						<div class="score-row"><span>8-letter words:</span><span>750/1000/1250/1500/1750</span></div>
+					</div>
+					
+					<h4>Bonuses</h4>
+					<ul>
+						<li>3+4 complete: +300</li>
+						<li>4+5 complete: +500</li>
+						<li>5+6 complete: +800</li>
+						<li>6+7 complete: +1200</li>
+						<li>7+8 complete: +1850</li>
+					</ul>
+					
+					<h4>Vulnerability & Penalty</h4>
+					<ul>
+						<li>At 2000+ points: 3-letter words disabled (RED DICE active)</li>
+						<li>If round score < 500 while vulnerable: -500 penalty</li>
+					</ul>
+				</div>
 			</Window>
 		</div>
 
@@ -339,6 +396,45 @@ import Badge from '../../components/Badge.astro';
 		background: var(--color-bg-secondary);
 	}
 
+	.rules-reference {
+		max-width: 1200px;
+		margin: 2rem auto 0;
+	}
+
+	.rules-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.rules-content h4 {
+		margin: 0;
+		color: var(--color-accent);
+		font-size: 1.1rem;
+	}
+
+	.rules-content p {
+		margin: 0.25rem 0;
+	}
+
+	.rules-content ul {
+		margin: 0.25rem 0;
+		padding-left: 1.5rem;
+	}
+
+	.rules-content ul li {
+		margin-bottom: 0.25rem;
+	}
+
+	.scoring-table {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		background: var(--color-bg-secondary);
+		padding: 0.5rem;
+		border: 1px solid var(--color-border);
+	}
+
 	@media (max-width: 768px) {
 		.standings-window {
 			position: static;
@@ -373,14 +469,17 @@ import Badge from '../../components/Badge.astro';
 	const VULNERABILITY_THRESHOLD = 2000;
 	const PENALTY_AMOUNT = -500;
 	const MIN_SCORE_THRESHOLD = 500;
-	const ROUND_TIME = 180;
+	const DEFAULT_ROUND_TIME = 180;
+	const DEFAULT_SCORE_LIMIT = 5000;
 
 	let state = {
 		gameState: 'setup',
 		players: [],
 		currentPlayerIndex: 0,
+		roundTime: DEFAULT_ROUND_TIME,
+		scoreLimit: DEFAULT_SCORE_LIMIT,
 		timer: {
-			secondsRemaining: ROUND_TIME,
+			secondsRemaining: DEFAULT_ROUND_TIME,
 			isRunning: false,
 			intervalId: null
 		},
@@ -394,6 +493,8 @@ import Badge from '../../components/Badge.astro';
 			gameState: state.gameState,
 			players: state.players,
 			currentPlayerIndex: state.currentPlayerIndex,
+			roundTime: state.roundTime,
+			scoreLimit: state.scoreLimit,
 			timer: {
 				secondsRemaining: state.timer.secondsRemaining,
 				isRunning: state.timer.isRunning
@@ -410,6 +511,8 @@ import Badge from '../../components/Badge.astro';
 			state = {
 				...state,
 				...data,
+				roundTime: data.roundTime || DEFAULT_ROUND_TIME,
+				scoreLimit: data.scoreLimit || DEFAULT_SCORE_LIMIT,
 				timer: {
 					...state.timer,
 					...data.timer,
@@ -434,9 +537,11 @@ import Badge from '../../components/Badge.astro';
 		if (timerEl) {
 			timerEl.textContent = formatTime(state.timer.secondsRemaining);
 			timerEl.className = 'timer-display';
-			if (state.timer.secondsRemaining <= 30) {
+			const warningThreshold = Math.max(30, Math.floor(parseInt(state.roundTime) * 0.17));
+			const dangerThreshold = Math.max(10, Math.floor(parseInt(state.roundTime) * 0.05));
+			if (state.timer.secondsRemaining <= dangerThreshold) {
 				timerEl.classList.add('danger');
-			} else if (state.timer.secondsRemaining <= 60) {
+			} else if (state.timer.secondsRemaining <= warningThreshold) {
 				timerEl.classList.add('warning');
 			}
 		}
@@ -594,11 +699,12 @@ import Badge from '../../components/Badge.astro';
 		const player = getCurrentPlayer();
 		const roundScore = calculateScore(player.currentRoundWords).totalScore + player.totalScore;
 		
-		if (roundScore >= VULNERABILITY_THRESHOLD && !player.vulnerable) {
+		if (roundScore + player.totalScore >= state.scoreLimit && !player.vulnerable) {
 			player.vulnerable = true;
 			player.redDice = true;
 			showStandings();
 		}
+	}
 	}
 
 	function applyPenalty(player) {
@@ -608,6 +714,29 @@ import Badge from '../../components/Badge.astro';
 				player.totalScore += PENALTY_AMOUNT;
 				player.penaltyApplied = true;
 			}
+		}
+	}
+
+	function advanceToNextPlayer() {
+		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+		
+		if (nextPlayerIndex === 0) {
+			state.gameState = 'game_over';
+			state.winner = determineWinner();
+			saveState();
+			showPhase('game-over');
+			renderGameOver();
+		} else {
+			state.currentPlayerIndex = nextPlayerIndex;
+			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+			stopTimer();
+			state.gameState = 'playing';
+			saveState();
+			showPhase('playing');
+			renderCurrentPlayer();
+			renderCurrentWords();
+			updateTimerDisplay();
+			showStandings();
 		}
 	}
 
@@ -789,16 +918,20 @@ import Badge from '../../components/Badge.astro';
 		const container = document.getElementById('standings-list');
 		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
 		
-		container.innerHTML = sorted.map((player, index) => `
+		container.innerHTML = sorted.map((player, index) => {
+			const isVulnerable = player.vulnerable ? '<span class="vulnerability-badge">VULNERABLE</span>' : '';
+			const isRedDice = player.redDice ? '<span class="red-dice-badge">RED DICE</span>' : '';
+			return `
 			<div class="standing-item">
 				<span>${index + 1}. ${player.name}</span>
 				<span>
 					${player.totalScore}
-					${player.vulnerable ? '<span class="vulnerability-badge">VULNERABLE</span>' : ''}
-					${player.redDice ? '<span class="red-dice-badge">RED DICE</span>' : ''}
+					${isVulnerable}
+					${isRedDice}
 				</span>
 			</div>
-		`).join('');
+		`;
+		}).join('');
 	}
 
 	function renderGameOver() {
@@ -911,7 +1044,7 @@ import Badge from '../../components/Badge.astro';
 		if (state.players.length > 0) {
 			state.gameState = 'playing';
 			state.currentPlayerIndex = 0;
-			state.timer.secondsRemaining = ROUND_TIME;
+			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
 			saveState();
 			showPhase('playing');
 			renderCurrentPlayer();
@@ -919,6 +1052,9 @@ import Badge from '../../components/Badge.astro';
 			updateTimerDisplay();
 			showStandings();
 			loadDictionary();
+			if (state.timer.isRunning) {
+				startTimer();
+			}
 		}
 	};
 
@@ -953,7 +1089,7 @@ import Badge from '../../components/Badge.astro';
 	window.restartRound = () => {
 		const player = getCurrentPlayer();
 		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
-		state.timer.secondsRemaining = ROUND_TIME;
+		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
 		stopTimer();
 		saveState();
 		renderCurrentWords();
@@ -965,27 +1101,7 @@ import Badge from '../../components/Badge.astro';
 		player.currentRoundScore = 0;
 		player.totalScore += 0;
 		
-		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-		
-		if (nextPlayerIndex === 0) {
-			state.gameState = 'game_over';
-			state.winner = determineWinner();
-			saveState();
-			showPhase('game-over');
-			renderGameOver();
-		} else {
-			state.currentPlayerIndex = nextPlayerIndex;
-			state.timer.secondsRemaining = ROUND_TIME;
-			stopTimer();
-			state.gameState = 'playing';
-			saveState();
-			showPhase('playing');
-			renderCurrentPlayer();
-			renderCurrentWords();
-			updateTimerDisplay();
-			updateTimerButtons();
-			showStandings();
-		}
+		advanceToNextPlayer();
 	};
 
 	window.editWords = () => {
@@ -1046,6 +1162,8 @@ import Badge from '../../components/Badge.astro';
 		if (state.gameState === 'setup') {
 			showPhase('setup');
 			renderSetup();
+			document.getElementById('round-time').value = state.roundTime || DEFAULT_ROUND_TIME;
+			document.getElementById('score-limit').value = state.scoreLimit || DEFAULT_SCORE_LIMIT;
 		} else if (state.gameState === 'playing') {
 			showPhase('playing');
 			renderCurrentPlayer();
@@ -1069,6 +1187,16 @@ import Badge from '../../components/Badge.astro';
 		
 		document.getElementById('add-player-btn').addEventListener('click', window.addPlayer);
 		document.getElementById('start-game-btn').addEventListener('click', window.startGame);
+		document.getElementById('round-time').addEventListener('input', () => {
+			const input = document.getElementById('round-time');
+			state.roundTime = parseInt(input.value) || DEFAULT_ROUND_TIME;
+			saveState();
+		});
+		document.getElementById('score-limit').addEventListener('input', () => {
+			const input = document.getElementById('score-limit');
+			state.scoreLimit = parseInt(input.value) || DEFAULT_SCORE_LIMIT;
+			saveState();
+		});
 		document.getElementById('start-timer-btn').addEventListener('click', window.startTimer);
 		document.getElementById('pause-timer-btn').addEventListener('click', window.pauseTimer);
 		document.getElementById('end-round-btn').addEventListener('click', window.endRound);
@@ -1078,6 +1206,44 @@ import Badge from '../../components/Badge.astro';
 		document.getElementById('confirm-round-btn').addEventListener('click', window.confirmRound);
 		document.getElementById('apply-adjustment-btn').addEventListener('click', window.applyManualAdjustment);
 		document.getElementById('play-again-btn').addEventListener('click', window.playAgain);
+		document.getElementById('end-game-btn').addEventListener('click', () => {
+			const confirmed = confirm('End entire game? This will reset all progress.');
+			if (confirmed) {
+				state = {
+					gameState: 'setup',
+					players: [],
+					currentPlayerIndex: 0,
+					roundTime: state.roundTime,
+					scoreLimit: state.scoreLimit,
+					timer: {
+						secondsRemaining: state.roundTime,
+						isRunning: false,
+						intervalId: null
+					},
+					winner: null,
+					dictionaryLoaded: state.dictionaryLoaded,
+					dictionary: state.dictionary
+				};
+				saveState();
+				showPhase('setup');
+				renderSetup();
+				updateTimerDisplay();
+				showStandings();
+			}
+		});
+		document.getElementById('new-game-btn').addEventListener('click', () => {
+			const confirmed = confirm('Start new game? Current settings will be preserved.');
+			if (confirmed) {
+				state.gameState = 'setup';
+				state.currentPlayerIndex = 0;
+				state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+				saveState();
+				showPhase('setup');
+				renderSetup();
+				updateTimerDisplay();
+				showStandings();
+			}
+		});
 
 		const standingsWindow = document.getElementById('standings-window');
 		const toggleStandingsBtn = document.getElementById('toggle-standings-btn');
