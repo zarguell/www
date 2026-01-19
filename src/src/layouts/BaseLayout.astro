@@ -7,11 +7,13 @@ import '../styles/global.css';
 interface Props {
 	title?: string;
 	description?: string;
+	hideAimChat?: boolean;
 }
 
 const {
 	title = 'Arguelles Site',
 	description = 'Welcome to the Arguelles Site!',
+	hideAimChat = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -43,7 +45,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			<slot />
 		</main>
 		<SiteFooter />
-		<AimChat />
+		{!hideAimChat && <AimChat />}
 	</body>
 </html>
 

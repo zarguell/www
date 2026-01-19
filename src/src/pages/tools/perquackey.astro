@@ -5,7 +5,7 @@ import RetroButton from '../../components/RetroButton.astro';
 import Badge from '../../components/Badge.astro';
 ---
 
-<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management">
+<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management" hideAimChat={true}>
 	<div class="tool-hero">
 		<h1>PERQUACKEY TRACKER</h1>
 		<p>Word Game Score Tracker with Timer & Dictionary</p>
@@ -82,9 +82,13 @@ import Badge from '../../components/Badge.astro';
 			</Window>
 		</div>
 
-		<div id="standings-window" class="standings" style="display: none;">
-			<Window title="Player Standings">
-				<div id="standings-list"></div>
+		<div id="standings-window" class="standings-window" style="display: none;">
+			<Window title="Standings" badgeText="MINI">
+				<div class="standings-header">
+					<span class="standings-title">Player Standings</span>
+					<button id="toggle-standings-btn" class="toggle-btn">−</button>
+				</div>
+				<div id="standings-list" class="standings-list"></div>
 			</Window>
 		</div>
 	</div>
@@ -267,18 +271,79 @@ import Badge from '../../components/Badge.astro';
 		margin-left: 0.5rem;
 	}
 
-	.standings {
+	.standings-window {
 		position: fixed;
-		top: 1rem;
+		bottom: 1rem;
 		right: 1rem;
-		max-width: 300px;
+		max-width: 200px;
+		min-width: 180px;
 		z-index: 100;
+		transition: all 0.3s ease;
+	}
+
+	.standings-window.collapsed {
+		max-width: 180px;
+	}
+
+	.standings-window.collapsed .standings-list {
+		display: none;
+	}
+
+	.standings-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: move;
+	}
+
+	.standings-title {
+		font-size: 0.9rem;
+		font-weight: bold;
+		color: var(--color-accent);
+	}
+
+	.toggle-btn {
+		background: var(--color-bg);
+		border: 1px solid var(--color-border);
+		color: var(--color-text);
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
+		line-height: 1;
+		padding: 0.25rem 0.5rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.toggle-btn:hover {
+		background: var(--color-accent);
+		color: var(--sticker-text);
+	}
+
+	.standings-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin-top: 0.5rem;
+		transition: all 0.3s ease;
+	}
+
+	.standing-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0.5rem;
+		font-size: 0.85rem;
+		border-bottom: 1px solid var(--color-border);
+		background: var(--color-bg-secondary);
 	}
 
 	@media (max-width: 768px) {
-		.standings {
+		.standings-window {
 			position: static;
 			max-width: 100%;
+			min-width: 100%;
 		}
 
 		.timer-display {
@@ -944,6 +1009,37 @@ import Badge from '../../components/Badge.astro';
 
 	window.playAgain = resetGame;
 
+	function makeDraggable(element, handle) {
+		let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+		handle.onmousedown = dragMouseDown;
+
+		function dragMouseDown(e) {
+			e = e || window.event;
+			e.preventDefault();
+			pos3 = e.clientX;
+			pos4 = e.clientY;
+			document.onmouseup = closeDragElement;
+			document.onmousemove = elementDrag;
+		}
+
+		function elementDrag(e) {
+			e = e || window.event;
+			e.preventDefault();
+			pos1 = pos3 - e.clientX;
+			pos2 = pos4 - e.clientY;
+			pos3 = e.clientX;
+			pos4 = e.clientY;
+			element.style.top = (element.offsetTop - pos2) + "px";
+			element.style.left = (element.offsetLeft - pos1) + "px";
+		}
+
+		function closeDragElement() {
+			document.onmouseup = null;
+			document.onmousemove = null;
+		}
+	}
+
 	document.addEventListener('DOMContentLoaded', () => {
 		loadState();
 		
@@ -982,6 +1078,24 @@ import Badge from '../../components/Badge.astro';
 		document.getElementById('confirm-round-btn').addEventListener('click', window.confirmRound);
 		document.getElementById('apply-adjustment-btn').addEventListener('click', window.applyManualAdjustment);
 		document.getElementById('play-again-btn').addEventListener('click', window.playAgain);
+
+		const standingsWindow = document.getElementById('standings-window');
+		const toggleStandingsBtn = document.getElementById('toggle-standings-btn');
+		let standingsCollapsed = false;
+
+		toggleStandingsBtn.addEventListener('click', () => {
+			standingsCollapsed = !standingsCollapsed;
+			standingsWindow.classList.toggle('collapsed');
+			toggleStandingsBtn.textContent = standingsCollapsed ? '+' : '−';
+		});
+
+		makeDraggable(standingsWindow, toggleStandingsBtn);
+
+		window.toggleStandings = () => {
+			standingsCollapsed = !standingsCollapsed;
+			standingsWindow.classList.toggle('collapsed');
+			toggleStandingsBtn.textContent = standingsCollapsed ? '+' : '−';
+		};
 		
 		const wordInput = document.getElementById('word-input');
 		const validationMsg = document.getElementById('validation-message');
