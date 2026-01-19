@@ -307,8 +307,8 @@ export const toolsData: ToolCategory[] = [
 		],
 	},
 	{
-		name: "Video Games",
-		id: "gaming",
+		name: "Games",
+		id: "games",
 		description: "Game utilities and calculators to enhance your gameplay experience.",
 		tools: [
 			{
@@ -323,6 +323,22 @@ export const toolsData: ToolCategory[] = [
 					"No spoilers included",
 				],
 				lastModified: "2025-11-20",
+			},
+			{
+				title: "Perquackey Tracker",
+				slug: "perquackey",
+				description: "Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management. Features real-time word validation, scoring based on official rules, vulnerability tracking, and multi-player support.",
+				badge: "WORD GAME",
+				features: [
+					"3-minute timer with persistence",
+					"Dictionary validation (lazy-loaded)",
+					"Official scoring table lookup",
+					"Bonus calculations (5+5 completions)",
+					"Vulnerability & red dice tracking",
+					"Multi-player support",
+					"State persistence",
+				],
+				lastModified: "2026-01-18",
 			},
 		],
 	},

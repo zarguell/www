@@ -1,0 +1,1003 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+import Badge from '../../components/Badge.astro';
+---
+
+<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management">
+	<div class="tool-hero">
+		<h1>PERQUACKEY TRACKER</h1>
+		<p>Word Game Score Tracker with Timer & Dictionary</p>
+	</div>
+
+	<div id="app">
+		<div id="setup-phase" class="phase">
+			<Window title="Game Setup">
+				<div class="form-group">
+					<label for="player-name">Add Player</label>
+					<input type="text" id="player-name" placeholder="Enter player name" maxlength="20" />
+					<button id="add-player-btn" class="retro-button">Add Player</button>
+				</div>
+
+				<div id="players-list"></div>
+
+				<div id="setup-actions">
+					<button id="start-game-btn" class="retro-button primary" disabled>Start Game</button>
+				</div>
+			</Window>
+		</div>
+
+		<div id="playing-phase" class="phase" style="display: none;">
+			<div class="timer-display" id="timer">3:00</div>
+			<div class="current-player" id="current-player-name"></div>
+
+			<Window title="Word Entry">
+				<div class="form-group">
+					<input type="text" id="word-input" placeholder="Enter word (3-8 letters)" maxlength="8" />
+					<div id="validation-message" class="validation-message"></div>
+				</div>
+			</Window>
+
+			<Window title="Current Words">
+				<div id="current-words" class="words-list"></div>
+			</Window>
+
+			<Window title="Controls">
+				<div class="controls-row">
+					<button id="end-round-btn" class="retro-button primary">End Round</button>
+					<button id="restart-round-btn" class="retro-button secondary">Restart Round</button>
+					<button id="forfeit-round-btn" class="retro-button danger">Forfeit Round</button>
+				</div>
+			</Window>
+		</div>
+
+		<div id="round-complete-phase" class="phase" style="display: none;">
+			<Window title="Round Summary">
+				<div id="round-summary"></div>
+				<div class="form-group">
+					<label for="manual-adjustment">Manual Score Adjustment</label>
+					<input type="number" id="manual-adjustment" value="0" />
+					<button id="apply-adjustment-btn" class="retro-button">Apply</button>
+				</div>
+			</Window>
+
+			<Window title="Actions">
+				<div class="controls-row">
+					<button id="edit-words-btn" class="retro-button secondary">Edit Words</button>
+					<button id="confirm-round-btn" class="retro-button primary">Confirm & Next</button>
+				</div>
+			</Window>
+		</div>
+
+		<div id="game-over-phase" class="phase" style="display: none;">
+			<Window title="Game Over">
+				<div id="winner-announcement"></div>
+				<div id="final-scores"></div>
+				<button id="play-again-btn" class="retro-button primary">Play Again</button>
+			</Window>
+		</div>
+
+		<div id="standings-window" class="standings" style="display: none;">
+			<Window title="Player Standings">
+				<div id="standings-list"></div>
+			</Window>
+		</div>
+	</div>
+</BaseLayout>
+
+<style>
+	.tool-hero h1 {
+		font-size: 3rem;
+		margin-bottom: 0.5rem;
+	}
+
+	#app {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.phase {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.form-group label {
+		font-size: 1.2rem;
+		font-weight: bold;
+	}
+
+	.form-group input {
+		padding: 0.75rem;
+		font-size: 1.2rem;
+		font-family: 'VT323', monospace;
+		border: 2px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+	}
+
+	#player-name, #word-input, #manual-adjustment {
+		text-transform: uppercase;
+	}
+
+	#players-list, #current-words, #standings-list, #round-summary, #final-scores {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.player-item, .word-item, .standing-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-bg-secondary);
+	}
+
+	.player-item, .standing-item {
+		justify-content: space-between;
+	}
+
+	.word-item {
+		justify-content: space-between;
+	}
+
+	.word-length-group {
+		margin-bottom: 1rem;
+	}
+
+	.word-length-header {
+		font-weight: bold;
+		margin-bottom: 0.5rem;
+		color: var(--color-accent);
+	}
+
+	.controls-row {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.timer-display {
+		font-size: 4rem;
+		text-align: center;
+		padding: 1rem;
+		border: 3px solid var(--color-border);
+		background: var(--color-bg-secondary);
+		margin-bottom: 1rem;
+	}
+
+	.timer-display.warning {
+		color: #ff9500;
+	}
+
+	.timer-display.danger {
+		color: #ff0000;
+		animation: pulse 0.5s infinite;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.5; }
+	}
+
+	.current-player {
+		font-size: 2rem;
+		text-align: center;
+		margin-bottom: 1rem;
+		color: var(--color-accent);
+	}
+
+	.validation-message {
+		min-height: 1.5rem;
+		font-size: 1rem;
+		margin-top: 0.25rem;
+	}
+
+	.validation-message.error {
+		color: var(--color-error);
+	}
+
+	.validation-message.success {
+		color: var(--color-success);
+	}
+
+	.validation-message.info {
+		color: var(--color-info);
+	}
+
+	.score-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 0.25rem 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.bonus-highlight {
+		color: var(--color-success);
+		font-weight: bold;
+	}
+
+	.total-score {
+		font-size: 1.5rem;
+		font-weight: bold;
+		text-align: right;
+		margin-top: 1rem;
+		color: var(--color-accent);
+	}
+
+	.winner-text {
+		font-size: 2.5rem;
+		text-align: center;
+		color: var(--color-accent);
+		margin-bottom: 1rem;
+	}
+
+	.vulnerability-badge {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		background: var(--color-error);
+		color: white;
+		font-size: 0.8rem;
+		margin-left: 0.5rem;
+	}
+
+	.red-dice-badge {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		background: #ff0000;
+		color: white;
+		font-size: 0.8rem;
+		margin-left: 0.5rem;
+	}
+
+	.standings {
+		position: fixed;
+		top: 1rem;
+		right: 1rem;
+		max-width: 300px;
+		z-index: 100;
+	}
+
+	@media (max-width: 768px) {
+		.standings {
+			position: static;
+			max-width: 100%;
+		}
+
+		.timer-display {
+			font-size: 3rem;
+		}
+	}
+</style>
+
+<script>
+	const SCORING_TABLE = {
+		3: {1:60, 2:70, 3:80, 4:90, 5:100},
+		4: {1:120, 2:140, 3:160, 4:180, 5:200},
+		5: {1:200, 2:250, 3:300, 4:350, 5:400},
+		6: {1:300, 2:400, 3:500, 4:600, 5:700},
+		7: {1:500, 2:650, 3:800, 4:950, 5:1100},
+		8: {1:750, 2:1000, 3:1250, 4:1500, 5:1750}
+	};
+
+	const BONUS_TABLE = {
+		'3-4': 300,
+		'4-5': 500,
+		'5-6': 800,
+		'6-7': 1200,
+		'7-8': 1850
+	};
+
+	const VULNERABILITY_THRESHOLD = 2000;
+	const PENALTY_AMOUNT = -500;
+	const MIN_SCORE_THRESHOLD = 500;
+	const ROUND_TIME = 180;
+
+	let state = {
+		gameState: 'setup',
+		players: [],
+		currentPlayerIndex: 0,
+		timer: {
+			secondsRemaining: ROUND_TIME,
+			isRunning: false,
+			intervalId: null
+		},
+		winner: null,
+		dictionaryLoaded: false,
+		dictionary: null
+	};
+
+	function saveState() {
+		const saveData = {
+			gameState: state.gameState,
+			players: state.players,
+			currentPlayerIndex: state.currentPlayerIndex,
+			timer: {
+				secondsRemaining: state.timer.secondsRemaining,
+				isRunning: state.timer.isRunning
+			},
+			winner: state.winner
+		};
+		localStorage.setItem('perquackey-state', JSON.stringify(saveData));
+	}
+
+	function loadState() {
+		const saved = localStorage.getItem('perquackey-state');
+		if (saved) {
+			const data = JSON.parse(saved);
+			state = {
+				...state,
+				...data,
+				timer: {
+					...state.timer,
+					...data.timer,
+					intervalId: null
+				}
+			};
+		}
+	}
+
+	function getCurrentPlayer() {
+		return state.players[state.currentPlayerIndex];
+	}
+
+	function formatTime(seconds) {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	}
+
+	function updateTimerDisplay() {
+		const timerEl = document.getElementById('timer');
+		if (timerEl) {
+			timerEl.textContent = formatTime(state.timer.secondsRemaining);
+			timerEl.className = 'timer-display';
+			if (state.timer.secondsRemaining <= 30) {
+				timerEl.classList.add('danger');
+			} else if (state.timer.secondsRemaining <= 60) {
+				timerEl.classList.add('warning');
+			}
+		}
+	}
+
+	function startTimer() {
+		if (state.timer.intervalId) return;
+		state.timer.isRunning = true;
+		state.timer.intervalId = setInterval(() => {
+			if (state.timer.secondsRemaining > 0) {
+				state.timer.secondsRemaining--;
+				updateTimerDisplay();
+				saveState();
+			} else {
+				stopTimer();
+				endRound();
+			}
+		}, 1000);
+	}
+
+	function stopTimer() {
+		if (state.timer.intervalId) {
+			clearInterval(state.timer.intervalId);
+			state.timer.intervalId = null;
+		}
+		state.timer.isRunning = false;
+	}
+
+	async function loadDictionary() {
+		if (state.dictionaryLoaded) return;
+		try {
+			const wordlist = await import('wordlist-js');
+			state.dictionary = new Set(wordlist.default);
+			state.dictionaryLoaded = true;
+		} catch (error) {
+			console.error('Failed to load dictionary:', error);
+		}
+	}
+
+	function validateWord(word) {
+		const validation = { valid: true, message: '' };
+
+		if (!word) {
+			validation.valid = false;
+			validation.message = '';
+			return validation;
+		}
+
+		if (word.length < 3 || word.length > 8) {
+			validation.valid = false;
+			validation.message = 'Word must be 3-8 letters';
+			return validation;
+		}
+
+		const player = getCurrentPlayer();
+		const currentLength = player.currentRoundWords[word.length];
+		
+		if (currentLength && currentLength.length >= 5) {
+			validation.valid = false;
+			validation.message = `Already have 5 words of ${word.length} letters`;
+			return validation;
+		}
+
+		if (/[A-Z]/.test(word) && word !== word.toLowerCase()) {
+			const hasMultipleCapitals = (word.match(/[A-Z]/g) || []).length > 1;
+			if (hasMultipleCapitals || word[0] === word[0].toUpperCase()) {
+				validation.valid = false;
+				validation.message = 'Proper nouns not allowed';
+				return validation;
+			}
+		}
+
+		const baseWord = word.endsWith('s') ? word.slice(0, -1) : null;
+		if (baseWord && player.currentRoundWords[baseWord.length]?.includes(baseWord)) {
+			validation.valid = false;
+			validation.message = `Cannot add "${word}" when "${baseWord}" exists`;
+			return validation;
+		}
+
+		if (player.currentRoundWords[word.length]?.includes(word)) {
+			validation.valid = false;
+			validation.message = 'Word already added';
+			return validation;
+		}
+
+		if (!state.dictionaryLoaded) {
+			validation.valid = false;
+			validation.message = 'Loading dictionary...';
+			return validation;
+		}
+
+		if (!state.dictionary.has(word.toLowerCase())) {
+			validation.valid = false;
+			validation.message = 'Not in dictionary';
+			return validation;
+		}
+
+		if (player.vulnerable && word.length === 3) {
+			validation.valid = false;
+			validation.message = '3-letter words disabled when vulnerable';
+			return validation;
+		}
+
+		validation.message = '✓ Valid word';
+		return validation;
+	}
+
+	function addWord(word) {
+		const player = getCurrentPlayer();
+		const length = word.length;
+		
+		if (!player.currentRoundWords[length]) {
+			player.currentRoundWords[length] = [];
+		}
+		player.currentRoundWords[length].push(word);
+		
+		saveState();
+		renderCurrentWords();
+		checkVulnerability();
+	}
+
+	function removeWord(length, index) {
+		const player = getCurrentPlayer();
+		player.currentRoundWords[length].splice(index, 1);
+		saveState();
+		renderCurrentWords();
+		checkVulnerability();
+	}
+
+	function calculateScore(words) {
+		let totalScore = 0;
+		let bonuses = [];
+
+		for (const [length, wordList] of Object.entries(words)) {
+			const len = parseInt(length);
+			const count = wordList.length;
+			if (count > 0 && SCORING_TABLE[len]) {
+				totalScore += SCORING_TABLE[len][count] || 0;
+			}
+		}
+
+		if (words[7]?.length >= 5 && words[8]?.length >= 5) {
+			totalScore += BONUS_TABLE['7-8'];
+			bonuses.push('7-8 Bonus: +1850');
+		} else if (words[6]?.length >= 5 && words[7]?.length >= 5) {
+			totalScore += BONUS_TABLE['6-7'];
+			bonuses.push('6-7 Bonus: +1200');
+		} else if (words[5]?.length >= 5 && words[6]?.length >= 5) {
+			totalScore += BONUS_TABLE['5-6'];
+			bonuses.push('5-6 Bonus: +800');
+		} else if (words[4]?.length >= 5 && words[5]?.length >= 5) {
+			totalScore += BONUS_TABLE['4-5'];
+			bonuses.push('4-5 Bonus: +500');
+		} else if (words[3]?.length >= 5 && words[4]?.length >= 5) {
+			totalScore += BONUS_TABLE['3-4'];
+			bonuses.push('3-4 Bonus: +300');
+		}
+
+		return { totalScore, bonuses };
+	}
+
+	function checkVulnerability() {
+		const player = getCurrentPlayer();
+		const roundScore = calculateScore(player.currentRoundWords).totalScore + player.totalScore;
+		
+		if (roundScore >= VULNERABILITY_THRESHOLD && !player.vulnerable) {
+			player.vulnerable = true;
+			player.redDice = true;
+			showStandings();
+		}
+	}
+
+	function applyPenalty(player) {
+		if (player.vulnerable && !player.penaltyApplied) {
+			const roundScore = calculateScore(player.currentRoundWords).totalScore;
+			if (roundScore < MIN_SCORE_THRESHOLD) {
+				player.totalScore += PENALTY_AMOUNT;
+				player.penaltyApplied = true;
+			}
+		}
+	}
+
+	function endRound() {
+		stopTimer();
+		const player = getCurrentPlayer();
+		applyPenalty(player);
+		
+		const roundScore = calculateScore(player.currentRoundWords).totalScore;
+		player.currentRoundScore = roundScore;
+		player.totalScore += roundScore;
+		
+		state.gameState = 'round_complete';
+		saveState();
+		showPhase('round-complete');
+		renderRoundSummary();
+		showStandings();
+	}
+
+	function confirmRound() {
+		const player = getCurrentPlayer();
+		
+		for (const [length, wordList] of Object.entries(player.currentRoundWords)) {
+			if (!player.words[length]) {
+				player.words[length] = [];
+			}
+			player.words[length].push(...wordList);
+		}
+		
+		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
+		player.currentRoundScore = 0;
+		player.manualScoreAdjustment = 0;
+		player.penaltyApplied = false;
+
+		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+		
+		if (nextPlayerIndex === 0) {
+			state.gameState = 'game_over';
+			state.winner = determineWinner();
+			saveState();
+			showPhase('game-over');
+			renderGameOver();
+		} else {
+			state.currentPlayerIndex = nextPlayerIndex;
+			state.timer.secondsRemaining = ROUND_TIME;
+			state.gameState = 'playing';
+			saveState();
+			showPhase('playing');
+			renderCurrentPlayer();
+			renderCurrentWords();
+			updateTimerDisplay();
+			showStandings();
+		}
+	}
+
+	function determineWinner() {
+		let maxScore = -Infinity;
+		let winners = [];
+		
+		for (const player of state.players) {
+			if (player.totalScore > maxScore) {
+				maxScore = player.totalScore;
+				winners = [player];
+			} else if (player.totalScore === maxScore) {
+				winners.push(player);
+			}
+		}
+		
+		return winners.length === 1 ? winners[0] : null;
+	}
+
+	function renderSetup() {
+		const playersList = document.getElementById('players-list');
+		const startBtn = document.getElementById('start-game-btn');
+		
+		playersList.innerHTML = state.players.map((player, index) => `
+			<div class="player-item">
+				<span>${player.name}</span>
+				<div>
+					<button class="retro-button" onclick="movePlayer(${index}, -1)">↑</button>
+					<button class="retro-button" onclick="movePlayer(${index}, 1)">↓</button>
+					<button class="retro-button danger" onclick="removePlayer(${index})">✕</button>
+				</div>
+			</div>
+		`).join('');
+		
+		startBtn.disabled = state.players.length < 1;
+	}
+
+	function renderCurrentPlayer() {
+		const player = getCurrentPlayer();
+		const nameEl = document.getElementById('current-player-name');
+		nameEl.textContent = `${player.name}'s Turn`;
+	}
+
+	function renderCurrentWords() {
+		const player = getCurrentPlayer();
+		const container = document.getElementById('current-words');
+		
+		container.innerHTML = '';
+		
+		for (let length = 3; length <= 8; length++) {
+			const words = player.currentRoundWords[length] || [];
+			if (words.length > 0) {
+				const group = document.createElement('div');
+				group.className = 'word-length-group';
+				
+				const header = document.createElement('div');
+				header.className = 'word-length-header';
+				header.textContent = `${length}-letter words (${words.length}/5)`;
+				group.appendChild(header);
+				
+				words.forEach((word, index) => {
+					const wordEl = document.createElement('div');
+					wordEl.className = 'word-item';
+					wordEl.innerHTML = `
+						<span>${word}</span>
+						<button class="retro-button danger" onclick="removeWord(${length}, ${index})">✕</button>
+					`;
+					group.appendChild(wordEl);
+				});
+				
+				container.appendChild(group);
+			}
+		}
+		
+		if (container.children.length === 0) {
+			container.innerHTML = '<div class="info-message">No words added yet</div>';
+		}
+	}
+
+	function renderRoundSummary() {
+		const player = getCurrentPlayer();
+		const container = document.getElementById('round-summary');
+		const { totalScore, bonuses } = calculateScore(player.currentRoundWords);
+		
+		let html = '<h3>Score Breakdown</h3>';
+		
+		for (let length = 3; length <= 8; length++) {
+			const words = player.currentRoundWords[length] || [];
+			if (words.length > 0) {
+				const score = SCORING_TABLE[length][words.length];
+				html += `<div class="score-row">
+					<span>${length}-letter (${words.length}/5)</span>
+					<span>+${score}</span>
+				</div>`;
+			}
+		}
+		
+		if (bonuses.length > 0) {
+			html += '<div style="margin-top: 1rem;">';
+			bonuses.forEach(bonus => {
+				html += `<div class="bonus-highlight">${bonus}</div>`;
+			});
+			html += '</div>';
+		}
+		
+		if (player.manualScoreAdjustment !== 0) {
+			html += `<div class="score-row">
+				<span>Manual Adjustment</span>
+				<span>${player.manualScoreAdjustment > 0 ? '+' : ''}${player.manualScoreAdjustment}</span>
+			</div>`;
+		}
+		
+		html += `<div class="total-score">Round Total: ${totalScore + player.manualScoreAdjustment}</div>`;
+		html += `<div style="margin-top: 1rem;">Game Total: ${player.totalScore + totalScore + player.manualScoreAdjustment}</div>`;
+		
+		if (player.vulnerable) {
+			html += '<div class="red-dice-badge">RED DICE ACTIVE</div>';
+			if (player.penaltyApplied) {
+				html += `<div class="vulnerability-badge">Penalty Applied: ${PENALTY_AMOUNT}</div>`;
+			}
+		}
+		
+		container.innerHTML = html;
+	}
+
+	function renderStandings() {
+		const container = document.getElementById('standings-list');
+		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+		
+		container.innerHTML = sorted.map((player, index) => `
+			<div class="standing-item">
+				<span>${index + 1}. ${player.name}</span>
+				<span>
+					${player.totalScore}
+					${player.vulnerable ? '<span class="vulnerability-badge">VULNERABLE</span>' : ''}
+					${player.redDice ? '<span class="red-dice-badge">RED DICE</span>' : ''}
+				</span>
+			</div>
+		`).join('');
+	}
+
+	function renderGameOver() {
+		const winnerEl = document.getElementById('winner-announcement');
+		const scoresEl = document.getElementById('final-scores');
+		
+		if (state.winner) {
+			winnerEl.innerHTML = `<div class="winner-text">🎉 ${state.winner.name} Wins! 🎉</div>`;
+		} else {
+			const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+			const topScores = sorted.filter(p => p.totalScore === sorted[0].totalScore);
+			winnerEl.innerHTML = `<div class="winner-text">🤝 Tie: ${topScores.map(p => p.name).join(' & ')} 🤝</div>`;
+		}
+		
+		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+		scoresEl.innerHTML = sorted.map((player, index) => `
+			<div class="standing-item">
+				<span>${index + 1}. ${player.name}</span>
+				<span>${player.totalScore}</span>
+			</div>
+		`).join('');
+	}
+
+	function showPhase(phase) {
+		document.querySelectorAll('.phase').forEach(el => el.style.display = 'none');
+		document.getElementById(`${phase}-phase`).style.display = 'flex';
+		
+		if (phase === 'playing' || phase === 'round-complete' || phase === 'game-over') {
+			document.getElementById('standings-window').style.display = 'block';
+		} else {
+			document.getElementById('standings-window').style.display = 'none';
+		}
+	}
+
+	function showStandings() {
+		if (state.gameState !== 'setup') {
+			renderStandings();
+		}
+	}
+
+	function resetGame() {
+		state = {
+			gameState: 'setup',
+			players: state.players.map(p => ({
+				...p,
+				totalScore: 0,
+				currentRoundScore: 0,
+				manualScoreAdjustment: 0,
+				words: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+				currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+				vulnerable: false,
+				redDice: false,
+				penaltyApplied: false
+			})),
+			currentPlayerIndex: 0,
+			timer: {
+				secondsRemaining: ROUND_TIME,
+				isRunning: false,
+				intervalId: null
+			},
+			winner: null,
+			dictionaryLoaded: state.dictionaryLoaded,
+			dictionary: state.dictionary
+		};
+		saveState();
+		showPhase('setup');
+		renderSetup();
+	}
+
+	window.addPlayer = () => {
+		const input = document.getElementById('player-name');
+		const name = input.value.trim();
+		if (name && !state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+			state.players.push({
+				id: Date.now().toString(),
+				name,
+				totalScore: 0,
+				currentRoundScore: 0,
+				manualScoreAdjustment: 0,
+				words: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+				currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+				vulnerable: false,
+				redDice: false,
+				penaltyApplied: false
+			});
+			input.value = '';
+			saveState();
+			renderSetup();
+		}
+	};
+
+	window.removePlayer = (index) => {
+		state.players.splice(index, 1);
+		saveState();
+		renderSetup();
+	};
+
+	window.movePlayer = (index, direction) => {
+		const newIndex = index + direction;
+		if (newIndex >= 0 && newIndex < state.players.length) {
+			[state.players[index], state.players[newIndex]] = [state.players[newIndex], state.players[index]];
+			saveState();
+			renderSetup();
+		}
+	};
+
+	window.removeWord = removeWord;
+
+	window.startGame = () => {
+		if (state.players.length > 0) {
+			state.gameState = 'playing';
+			state.currentPlayerIndex = 0;
+			state.timer.secondsRemaining = ROUND_TIME;
+			saveState();
+			showPhase('playing');
+			renderCurrentPlayer();
+			renderCurrentWords();
+			updateTimerDisplay();
+			showStandings();
+			startTimer();
+			loadDictionary();
+		}
+	};
+
+	window.endRound = endRound;
+
+	window.restartRound = () => {
+		const player = getCurrentPlayer();
+		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
+		state.timer.secondsRemaining = ROUND_TIME;
+		saveState();
+		renderCurrentWords();
+		updateTimerDisplay();
+		startTimer();
+	};
+
+	window.forfeitRound = () => {
+		const player = getCurrentPlayer();
+		player.currentRoundScore = 0;
+		player.totalScore += 0;
+		
+		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+		
+		if (nextPlayerIndex === 0) {
+			state.gameState = 'game_over';
+			state.winner = determineWinner();
+			saveState();
+			showPhase('game-over');
+			renderGameOver();
+		} else {
+			state.currentPlayerIndex = nextPlayerIndex;
+			state.timer.secondsRemaining = ROUND_TIME;
+			state.gameState = 'playing';
+			saveState();
+			showPhase('playing');
+			renderCurrentPlayer();
+			renderCurrentWords();
+			updateTimerDisplay();
+			showStandings();
+			startTimer();
+		}
+	};
+
+	window.editWords = () => {
+		state.gameState = 'playing';
+		saveState();
+		showPhase('playing');
+		renderCurrentPlayer();
+		renderCurrentWords();
+		updateTimerDisplay();
+	};
+
+	window.confirmRound = confirmRound;
+
+	window.applyManualAdjustment = () => {
+		const input = document.getElementById('manual-adjustment');
+		const player = getCurrentPlayer();
+		player.manualScoreAdjustment = parseInt(input.value) || 0;
+		saveState();
+		renderRoundSummary();
+	};
+
+	window.playAgain = resetGame;
+
+	document.addEventListener('DOMContentLoaded', () => {
+		loadState();
+		
+		if (state.gameState === 'setup') {
+			showPhase('setup');
+			renderSetup();
+		} else if (state.gameState === 'playing') {
+			showPhase('playing');
+			renderCurrentPlayer();
+			renderCurrentWords();
+			updateTimerDisplay();
+			showStandings();
+			loadDictionary();
+			if (state.timer.isRunning) {
+				startTimer();
+			}
+		} else if (state.gameState === 'round_complete') {
+			showPhase('round-complete');
+			renderRoundSummary();
+			showStandings();
+		} else if (state.gameState === 'game_over') {
+			showPhase('game-over');
+			renderGameOver();
+			showStandings();
+		}
+		
+		document.getElementById('add-player-btn').addEventListener('click', window.addPlayer);
+		document.getElementById('start-game-btn').addEventListener('click', window.startGame);
+		document.getElementById('end-round-btn').addEventListener('click', window.endRound);
+		document.getElementById('restart-round-btn').addEventListener('click', window.restartRound);
+		document.getElementById('forfeit-round-btn').addEventListener('click', window.forfeitRound);
+		document.getElementById('edit-words-btn').addEventListener('click', window.editWords);
+		document.getElementById('confirm-round-btn').addEventListener('click', window.confirmRound);
+		document.getElementById('apply-adjustment-btn').addEventListener('click', window.applyManualAdjustment);
+		document.getElementById('play-again-btn').addEventListener('click', window.playAgain);
+		
+		const wordInput = document.getElementById('word-input');
+		const validationMsg = document.getElementById('validation-message');
+		
+		wordInput.addEventListener('input', async () => {
+			const word = wordInput.value.trim().toUpperCase();
+			validationMsg.className = 'validation-message info';
+			
+			if (word) {
+				await loadDictionary();
+				const validation = validateWord(word);
+				validationMsg.textContent = validation.message;
+				validationMsg.className = `validation-message ${validation.valid ? 'success' : 'error'}`;
+			} else {
+				validationMsg.textContent = '';
+			}
+		});
+		
+		wordInput.addEventListener('keydown', async (e) => {
+			if (e.key === 'Enter') {
+				const word = wordInput.value.trim().toUpperCase();
+				if (word) {
+					await loadDictionary();
+					const validation = validateWord(word);
+					if (validation.valid) {
+						addWord(word);
+						wordInput.value = '';
+						validationMsg.textContent = '';
+					} else {
+						validationMsg.textContent = validation.message;
+						validationMsg.className = 'validation-message error';
+					}
+				}
+			}
+		});
+		
+		const playerNameInput = document.getElementById('player-name');
+		playerNameInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				window.addPlayer();
+			}
+		});
+	});
+</script>
