@@ -48,6 +48,7 @@ import Badge from '../../components/Badge.astro';
 				<div class="form-group">
 					<input type="text" id="word-input" placeholder="Enter word (3-8 letters)" maxlength="8" />
 					<div id="validation-message" class="validation-message"></div>
+					<button id="override-btn" class="override-btn" style="display: none;">Override Dictionary</button>
 				</div>
 			</Window>
 
@@ -301,6 +302,23 @@ import Badge from '../../components/Badge.astro';
 
 	.validation-message.info {
 		color: var(--color-info);
+	}
+
+	.override-btn {
+		background: var(--color-error);
+		border: 2px solid var(--color-border);
+		color: white;
+		padding: 0.5rem 1rem;
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin-top: 0.5rem;
+	}
+
+	.override-btn:hover {
+		background: #cc0000;
+		transform: scale(1.02);
 	}
 
 	.score-row {
@@ -1582,36 +1600,62 @@ import Badge from '../../components/Badge.astro';
 		
 		const wordInput = document.getElementById('word-input');
 		const validationMsg = document.getElementById('validation-message');
+		const overrideBtn = document.getElementById('override-btn');
+		let lastValidation = null;
+		let currentWord = '';
 		
-		wordInput.addEventListener('input', async () => {
-			const word = wordInput.value.trim().toUpperCase();
+		async function validateAndUpdate() {
+			currentWord = wordInput.value.trim().toUpperCase();
 			validationMsg.className = 'validation-message info';
+			overrideBtn.style.display = 'none';
 			
-			if (word) {
+			if (currentWord) {
 				await loadDictionary();
-				const validation = validateWord(word);
-				validationMsg.textContent = validation.message;
-				validationMsg.className = `validation-message ${validation.valid ? 'success' : 'error'}`;
+				lastValidation = validateWord(currentWord);
+				validationMsg.textContent = lastValidation.message;
+				validationMsg.className = `validation-message ${lastValidation.valid ? 'success' : 'error'}`;
+				
+				if (!lastValidation.valid && lastValidation.message === 'Not in dictionary') {
+					overrideBtn.style.display = 'inline-block';
+				}
 			} else {
 				validationMsg.textContent = '';
+				lastValidation = null;
 			}
-		});
+		}
+		
+		wordInput.addEventListener('input', validateAndUpdate);
 		
 		wordInput.addEventListener('keydown', async (e) => {
 			if (e.key === 'Enter') {
-				const word = wordInput.value.trim().toUpperCase();
-				if (word) {
-					await loadDictionary();
-					const validation = validateWord(word);
-					if (validation.valid) {
-						addWord(word);
+				if (currentWord) {
+					if (!lastValidation) {
+						await validateAndUpdate();
+					}
+					
+					if (lastValidation && lastValidation.valid) {
+						addWord(currentWord);
 						wordInput.value = '';
+						currentWord = '';
 						validationMsg.textContent = '';
+						lastValidation = null;
+						overrideBtn.style.display = 'none';
 					} else {
-						validationMsg.textContent = validation.message;
+						validationMsg.textContent = lastValidation.message;
 						validationMsg.className = 'validation-message error';
 					}
 				}
+			}
+		});
+		
+		overrideBtn.addEventListener('click', () => {
+			if (currentWord && lastValidation && !lastValidation.valid) {
+				addWord(currentWord);
+				wordInput.value = '';
+				currentWord = '';
+				validationMsg.textContent = '';
+				lastValidation = null;
+				overrideBtn.style.display = 'none';
 			}
 		});
 		
