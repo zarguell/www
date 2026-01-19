@@ -845,21 +845,12 @@ import Badge from '../../components/Badge.astro';
 		
 		const roundScore = calculateScore(player.currentRoundWords).totalScore;
 		player.currentRoundScore = roundScore;
-		player.totalScore += roundScore;
 		
-		if (player.totalScore >= state.scoreLimit) {
-			state.gameState = 'game_over';
-			state.winner = player;
-			saveState();
-			showPhase('game-over');
-			renderGameOver();
-		} else {
-			state.gameState = 'round_complete';
-			saveState();
-			showPhase('round-complete');
-			renderRoundSummary();
-			showStandings();
-		}
+		state.gameState = 'round_complete';
+		saveState();
+		showPhase('round-complete');
+		renderRoundSummary();
+		showStandings();
 	}
 
 		function confirmRound() {
@@ -881,24 +872,35 @@ import Badge from '../../components/Badge.astro';
 		});
 		player.allWordsPlayed.push(...roundWords);
 		
+		player.totalScore += player.currentRoundScore + player.manualScoreAdjustment;
+		
 		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
 		player.currentRoundScore = 0;
 		player.manualScoreAdjustment = 0;
 		player.penaltyApplied = false;
 
-		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-		state.currentPlayerIndex = nextPlayerIndex;
-		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-		state.timer.isRunning = false;
-		state.timer.intervalId = null;
-		state.gameState = 'playing';
-		saveState();
-		showPhase('playing');
-		renderCurrentPlayer();
-		renderCurrentWords();
-		updateTimerDisplay();
-		updateTimerButtons();
-		showStandings();
+		if (player.totalScore >= state.scoreLimit) {
+			state.winner = player;
+			state.gameState = 'game_over';
+			saveState();
+			showPhase('game-over');
+			renderGameOver();
+			showStandings();
+		} else {
+			const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+			state.currentPlayerIndex = nextPlayerIndex;
+			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+			state.timer.isRunning = false;
+			state.timer.intervalId = null;
+			state.gameState = 'playing';
+			saveState();
+			showPhase('playing');
+			renderCurrentPlayer();
+			renderCurrentWords();
+			updateTimerDisplay();
+			updateTimerButtons();
+			showStandings();
+		}
 	}
 
 	function getLongestWord() {
@@ -1107,7 +1109,7 @@ import Badge from '../../components/Badge.astro';
 		}
 		
 		html += `<div class="total-score">Round Total: ${totalScore + player.manualScoreAdjustment}</div>`;
-		html += `<div style="margin-top: 1rem;">Game Total: ${player.totalScore + player.manualScoreAdjustment}</div>`;
+		html += `<div style="margin-top: 1rem;">Game Total: ${player.totalScore + totalScore + player.manualScoreAdjustment}</div>`;
 		
 		if (player.vulnerable) {
 			html += '<div class="red-dice-badge">RED DICE ACTIVE</div>';
