@@ -331,15 +331,10 @@ export const toolsData: ToolCategory[] = [
 				badge: "WORD GAME",
 				features: [
 					"3-minute timer with persistence",
-					"Dictionary validation (lazy-loaded)",
+					"Dictionary validation",
 					"Official scoring table lookup",
-					"Bonus calculations (5+5 completions)",
-					"Vulnerability & red dice tracking",
 					"Multi-player support",
-					"State persistence",
-					"Virtual dice mode (classic & modern sets)",
-					"Retro pixel art dice visualization",
-					"Red dice auto-appear when vulnerable",
+					"Virtual dice mode (classic & modern sets)"
 				],
 				lastModified: "2026-01-19",
 			},
