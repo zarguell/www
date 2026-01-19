@@ -718,25 +718,16 @@ import Badge from '../../components/Badge.astro';
 
 	function advanceToNextPlayer() {
 		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-		
-		if (nextPlayerIndex === 0) {
-			state.gameState = 'game_over';
-			state.winner = determineWinner();
-			saveState();
-			showPhase('game-over');
-			renderGameOver();
-		} else {
-			state.currentPlayerIndex = nextPlayerIndex;
-			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-			stopTimer();
-			state.gameState = 'playing';
-			saveState();
-			showPhase('playing');
-			renderCurrentPlayer();
-			renderCurrentWords();
-			updateTimerDisplay();
-			showStandings();
-		}
+		state.currentPlayerIndex = nextPlayerIndex;
+		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+		stopTimer();
+		state.gameState = 'playing';
+		saveState();
+		showPhase('playing');
+		renderCurrentPlayer();
+		renderCurrentWords();
+		updateTimerDisplay();
+		showStandings();
 	}
 
 	function endRound() {
@@ -748,11 +739,19 @@ import Badge from '../../components/Badge.astro';
 		player.currentRoundScore = roundScore;
 		player.totalScore += roundScore;
 		
-		state.gameState = 'round_complete';
-		saveState();
-		showPhase('round-complete');
-		renderRoundSummary();
-		showStandings();
+		if (player.totalScore >= state.scoreLimit) {
+			state.gameState = 'game_over';
+			state.winner = player;
+			saveState();
+			showPhase('game-over');
+			renderGameOver();
+		} else {
+			state.gameState = 'round_complete';
+			saveState();
+			showPhase('round-complete');
+			renderRoundSummary();
+			showStandings();
+		}
 	}
 
 	function confirmRound() {
@@ -771,24 +770,15 @@ import Badge from '../../components/Badge.astro';
 		player.penaltyApplied = false;
 
 		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-		
-		if (nextPlayerIndex === 0) {
-			state.gameState = 'game_over';
-			state.winner = determineWinner();
-			saveState();
-			showPhase('game-over');
-			renderGameOver();
-		} else {
-			state.currentPlayerIndex = nextPlayerIndex;
-			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-			state.gameState = 'playing';
-			saveState();
-			showPhase('playing');
-			renderCurrentPlayer();
-			renderCurrentWords();
-			updateTimerDisplay();
-			showStandings();
-		}
+		state.currentPlayerIndex = nextPlayerIndex;
+		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+		state.gameState = 'playing';
+		saveState();
+		showPhase('playing');
+		renderCurrentPlayer();
+		renderCurrentWords();
+		updateTimerDisplay();
+		showStandings();
 	}
 
 	function determineWinner() {
