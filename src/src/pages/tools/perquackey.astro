@@ -705,7 +705,6 @@ import Badge from '../../components/Badge.astro';
 			showStandings();
 		}
 	}
-	}
 
 	function applyPenalty(player) {
 		if (player.vulnerable && !player.penaltyApplied) {
@@ -781,7 +780,7 @@ import Badge from '../../components/Badge.astro';
 			renderGameOver();
 		} else {
 			state.currentPlayerIndex = nextPlayerIndex;
-			state.timer.secondsRemaining = ROUND_TIME;
+			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
 			state.gameState = 'playing';
 			saveState();
 			showPhase('playing');
@@ -988,7 +987,7 @@ import Badge from '../../components/Badge.astro';
 			})),
 			currentPlayerIndex: 0,
 			timer: {
-				secondsRemaining: ROUND_TIME,
+				secondsRemaining: parseInt(state.roundTime) || DEFAULT_ROUND_TIME,
 				isRunning: false,
 				intervalId: null
 			},
