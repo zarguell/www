@@ -5,9 +5,11 @@ import RetroButton from '../../components/RetroButton.astro';
 import Badge from '../../components/Badge.astro';
 import DiceConfig from '../../components/DiceConfig.astro';
 import DiceRoller from '../../components/DiceRoller.astro';
+
+const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 ---
 
-<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management" hideAimChat={true}>
+<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management" ogImage={ogImage} hideAimChat={true}>
 	<div class="tool-hero">
 		<h1>PERQUACKEY TRACKER</h1>
 		<p>Word Game Score Tracker with Timer & Dictionary</p>

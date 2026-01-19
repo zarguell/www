@@ -8,12 +8,14 @@ interface Props {
 	title?: string;
 	description?: string;
 	hideAimChat?: boolean;
+	ogImage?: string;
 }
 
 const {
 	title = 'Arguelles Site',
-	description = 'Welcome to the Arguelles Site!',
+	description = 'Welcome to Arguelles Site!',
 	hideAimChat = false,
+	ogImage,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -28,6 +30,18 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalURL} />
+
+		<!-- Open Graph meta tags -->
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		{ogImage && (
+			<>
+				<meta property="og:image" content={ogImage} />
+				<meta property="og:image:alt" content="Preview image" />
+			</>
+		)}
 
 		<!-- RSS Feed -->
 		<link rel="alternate" type="application/rss+xml" title={title} href="/rss.xml" />
