@@ -327,7 +327,7 @@ export const toolsData: ToolCategory[] = [
 			{
 				title: "Perquackey Tracker",
 				slug: "perquackey",
-				description: "Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management. Features real-time word validation, scoring based on official rules, vulnerability tracking, and multi-player support.",
+				description: "Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management. Features real-time word validation, scoring based on official rules, vulnerability tracking, multi-player support, and virtual dice rolling mode.",
 				badge: "WORD GAME",
 				features: [
 					"3-minute timer with persistence",
@@ -337,8 +337,11 @@ export const toolsData: ToolCategory[] = [
 					"Vulnerability & red dice tracking",
 					"Multi-player support",
 					"State persistence",
+					"Virtual dice mode (classic & modern sets)",
+					"Retro pixel art dice visualization",
+					"Red dice auto-appear when vulnerable",
 				],
-				lastModified: "2026-01-18",
+				lastModified: "2026-01-19",
 			},
 		],
 	},

@@ -1,0 +1,153 @@
+---
+import Window from './Window.astro';
+import RetroButton from './RetroButton.astro';
+---
+
+<div class="dice-config">
+	<Window title="Game Mode & Dice Settings">
+		<div class="form-group">
+			<label for="dice-mode">Game Mode</label>
+			<div class="radio-group">
+				<label class="radio-option">
+					<input type="radio" name="dice-mode" value="manual" id="mode-manual" checked />
+					<span>Manual Entry</span>
+				</label>
+				<label class="radio-option">
+					<input type="radio" name="dice-mode" value="virtual" id="mode-virtual" />
+					<span>Virtual Dice</span>
+				</label>
+			</div>
+		</div>
+
+		<div id="virtual-dice-settings" class="virtual-settings" style="display: none;">
+			<div class="form-group">
+				<label for="dice-set">Dice Set</label>
+				<div class="radio-group">
+					<label class="radio-option">
+						<input type="radio" name="dice-set" value="classic" id="set-classic" checked />
+						<span>Classic (Pre-2004)</span>
+					</label>
+					<label class="radio-option">
+						<input type="radio" name="dice-set" value="modern" id="set-modern" />
+						<span>Modern (2004+)</span>
+					</label>
+				</div>
+			</div>
+
+			<div class="dice-info">
+				<p class="dice-info-title">Dice Sets:</p>
+				<div class="dice-info-content">
+					<div class="dice-set-info">
+						<strong>Classic:</strong> Original dice distribution with Q, S, S, V, W, Y red dice
+					</div>
+					<div class="dice-set-info">
+						<strong>Modern:</strong> Updated dice with B, F, P, Q, S, Y and H, L, N, S, V, W red dice
+					</div>
+				</div>
+			</div>
+		</div>
+	</Window>
+</div>
+
+<style>
+	.dice-config {
+		margin-bottom: 1.5rem;
+	}
+
+	.form-group {
+		margin-bottom: 1rem;
+	}
+
+	.form-group label {
+		font-size: 1.2rem;
+		font-weight: bold;
+		display: block;
+		margin-bottom: 0.5rem;
+	}
+
+	.radio-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.radio-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		padding: 0.5rem;
+		border: 2px solid var(--color-border);
+		background: var(--color-bg-secondary);
+		transition: all 0.2s ease;
+	}
+
+	.radio-option:hover {
+		background: var(--color-accent);
+		color: var(--sticker-text);
+	}
+
+	.radio-option input[type="radio"] {
+		cursor: pointer;
+		width: 1.2rem;
+		height: 1.2rem;
+	}
+
+	.radio-option span {
+		flex: 1;
+		font-size: 1.1rem;
+	}
+
+	.virtual-settings {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 2px solid var(--color-border);
+	}
+
+	.dice-info {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: var(--color-bg-secondary);
+		border: 2px solid var(--color-border);
+	}
+
+	.dice-info-title {
+		font-weight: bold;
+		margin: 0 0 0.5rem 0;
+		font-size: 1rem;
+		color: var(--color-accent);
+	}
+
+	.dice-info-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.dice-set-info {
+		font-size: 0.95rem;
+		line-height: 1.4;
+	}
+
+	.dice-set-info strong {
+		color: var(--color-accent);
+	}
+
+	@media (max-width: 768px) {
+		.radio-group {
+			gap: 0.3rem;
+		}
+
+		.radio-option {
+			padding: 0.4rem;
+		}
+
+		.dice-info {
+			padding: 0.5rem;
+		}
+
+		.dice-set-info {
+			font-size: 0.85rem;
+		}
+	}
+</style>

@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 import Badge from '../../components/Badge.astro';
+import DiceConfig from '../../components/DiceConfig.astro';
+import DiceRoller from '../../components/DiceRoller.astro';
 ---
 
 <BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management" hideAimChat={true}>
@@ -13,6 +15,8 @@ import Badge from '../../components/Badge.astro';
 
 	<div id="app">
 		<div id="setup-phase" class="phase">
+			<DiceConfig />
+
 			<Window title="Game Setup">
 				<div class="form-group">
 					<label for="player-name">Add Player</label>
@@ -44,13 +48,20 @@ import Badge from '../../components/Badge.astro';
 			<div class="timer-display" id="timer">3:00</div>
 			<div class="current-player" id="current-player-name"></div>
 
-			<Window title="Word Entry">
-				<div class="form-group">
-					<input type="text" id="word-input" placeholder="Enter word (3-8 letters)" maxlength="8" />
-					<div id="validation-message" class="validation-message"></div>
-					<button id="override-btn" class="override-btn" style="display: none;">Override Dictionary</button>
-				</div>
-			</Window>
+			<div id="manual-word-entry">
+				<Window title="Word Entry">
+					<div class="form-group">
+						<input type="text" id="word-input" placeholder="Enter word (3-8 letters)" maxlength="8" />
+						<div id="validation-message" class="validation-message"></div>
+						<button id="override-btn" class="override-btn" style="display: none;">Override Dictionary</button>
+					</div>
+				</Window>
+			</div>
+
+			<div id="virtual-dice-entry" style="display: none;">
+				<DiceRoller />
+				<div id="dice-validation-message" class="validation-message"></div>
+			</div>
 
 			<Window title="Current Words">
 				<div id="current-words" class="words-list"></div>
@@ -531,6 +542,186 @@ import Badge from '../../components/Badge.astro';
 		margin-top: 1rem;
 	}
 
+	/* Virtual Dice Styles */
+	.dice-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+		min-height: 100px;
+	}
+
+	.die {
+		width: 70px;
+		height: 70px;
+		border: 6px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+		font-family: 'VT323', monospace;
+		font-size: 2.5rem;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		user-select: none;
+		position: relative;
+		box-shadow:
+			6px 6px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
+		transition: all 0.1s ease;
+		image-rendering: pixelated;
+		border-radius: 8px;
+	}
+
+	.die::before {
+		content: '';
+		position: absolute;
+		top: 6px;
+		left: 6px;
+		right: 6px;
+		bottom: 6px;
+		border: 3px solid rgba(0, 0, 0, 0.3);
+		border-radius: 4px;
+		pointer-events: none;
+	}
+
+	.die::after {
+		content: '';
+		position: absolute;
+		bottom: 3px;
+		right: 3px;
+		width: 8px;
+		height: 8px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 50%;
+		pointer-events: none;
+	}
+
+	.die.black {
+		background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+		color: #ffffff;
+		border-color: #000000;
+	}
+
+	.die.black:hover {
+		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+		transform: translate(-3px, -3px);
+		box-shadow:
+			9px 9px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
+	}
+
+	.die.black.selected {
+		background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+		border-color: var(--color-accent);
+		border-width: 8px;
+		box-shadow:
+			0 0 15px var(--color-accent),
+			6px 6px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
+		transform: scale(1.08);
+	}
+
+	.die.red {
+		background: linear-gradient(135deg, #aa0000 0%, #880000 100%);
+		color: #ffffff;
+		border-color: #770000;
+	}
+
+	.die.red:hover {
+		background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
+		transform: translate(-3px, -3px);
+		box-shadow:
+			9px 9px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
+	}
+
+	.die.red.selected {
+		background: linear-gradient(135deg, #dd0000 0%, #bb0000 100%);
+		border-color: var(--color-accent);
+		border-width: 8px;
+		box-shadow:
+			0 0 15px var(--color-accent),
+			6px 6px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
+		transform: scale(1.08);
+	}
+
+	.die.rolling {
+		animation: roll 0.5s ease-in-out;
+	}
+
+	@keyframes roll {
+		0% {
+			transform: rotate(0deg) scale(1);
+		}
+		25% {
+			transform: rotate(90deg) scale(1.1);
+		}
+		50% {
+			transform: rotate(180deg) scale(1);
+		}
+		75% {
+			transform: rotate(270deg) scale(1.1);
+		}
+		100% {
+			transform: rotate(360deg) scale(1);
+		}
+	}
+
+	.dice-controls {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.selected-word-display {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: var(--color-bg-secondary);
+		border: 2px solid var(--color-border);
+		min-height: 3rem;
+	}
+
+	.selected-word-label {
+		font-size: 1.1rem;
+		font-weight: bold;
+		color: var(--color-accent);
+		white-space: nowrap;
+	}
+
+	.selected-word-value {
+		font-size: 1.3rem;
+		font-family: 'VT323', monospace;
+		font-weight: bold;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		flex: 1;
+		color: var(--color-text);
+	}
+
+	.selected-word-value:empty::before {
+		content: 'Click dice to select letters';
+		color: var(--color-border);
+		font-size: 1rem;
+		letter-spacing: normal;
+		text-transform: none;
+	}
+
+	.dice-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.dice-actions .retro-button {
+		flex: 1;
+		min-width: 120px;
+	}
+
 	@media (max-width: 768px) {
 		.standings-window {
 			position: static;
@@ -540,6 +731,48 @@ import Badge from '../../components/Badge.astro';
 
 		.timer-display {
 			font-size: 3rem;
+		}
+
+		.dice-grid {
+			grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+			gap: 0.75rem;
+		}
+
+		.die {
+			width: 55px;
+			height: 55px;
+			font-size: 1.8rem;
+			border-width: 5px;
+		}
+
+		.die::before {
+			top: 5px;
+			left: 5px;
+			right: 5px;
+			bottom: 5px;
+			border-width: 2px;
+		}
+
+		.die.selected {
+			border-width: 6px;
+		}
+
+		.dice-actions {
+			flex-direction: column;
+		}
+
+		.dice-actions .retro-button {
+			width: 100%;
+		}
+
+		.selected-word-display {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.25rem;
+		}
+
+		.selected-word-value {
+			font-size: 1.1rem;
 		}
 	}
 </style>
@@ -568,6 +801,12 @@ import Badge from '../../components/Badge.astro';
 	const DEFAULT_ROUND_TIME = 180;
 	const DEFAULT_SCORE_LIMIT = 5000;
 
+	
+	let lastTapTime = 0;
+	const DOUBLE_TAP_THRESHOLD = 200;
+	let audioContext = null;
+	let userInteracted = false;
+
 	let state = {
 		gameState: 'setup',
 		players: [],
@@ -582,7 +821,16 @@ import Badge from '../../components/Badge.astro';
 		winner: null,
 		dictionaryLoaded: false,
 		dictionary: null,
-		soundEnabled: true
+		soundEnabled: true,
+		diceMode: 'manual',
+		diceSet: 'classic',
+		currentDice: [],
+		diceRolled: false,
+		selectedDiceOrder: [],
+		reorderMode: {
+			active: false,
+			sourceIndex: null
+		}
 	};
 
 	function saveState() {
@@ -597,7 +845,10 @@ import Badge from '../../components/Badge.astro';
 				isRunning: state.timer.isRunning
 			},
 			winner: state.winner,
-			soundEnabled: state.soundEnabled
+			soundEnabled: state.soundEnabled,
+			diceSoundEnabled: state.diceSoundEnabled,
+			diceMode: state.diceMode,
+			diceSet: state.diceSet
 		};
 		localStorage.setItem('perquackey-state', JSON.stringify(saveData));
 	}
@@ -616,7 +867,10 @@ import Badge from '../../components/Badge.astro';
 					...data.timer,
 					intervalId: null
 				},
-				soundEnabled: data.soundEnabled !== undefined ? data.soundEnabled : true
+				soundEnabled: data.soundEnabled !== undefined ? data.soundEnabled : true,
+				diceSoundEnabled: data.diceSoundEnabled !== undefined ? data.diceSoundEnabled : false,
+				diceMode: data.diceMode || 'manual',
+				diceSet: data.diceSet || 'classic'
 			};
 		}
 	}
@@ -652,21 +906,61 @@ import Badge from '../../components/Badge.astro';
 		if (!state.soundEnabled) return;
 		
 		try {
-			const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-			const oscillator = audioCtx.createOscillator();
-			const gainNode = audioCtx.createGain();
+			// Create or reuse AudioContext
+			if (!audioContext) {
+				audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			}
+			
+			// Resume if suspended (required after user gesture)
+			if (audioContext.state === 'suspended') {
+				audioContext.resume();
+			}
+			
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
 			
 			oscillator.connect(gainNode);
-			gainNode.connect(audioCtx.destination);
+			gainNode.connect(audioContext.destination);
 			
 			oscillator.frequency.value = 800;
 			oscillator.type = 'square';
 			gainNode.gain.value = 0.3;
 			
 			oscillator.start();
-			oscillator.stop(audioCtx.currentTime + 0.5);
+			oscillator.stop(audioContext.currentTime + 0.5);
 		} catch (error) {
-			console.error('Audio not supported:', error);
+			// Silently fail if audio not supported
+		}
+	}
+
+	function playDiceSelectSound() {
+		if (!state.soundEnabled || !state.diceSoundEnabled) return;
+		
+		try {
+			// Create or reuse AudioContext
+			if (!audioContext) {
+				audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			}
+			
+			// Resume if suspended (required after user gesture)
+			if (audioContext.state === 'suspended') {
+				audioContext.resume();
+			}
+			
+			const oscillator = audioContext.createOscillator();
+			const gainNode = audioContext.createGain();
+			
+			oscillator.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+			
+			oscillator.frequency.value = 1200;
+			oscillator.type = 'sine';
+			gainNode.gain.value = 0.15;
+			
+			oscillator.start();
+			oscillator.stop(audioContext.currentTime + 0.05);
+		} catch (error) {
+			// Silently fail if audio not supported
 		}
 	}
 
@@ -765,6 +1059,354 @@ import Badge from '../../components/Badge.astro';
 		return validation;
 	}
 
+	function rollDiceForRound() {
+		const player = getCurrentPlayer();
+		const includeRedDice = player.vulnerable;
+
+		const diceConfig = {
+			classic: {
+				black: [
+					['A','A','A','E','E','E'], ['A','A','A','E','E','E'],
+					['B','H','I','K','R','T'], ['F','H','I','R','S','U'],
+					['G','I','M','R','S','U'], ['E','J','Q','V','X','Z'],
+					['F','I','N','P','T','U'], ['C','M','O','O','P','W'],
+					['D','L','N','O','R','T'], ['B','L','O','O','W','Y']
+				],
+				red: [
+					['Q','S','S','V','W','Y'],
+					['B','F','H','L','N','P'],
+					['C','D','G','J','K','M']
+				]
+			},
+			modern: {
+				black: [
+					['A','A','A','E','E','E'], ['A','A','A','E','E','E'],
+					['B','H','I','K','R','T'], ['F','H','I','R','S','U'],
+					['G','I','M','R','S','U'], ['E','J','Q','V','X','Z'],
+					['F','I','N','P','T','U'], ['C','M','O','O','P','W'],
+					['D','L','N','O','R','T'], ['B','L','O','O','W','Y']
+				],
+				red: [
+					['B','F','P','Q','S','Y'],
+					['C','D','G','J','K','M'],
+					['H','L','N','S','V','W']
+				]
+			}
+		};
+
+		const config = diceConfig[state.diceSet];
+		const rolled = [];
+
+		let index = 0;
+		for (const die of config.black) {
+			const randomIndex = Math.floor(Math.random() * die.length);
+			rolled.push({
+				letter: die[randomIndex],
+				color: 'black',
+				selected: false,
+				index: index++
+			});
+		}
+
+		if (includeRedDice) {
+			for (const die of config.red) {
+				const randomIndex = Math.floor(Math.random() * die.length);
+				rolled.push({
+					letter: die[randomIndex],
+					color: 'red',
+					selected: false,
+					index: index++
+				});
+			}
+		}
+
+		state.currentDice = rolled;
+		state.diceRolled = true;
+		state.selectedDiceOrder = [];
+		saveState();
+		renderDice();
+		
+		const undoBtn = document.getElementById('undo-last-die-btn');
+		if (undoBtn) {
+			undoBtn.disabled = true;
+		}
+	}
+
+	function toggleDiceSelection(index) {
+		const die = state.currentDice[index];
+
+		if (die.selected) {
+			die.selected = false;
+			state.selectedDiceOrder = state.selectedDiceOrder.filter(i => i !== index);
+		} else {
+			die.selected = true;
+			state.selectedDiceOrder.push(index);
+		}
+
+		renderDice();
+		updateSelectedWord();
+		playDiceSelectSound();
+		validateDiceWord();
+		
+		const undoBtn = document.getElementById('undo-last-die-btn');
+		if (undoBtn) {
+			undoBtn.disabled = state.selectedDiceOrder.length === 0;
+		}
+	}
+
+	function handleDiceReorder(index) {
+		const die = state.currentDice[index];
+		
+		if (!state.reorderMode.active) {
+			if (die.selected) {
+				state.reorderMode.active = true;
+				state.reorderMode.sourceIndex = index;
+				highlightReorderTarget(index);
+			} else {
+				toggleDiceSelection(index);
+			}
+		} else if (state.reorderMode.sourceIndex === index) {
+			state.reorderMode.active = false;
+			state.reorderMode.sourceIndex = null;
+			clearReorderHighlight();
+		} else {
+			if (die.selected) {
+				swapDiceInSelection(state.reorderMode.sourceIndex, index);
+			} else {
+				replaceDieInSelection(state.reorderMode.sourceIndex, index);
+			}
+			state.reorderMode.active = false;
+			state.reorderMode.sourceIndex = null;
+			clearReorderHighlight();
+		}
+	}
+
+	function swapDiceInSelection(fromIndex, toIndex) {
+		const fromPos = state.selectedDiceOrder.indexOf(fromIndex);
+		const toPos = state.selectedDiceOrder.indexOf(toIndex);
+		
+		if (fromPos !== -1 && toPos !== -1 && fromPos !== toPos) {
+			const temp = state.selectedDiceOrder[fromPos];
+			state.selectedDiceOrder[fromPos] = state.selectedDiceOrder[toPos];
+			state.selectedDiceOrder[toPos] = temp;
+			
+			renderDice();
+			updateSelectedWord();
+			validateDiceWord();
+		}
+	}
+
+	function replaceDieInSelection(sourceIndex, newIndex) {
+		const sourcePos = state.selectedDiceOrder.indexOf(sourceIndex);
+		
+		if (sourcePos !== -1) {
+			state.currentDice[sourceIndex].selected = false;
+			state.currentDice[newIndex].selected = true;
+			state.selectedDiceOrder[sourcePos] = newIndex;
+			
+			renderDice();
+			updateSelectedWord();
+			validateDiceWord();
+		}
+	}
+
+	function highlightReorderTarget(index) {
+		const dieElements = document.querySelectorAll('.die');
+		dieElements[index].classList.add('reorder-target');
+		showReorderHelp();
+	}
+
+	function clearReorderHighlight() {
+		document.querySelectorAll('.die').forEach(die => {
+			die.classList.remove('reorder-target');
+		});
+		hideReorderHelp();
+	}
+
+	function showReorderHelp() {
+		const container = document.querySelector('.dice-controls');
+		if (!document.getElementById('reorder-help')) {
+			const help = document.createElement('div');
+			help.id = 'reorder-help';
+			help.className = 'reorder-help-text';
+			help.textContent = '🔄 Tap another die to swap or replace, or tap again to cancel';
+			container.insertBefore(help, container.firstChild);
+		}
+	}
+
+	function hideReorderHelp() {
+		const help = document.getElementById('reorder-help');
+		if (help) help.remove();
+	}
+
+	function handleDicePointerDown(event, index) {
+		if (!event.isPrimary) return;
+		event.preventDefault();
+
+		const now = Date.now();
+		if (now - lastTapTime < DOUBLE_TAP_THRESHOLD) {
+			return;
+		}
+		lastTapTime = now;
+
+		const dieElement = event.target.closest('.die');
+		if (dieElement) {
+			dieElement.classList.add('touch-active');
+			setTimeout(() => {
+				dieElement.classList.remove('touch-active');
+			}, 150);
+		}
+
+		handleDiceReorder(index);
+		const die = state.currentDice[index];
+		if (die && die.selected) {
+			provideHapticFeedback('selection');
+		}
+	}
+
+	function clearDiceSelection() {
+		state.currentDice.forEach(die => die.selected = false);
+		state.selectedDiceOrder = [];
+		renderDice();
+		updateSelectedWord();
+		document.getElementById('add-word-btn').disabled = true;
+		
+		const undoBtn = document.getElementById('undo-last-die-btn');
+		if (undoBtn) {
+			undoBtn.disabled = true;
+		}
+	}
+
+	function getSelectedDiceWord() {
+		return state.selectedDiceOrder
+			.map(index => state.currentDice[index].letter)
+			.join('');
+	}
+
+	function validateDiceWord() {
+		const word = getSelectedDiceWord();
+		const validation = validateWord(word);
+		const validationEl = document.getElementById('dice-validation-message');
+		const addBtn = document.getElementById('add-word-btn');
+
+		if (!word) {
+			validationEl.textContent = '';
+			validationEl.className = 'validation-message';
+			addBtn.disabled = true;
+			return;
+		}
+
+		validationEl.textContent = validation.message;
+		validationEl.className = `validation-message ${validation.valid ? 'success' : 'error'}`;
+		addBtn.disabled = !validation.valid;
+		
+		const undoBtn = document.getElementById('undo-last-die-btn');
+		if (undoBtn) {
+			undoBtn.disabled = state.selectedDiceOrder.length === 0;
+		}
+	}
+
+	function provideHapticFeedback(pattern = 'selection') {
+		// Check for vibration support AND user interaction
+		if (!navigator.vibrate || !userInteracted) return;
+		
+		try {
+			switch(pattern) {
+				case 'selection':
+					navigator.vibrate(10);
+					break;
+				case 'success':
+					navigator.vibrate([10, 50, 10]);
+					break;
+				case 'undo':
+					navigator.vibrate(15);
+					break;
+			}
+		} catch (error) {
+			// Silently fail if vibration not supported
+		}
+	}
+
+	function clearAllDice() {
+		state.currentDice.forEach(die => die.selected = false);
+		state.selectedDiceOrder = [];
+		state.reorderMode.active = false;
+		state.reorderMode.sourceIndex = null;
+		clearReorderHighlight();
+		
+		renderDice();
+		updateSelectedWord();
+		validateDiceWord();
+		provideHapticFeedback('undo');
+	}
+
+	function undoLastDie() {
+		if (state.selectedDiceOrder.length === 0) return;
+		
+		const lastIndex = state.selectedDiceOrder.pop();
+		state.currentDice[lastIndex].selected = false;
+		
+		state.reorderMode.active = false;
+		state.reorderMode.sourceIndex = null;
+		clearReorderHighlight();
+		
+		renderDice();
+		updateSelectedWord();
+		validateDiceWord();
+		provideHapticFeedback('selection');
+	}
+
+	function addDiceWord() {
+		const word = getSelectedDiceWord();
+		if (word) {
+			addWord(word);
+			provideHapticFeedback('success');
+			state.currentDice.forEach(die => die.selected = false);
+			state.selectedDiceOrder = [];
+			renderDice();
+			updateSelectedWord();
+			validateDiceWord();
+			
+			const undoBtn = document.getElementById('undo-last-die-btn');
+			if (undoBtn) {
+				undoBtn.disabled = true;
+			}
+		}
+	}
+
+	function renderDice() {
+		const diceGrid = document.getElementById('dice-grid');
+		if (!diceGrid) return;
+
+		diceGrid.innerHTML = state.currentDice.map(die => `
+			<div class="die ${die.color} ${die.selected ? 'selected' : ''}"
+			     onpointerdown="window.handleDicePointerDown(event, ${die.index})"
+			     data-index="${die.index}">
+				${die.letter}
+			</div>
+		`).join('');
+	}
+
+	function updateSelectedWord() {
+		const wordEl = document.getElementById('selected-word');
+		if (wordEl) {
+			wordEl.textContent = getSelectedDiceWord();
+		}
+	}
+
+	function showWordEntryMode() {
+		const manualEntry = document.getElementById('manual-word-entry');
+		const diceEntry = document.getElementById('virtual-dice-entry');
+
+		if (state.diceMode === 'virtual') {
+			manualEntry.style.display = 'none';
+			diceEntry.style.display = 'block';
+		} else {
+			manualEntry.style.display = 'block';
+			diceEntry.style.display = 'none';
+		}
+	}
+
 	function addWord(word) {
 		const player = getCurrentPlayer();
 		const length = word.length;
@@ -847,13 +1489,20 @@ import Badge from '../../components/Badge.astro';
 		state.timer.isRunning = false;
 		state.timer.intervalId = null;
 		state.gameState = 'playing';
+		state.diceRolled = false;
+		state.selectedDiceOrder = [];
 		saveState();
 		showPhase('playing');
+		showWordEntryMode();
 		renderCurrentPlayer();
 		renderCurrentWords();
 		updateTimerDisplay();
 		updateTimerButtons();
 		showStandings();
+
+		if (state.diceMode === 'virtual') {
+			rollDiceForRound();
+		}
 	}
 
 	function endRound() {
@@ -911,13 +1560,20 @@ import Badge from '../../components/Badge.astro';
 			state.timer.isRunning = false;
 			state.timer.intervalId = null;
 			state.gameState = 'playing';
+			state.diceRolled = false;
+			state.selectedDiceOrder = [];
 			saveState();
 			showPhase('playing');
+			showWordEntryMode();
 			renderCurrentPlayer();
 			renderCurrentWords();
 			updateTimerDisplay();
 			updateTimerButtons();
 			showStandings();
+
+			if (state.diceMode === 'virtual') {
+				rollDiceForRound();
+			}
 		}
 	}
 
@@ -1263,11 +1919,14 @@ import Badge from '../../components/Badge.astro';
 			winner: null,
 			dictionaryLoaded: state.dictionaryLoaded,
 			dictionary: state.dictionary,
-			soundEnabled: state.soundEnabled
+			soundEnabled: state.soundEnabled,
+			diceMode: state.diceMode,
+			diceSet: state.diceSet,
+			currentDice: [],
+			diceRolled: false,
+			diceSoundEnabled: state.diceSoundEnabled,
+			selectedDiceOrder: []
 		};
-		saveState();
-		showPhase('setup');
-		renderSetup();
 	}
 
 	window.addPlayer = () => {
@@ -1310,19 +1969,33 @@ import Badge from '../../components/Badge.astro';
 	};
 
 	window.removeWord = removeWord;
+	window.toggleDiceSelection = toggleDiceSelection;
+	window.addDiceWord = addDiceWord;
+	window.clearDiceSelection = clearDiceSelection;
+	window.clearAllDice = clearAllDice;
+	window.undoLastDie = undoLastDie;
+	window.handleDicePointerDown = handleDicePointerDown;
 
 	window.startGame = () => {
 		if (state.players.length > 0) {
 			state.gameState = 'playing';
 			state.currentPlayerIndex = 0;
 			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+			state.diceRolled = false;
+			state.selectedDiceOrder = [];
 			saveState();
 			showPhase('playing');
+			showWordEntryMode();
 			renderCurrentPlayer();
 			renderCurrentWords();
 			updateTimerDisplay();
 			showStandings();
 			loadDictionary();
+
+			if (state.diceMode === 'virtual' && !state.diceRolled) {
+				rollDiceForRound();
+			}
+
 			if (state.timer.isRunning) {
 				startTimer();
 			}
@@ -1371,11 +2044,13 @@ import Badge from '../../components/Badge.astro';
 		const player = getCurrentPlayer();
 		player.currentRoundScore = 0;
 		player.totalScore += 0;
-		
+
 		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
 		state.timer.isRunning = false;
 		state.timer.intervalId = null;
-		
+		state.diceRolled = false;
+		state.selectedDiceOrder = [];
+
 		advanceToNextPlayer();
 	};
 
@@ -1461,6 +2136,15 @@ import Badge from '../../components/Badge.astro';
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
+		// Mark user as interacted on first click/touch anywhere on page
+		const enableUserInteraction = () => {
+			userInteracted = true;
+			document.removeEventListener('click', enableUserInteraction);
+			document.removeEventListener('touchstart', enableUserInteraction);
+		};
+		document.addEventListener('click', enableUserInteraction);
+		document.addEventListener('touchstart', enableUserInteraction);
+		
 		loadState();
 		
 		if (state.gameState === 'setup') {
@@ -1468,8 +2152,14 @@ import Badge from '../../components/Badge.astro';
 			renderSetup();
 			document.getElementById('round-time').value = state.roundTime || DEFAULT_ROUND_TIME;
 			document.getElementById('score-limit').value = state.scoreLimit || DEFAULT_SCORE_LIMIT;
+
+			document.getElementById(`mode-${state.diceMode}`).checked = true;
+			document.getElementById(`set-${state.diceSet}`).checked = true;
+			const virtualSettings = document.getElementById('virtual-dice-settings');
+			virtualSettings.style.display = state.diceMode === 'virtual' ? 'block' : 'none';
 		} else if (state.gameState === 'playing') {
 			showPhase('playing');
+			showWordEntryMode();
 			renderCurrentPlayer();
 			renderCurrentWords();
 			updateTimerDisplay();
@@ -1477,6 +2167,11 @@ import Badge from '../../components/Badge.astro';
 			loadDictionary();
 			updateTimerButtons();
 			updateSoundButton();
+
+			if (state.diceMode === 'virtual' && !state.diceRolled) {
+				rollDiceForRound();
+			}
+
 			if (state.timer.isRunning) {
 				startTimer();
 			}
@@ -1492,6 +2187,7 @@ import Badge from '../../components/Badge.astro';
 		
 		document.getElementById('add-player-btn').addEventListener('click', window.addPlayer);
 		document.getElementById('start-game-btn').addEventListener('click', window.startGame);
+
 		document.getElementById('round-time').addEventListener('input', () => {
 			const input = document.getElementById('round-time');
 			state.roundTime = parseInt(input.value) || DEFAULT_ROUND_TIME;
@@ -1501,6 +2197,22 @@ import Badge from '../../components/Badge.astro';
 			const input = document.getElementById('score-limit');
 			state.scoreLimit = parseInt(input.value) || DEFAULT_SCORE_LIMIT;
 			saveState();
+		});
+
+		document.querySelectorAll('input[name="dice-mode"]').forEach(radio => {
+			radio.addEventListener('change', (e) => {
+				state.diceMode = e.target.value;
+				saveState();
+				const virtualSettings = document.getElementById('virtual-dice-settings');
+				virtualSettings.style.display = state.diceMode === 'virtual' ? 'block' : 'none';
+			});
+		});
+
+		document.querySelectorAll('input[name="dice-set"]').forEach(radio => {
+			radio.addEventListener('change', (e) => {
+				state.diceSet = e.target.value;
+				saveState();
+			});
 		});
 		document.getElementById('start-timer-btn').addEventListener('click', window.startTimer);
 		document.getElementById('pause-timer-btn').addEventListener('click', window.pauseTimer);
@@ -1665,5 +2377,33 @@ import Badge from '../../components/Badge.astro';
 				window.addPlayer();
 			}
 		});
+
+		const rollDiceBtn = document.getElementById('roll-dice-btn');
+		const clearSelectionBtn = document.getElementById('clear-all-btn');
+		const addWordBtn = document.getElementById('add-word-btn');
+		const undoBtn = document.getElementById('undo-last-die-btn');
+
+		rollDiceBtn?.addEventListener('click', () => {
+			rollDiceForRound();
+		});
+
+		clearSelectionBtn?.addEventListener('click', () => {
+			clearAllDice();
+		});
+
+		addWordBtn?.addEventListener('click', () => {
+			addDiceWord();
+		});
+		
+		undoBtn?.addEventListener('click', window.undoLastDie);
+
+		const diceSoundCheckbox = document.getElementById('dice-sound-checkbox');
+		if (diceSoundCheckbox) {
+			diceSoundCheckbox.checked = state.diceSoundEnabled;
+			diceSoundCheckbox.addEventListener('change', (e) => {
+				state.diceSoundEnabled = e.target.checked;
+				saveState();
+			});
+		}
 	});
 </script>
