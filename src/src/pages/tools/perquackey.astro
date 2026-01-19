@@ -404,14 +404,15 @@ import Badge from '../../components/Badge.astro';
 		if (state.dictionaryLoaded) return;
 		try {
 			const wordlist = await import('wordlist-js');
-			state.dictionary = new Set(wordlist.default);
+			state.dictionary = new Set(wordlist.englishAll);
 			state.dictionaryLoaded = true;
+			console.log('Dictionary loaded with', wordlist.englishAll.length, 'words');
 		} catch (error) {
 			console.error('Failed to load dictionary:', error);
 		}
 	}
 
-	function validateWord(word) {
+	function validateWord(word, originalWord) {
 		const validation = { valid: true, message: '' };
 
 		if (!word) {
@@ -426,18 +427,19 @@ import Badge from '../../components/Badge.astro';
 			return validation;
 		}
 
+		// Check for proper nouns (capital letters in original input)
+		if (/[A-Z]/.test(originalWord)) {
+			validation.valid = false;
+			validation.message = 'Proper nouns not allowed';
+			return validation;
+		}
+
 		const player = getCurrentPlayer();
 		const currentLength = player.currentRoundWords[word.length];
 		
 		if (currentLength && currentLength.length >= 5) {
 			validation.valid = false;
 			validation.message = `Already have 5 words of ${word.length} letters`;
-			return validation;
-		}
-
-		if (/[A-Z]/.test(word)) {
-			validation.valid = false;
-			validation.message = 'Proper nouns not allowed';
 			return validation;
 		}
 
@@ -992,12 +994,13 @@ import Badge from '../../components/Badge.astro';
 		const validationMsg = document.getElementById('validation-message');
 		
 		wordInput.addEventListener('input', async () => {
-			const word = wordInput.value.trim().toUpperCase();
+			const originalWord = wordInput.value.trim();
+			const word = originalWord.toUpperCase();
 			validationMsg.className = 'validation-message info';
 			
 			if (word) {
 				await loadDictionary();
-				const validation = validateWord(word);
+				const validation = validateWord(word, originalWord);
 				validationMsg.textContent = validation.message;
 				validationMsg.className = `validation-message ${validation.valid ? 'success' : 'error'}`;
 			} else {
@@ -1007,10 +1010,11 @@ import Badge from '../../components/Badge.astro';
 		
 		wordInput.addEventListener('keydown', async (e) => {
 			if (e.key === 'Enter') {
-				const word = wordInput.value.trim().toUpperCase();
+				const originalWord = wordInput.value.trim();
+				const word = originalWord.toUpperCase();
 				if (word) {
 					await loadDictionary();
-					const validation = validateWord(word);
+					const validation = validateWord(word, originalWord);
 					if (validation.valid) {
 						addWord(word);
 						wordInput.value = '';
