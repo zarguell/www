@@ -296,20 +296,6 @@ describe('Perquackey Tracker - Word Validation', () => {
 		});
 	});
 
-	describe('Edge Cases - Proper Nouns', () => {
-		it('detects capital letters in word', () => {
-			const word = 'CAT';
-			const hasCapitals = /[A-Z]/.test(word);
-			expect(hasCapitals).toBe(true);
-		});
-
-		it('allows all-lowercase words', () => {
-			const word = 'cat';
-			const hasCapitals = /[A-Z]/.test(word);
-			expect(hasCapitals).toBe(false);
-		});
-	});
-
 	describe('Edge Cases - S-Plural Conflicts', () => {
 		it('detects s-plural word', () => {
 			const word = 'cats';
