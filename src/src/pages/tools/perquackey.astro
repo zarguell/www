@@ -66,6 +66,7 @@ import Badge from '../../components/Badge.astro';
 					<button id="forfeit-round-btn" class="retro-button danger">Forfeit Round</button>
 				</div>
 				<div class="controls-row">
+					<button id="toggle-sound-btn" class="mute-btn">🔊 Sound On</button>
 					<button id="end-game-btn" class="retro-button danger">End Game</button>
 				</div>
 			</Window>
@@ -90,11 +91,19 @@ import Badge from '../../components/Badge.astro';
 		</div>
 
 		<div id="game-over-phase" class="phase" style="display: none;">
-			<Window title="Game Over">
-				<div id="winner-announcement"></div>
-				<div id="final-scores"></div>
-				<button id="play-again-btn" class="retro-button primary">Play Again</button>
-				<button id="new-game-btn" class="retro-button secondary">New Game</button>
+			<Window title="Game Recap">
+				<div id="game-recap-card" class="recap-card">
+					<div id="recap-winner" class="recap-section"></div>
+					<div id="recap-stats" class="recap-section"></div>
+					<div id="recap-scores" class="recap-section"></div>
+					<div id="recap-longest-word" class="recap-section"></div>
+					<div id="recap-best-round" class="recap-section"></div>
+				</div>
+				<div class="recap-actions">
+					<button id="share-recap-btn" class="retro-button primary">📤 Share Results</button>
+					<button id="play-again-btn" class="retro-button">Play Again</button>
+					<button id="new-game-btn" class="retro-button secondary">New Game</button>
+				</div>
 			</Window>
 		</div>
 
@@ -253,9 +262,20 @@ import Badge from '../../components/Badge.astro';
 		animation: pulse 0.5s infinite;
 	}
 
+	.timer-display.time-up {
+		animation: blinkRed 0.5s infinite;
+		background: #ff0000 !important;
+		color: #ffffff !important;
+	}
+
 	@keyframes pulse {
 		0%, 100% { opacity: 1; }
 		50% { opacity: 0.5; }
+	}
+
+	@keyframes blinkRed {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.3; }
 	}
 
 	.current-player {
@@ -435,6 +455,64 @@ import Badge from '../../components/Badge.astro';
 		border: 1px solid var(--color-border);
 	}
 
+	.recap-card {
+		background: var(--color-bg-secondary);
+		border: 2px solid var(--color-accent);
+		padding: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.recap-section {
+		margin-bottom: 1rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.recap-section:last-child {
+		border-bottom: none;
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	.recap-label {
+		color: var(--color-accent);
+		font-weight: bold;
+		font-size: 1.1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.recap-value {
+		font-size: 1.3rem;
+		margin-left: 0.5rem;
+	}
+
+	.mute-btn {
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		color: var(--color-text);
+		padding: 0.5rem 1rem;
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.mute-btn:hover {
+		background: var(--color-accent);
+		color: var(--sticker-text);
+	}
+
+	.mute-btn.muted {
+		opacity: 0.5;
+	}
+
+	.recap-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+	}
+
 	@media (max-width: 768px) {
 		.standings-window {
 			position: static;
@@ -485,7 +563,8 @@ import Badge from '../../components/Badge.astro';
 		},
 		winner: null,
 		dictionaryLoaded: false,
-		dictionary: null
+		dictionary: null,
+		soundEnabled: true
 	};
 
 	function saveState() {
@@ -499,7 +578,8 @@ import Badge from '../../components/Badge.astro';
 				secondsRemaining: state.timer.secondsRemaining,
 				isRunning: state.timer.isRunning
 			},
-			winner: state.winner
+			winner: state.winner,
+			soundEnabled: state.soundEnabled
 		};
 		localStorage.setItem('perquackey-state', JSON.stringify(saveData));
 	}
@@ -517,7 +597,8 @@ import Badge from '../../components/Badge.astro';
 					...state.timer,
 					...data.timer,
 					intervalId: null
-				}
+				},
+				soundEnabled: data.soundEnabled !== undefined ? data.soundEnabled : true
 			};
 		}
 	}
@@ -539,11 +620,35 @@ import Badge from '../../components/Badge.astro';
 			timerEl.className = 'timer-display';
 			const warningThreshold = Math.max(30, Math.floor(parseInt(state.roundTime) * 0.17));
 			const dangerThreshold = Math.max(10, Math.floor(parseInt(state.roundTime) * 0.05));
-			if (state.timer.secondsRemaining <= dangerThreshold) {
+			if (state.timer.secondsRemaining <= 0) {
+				timerEl.classList.add('time-up');
+			} else if (state.timer.secondsRemaining <= dangerThreshold) {
 				timerEl.classList.add('danger');
 			} else if (state.timer.secondsRemaining <= warningThreshold) {
 				timerEl.classList.add('warning');
 			}
+		}
+	}
+
+	function playTimerEndSound() {
+		if (!state.soundEnabled) return;
+		
+		try {
+			const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			const oscillator = audioCtx.createOscillator();
+			const gainNode = audioCtx.createGain();
+			
+			oscillator.connect(gainNode);
+			gainNode.connect(audioCtx.destination);
+			
+			oscillator.frequency.value = 800;
+			oscillator.type = 'square';
+			gainNode.gain.value = 0.3;
+			
+			oscillator.start();
+			oscillator.stop(audioCtx.currentTime + 0.5);
+		} catch (error) {
+			console.error('Audio not supported:', error);
 		}
 	}
 
@@ -557,6 +662,7 @@ import Badge from '../../components/Badge.astro';
 				saveState();
 			} else {
 				stopTimer();
+				playTimerEndSound();
 				endRound();
 			}
 		}, 1000);
@@ -720,13 +826,15 @@ import Badge from '../../components/Badge.astro';
 		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
 		state.currentPlayerIndex = nextPlayerIndex;
 		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-		stopTimer();
+		state.timer.isRunning = false;
+		state.timer.intervalId = null;
 		state.gameState = 'playing';
 		saveState();
 		showPhase('playing');
 		renderCurrentPlayer();
 		renderCurrentWords();
 		updateTimerDisplay();
+		updateTimerButtons();
 		showStandings();
 	}
 
@@ -754,15 +862,24 @@ import Badge from '../../components/Badge.astro';
 		}
 	}
 
-	function confirmRound() {
+		function confirmRound() {
 		const player = getCurrentPlayer();
 		
+		const roundWords = [];
 		for (const [length, wordList] of Object.entries(player.currentRoundWords)) {
 			if (!player.words[length]) {
 				player.words[length] = [];
 			}
 			player.words[length].push(...wordList);
+			roundWords.push(...wordList);
 		}
+		
+		player.roundHistory.push({
+			roundNumber: player.roundHistory.length + 1,
+			score: player.currentRoundScore,
+			words: roundWords
+		});
+		player.allWordsPlayed.push(...roundWords);
 		
 		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
 		player.currentRoundScore = 0;
@@ -772,13 +889,112 @@ import Badge from '../../components/Badge.astro';
 		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
 		state.currentPlayerIndex = nextPlayerIndex;
 		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+		state.timer.isRunning = false;
+		state.timer.intervalId = null;
 		state.gameState = 'playing';
 		saveState();
 		showPhase('playing');
 		renderCurrentPlayer();
 		renderCurrentWords();
 		updateTimerDisplay();
+		updateTimerButtons();
 		showStandings();
+	}
+
+	function getLongestWord() {
+		let longest = { word: '', length: 0, player: null };
+		
+		for (const player of state.players) {
+			for (const word of player.allWordsPlayed) {
+				if (word.length > longest.length) {
+					longest = { word, length: word.length, player: player.name };
+				}
+			}
+		}
+		
+		return longest.word ? longest : null;
+	}
+
+	function getHighestRound() {
+		let highest = { score: 0, player: null, round: 0 };
+		
+		for (const player of state.players) {
+			for (const round of player.roundHistory) {
+				if (round.score > highest.score) {
+					highest = { score: round.score, player: player.name, round: round.roundNumber };
+				}
+			}
+		}
+		
+		return highest.score > 0 ? highest : null;
+	}
+
+	function generateShareText() {
+		const winner = state.winner;
+		const totalRounds = Math.max(...state.players.map(p => p.roundHistory.length), 0);
+		const longest = getLongestWord();
+		const highestRound = getHighestRound();
+		const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+		
+		let shareText = `🎮 Perquackey Results - ${today}\n\n`;
+		
+		if (winner) {
+			shareText += `🏆 Winner: ${winner.name}\n`;
+			shareText += `⭐ Score: ${winner.totalScore}\n`;
+		} else {
+			const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+			shareText += `🤝 Tie Game!\n`;
+			shareText += `⭐ Top Score: ${sorted[0].totalScore}\n`;
+		}
+		
+		shareText += `🔢 Rounds: ${totalRounds}\n\n`;
+		
+		shareText += `📊 Final Scores:\n`;
+		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+		sorted.forEach((player, index) => {
+			shareText += `${index + 1}. ${player.name}: ${player.totalScore}\n`;
+		});
+		
+		if (longest) {
+			shareText += `\n📝 Longest Word: "${longest.word}" (${longest.length} letters) by ${longest.player}\n`;
+		}
+		
+		if (highestRound) {
+			shareText += `🎯 Best Round: ${highestRound.score} pts by ${highestRound.player} (Round ${highestRound.round})\n`;
+		}
+		
+		shareText += `\nPlay at: https://www.arguelles.me/tools/perquackey/`;
+		
+		return shareText;
+	}
+
+	async function shareResults() {
+		const shareText = generateShareText();
+		
+		if (navigator.share) {
+			try {
+				await navigator.share({
+					text: shareText
+				});
+			} catch (err) {
+				if (err.name !== 'AbortError') {
+					console.error('Share failed:', err);
+				}
+			}
+		} else {
+			try {
+				await navigator.clipboard.writeText(shareText);
+				const shareBtn = document.getElementById('share-recap-btn');
+				const originalText = shareBtn.textContent;
+				shareBtn.textContent = '✅ Copied!';
+				setTimeout(() => {
+					shareBtn.textContent = originalText;
+				}, 2000);
+			} catch (err) {
+				console.error('Clipboard copy failed:', err);
+				alert('Could not copy to clipboard. Please manually copy results.');
+			}
+		}
 	}
 
 	function determineWinner() {
@@ -891,7 +1107,7 @@ import Badge from '../../components/Badge.astro';
 		}
 		
 		html += `<div class="total-score">Round Total: ${totalScore + player.manualScoreAdjustment}</div>`;
-		html += `<div style="margin-top: 1rem;">Game Total: ${player.totalScore + totalScore + player.manualScoreAdjustment}</div>`;
+		html += `<div style="margin-top: 1rem;">Game Total: ${player.totalScore + player.manualScoreAdjustment}</div>`;
 		
 		if (player.vulnerable) {
 			html += '<div class="red-dice-badge">RED DICE ACTIVE</div>';
@@ -924,24 +1140,63 @@ import Badge from '../../components/Badge.astro';
 	}
 
 	function renderGameOver() {
-		const winnerEl = document.getElementById('winner-announcement');
-		const scoresEl = document.getElementById('final-scores');
+		const winnerEl = document.getElementById('recap-winner');
+		const statsEl = document.getElementById('recap-stats');
+		const scoresEl = document.getElementById('recap-scores');
+		const longestWordEl = document.getElementById('recap-longest-word');
+		const bestRoundEl = document.getElementById('recap-best-round');
+		
+		const totalRounds = Math.max(...state.players.map(p => p.roundHistory.length), 0);
+		const longest = getLongestWord();
+		const highestRound = getHighestRound();
 		
 		if (state.winner) {
-			winnerEl.innerHTML = `<div class="winner-text">🎉 ${state.winner.name} Wins! 🎉</div>`;
+			winnerEl.innerHTML = `
+				<div class="winner-text">🎉 ${state.winner.name} Wins! 🎉</div>
+				<div class="recap-value" style="text-align: center;">Score: ${state.winner.totalScore}</div>
+			`;
 		} else {
 			const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
 			const topScores = sorted.filter(p => p.totalScore === sorted[0].totalScore);
-			winnerEl.innerHTML = `<div class="winner-text">🤝 Tie: ${topScores.map(p => p.name).join(' & ')} 🤝</div>`;
+			winnerEl.innerHTML = `
+				<div class="winner-text">🤝 Tie: ${topScores.map(p => p.name).join(' & ')} 🤝</div>
+				<div class="recap-value" style="text-align: center;">Score: ${sorted[0].totalScore}</div>
+			`;
 		}
 		
+		statsEl.innerHTML = `
+			<div class="recap-label">🔢 Rounds Played</div>
+			<div class="recap-value">${totalRounds}</div>
+		`;
+		
 		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-		scoresEl.innerHTML = sorted.map((player, index) => `
-			<div class="standing-item">
-				<span>${index + 1}. ${player.name}</span>
-				<span>${player.totalScore}</span>
-			</div>
-		`).join('');
+		scoresEl.innerHTML = `
+			<div class="recap-label">📊 Final Scores</div>
+			${sorted.map((player, index) => `
+				<div class="standing-item">
+					<span>${index + 1}. ${player.name}</span>
+					<span>${player.totalScore}</span>
+				</div>
+			`).join('')}
+		`;
+		
+		if (longest) {
+			longestWordEl.innerHTML = `
+				<div class="recap-label">📝 Longest Word</div>
+				<div class="recap-value">"${longest.word}" (${longest.length} letters) by ${longest.player}</div>
+			`;
+		} else {
+			longestWordEl.innerHTML = '';
+		}
+		
+		if (highestRound) {
+			bestRoundEl.innerHTML = `
+				<div class="recap-label">🎯 Best Single Round</div>
+				<div class="recap-value">${highestRound.score} points by ${highestRound.player} (Round ${highestRound.round})</div>
+			`;
+		} else {
+			bestRoundEl.innerHTML = '';
+		}
 	}
 
 	function showPhase(phase) {
@@ -966,6 +1221,8 @@ import Badge from '../../components/Badge.astro';
 			gameState: 'setup',
 			players: state.players.map(p => ({
 				...p,
+				name: p.name,
+				id: p.id,
 				totalScore: 0,
 				currentRoundScore: 0,
 				manualScoreAdjustment: 0,
@@ -973,7 +1230,9 @@ import Badge from '../../components/Badge.astro';
 				currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
 				vulnerable: false,
 				redDice: false,
-				penaltyApplied: false
+				penaltyApplied: false,
+				roundHistory: [],
+				allWordsPlayed: []
 			})),
 			currentPlayerIndex: 0,
 			timer: {
@@ -983,7 +1242,8 @@ import Badge from '../../components/Badge.astro';
 			},
 			winner: null,
 			dictionaryLoaded: state.dictionaryLoaded,
-			dictionary: state.dictionary
+			dictionary: state.dictionary,
+			soundEnabled: state.soundEnabled
 		};
 		saveState();
 		showPhase('setup');
@@ -1004,7 +1264,9 @@ import Badge from '../../components/Badge.astro';
 				currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
 				vulnerable: false,
 				redDice: false,
-				penaltyApplied: false
+				penaltyApplied: false,
+				roundHistory: [],
+				allWordsPlayed: []
 			});
 			input.value = '';
 			saveState();
@@ -1090,6 +1352,10 @@ import Badge from '../../components/Badge.astro';
 		player.currentRoundScore = 0;
 		player.totalScore += 0;
 		
+		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+		state.timer.isRunning = false;
+		state.timer.intervalId = null;
+		
 		advanceToNextPlayer();
 	};
 
@@ -1112,9 +1378,38 @@ import Badge from '../../components/Badge.astro';
 		renderRoundSummary();
 	};
 
-	window.playAgain = resetGame;
+		window.playAgain = resetGame;
 
-	function makeDraggable(element, handle) {
+		window.toggleSound = () => {
+			state.soundEnabled = !state.soundEnabled;
+			saveState();
+			
+			const btn = document.getElementById('toggle-sound-btn');
+			if (state.soundEnabled) {
+				btn.textContent = '🔊 Sound On';
+				btn.classList.remove('muted');
+			} else {
+				btn.textContent = '🔇 Muted';
+				btn.classList.add('muted');
+			}
+		};
+
+		function updateSoundButton() {
+			const btn = document.getElementById('toggle-sound-btn');
+			if (btn) {
+				if (state.soundEnabled) {
+					btn.textContent = '🔊 Sound On';
+					btn.classList.remove('muted');
+				} else {
+					btn.textContent = '🔇 Muted';
+					btn.classList.add('muted');
+				}
+			}
+		}
+
+		window.shareResults = shareResults;
+
+		function makeDraggable(element, handle) {
 		let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
 		handle.onmousedown = dragMouseDown;
@@ -1161,6 +1456,7 @@ import Badge from '../../components/Badge.astro';
 			showStandings();
 			loadDictionary();
 			updateTimerButtons();
+			updateSoundButton();
 			if (state.timer.isRunning) {
 				startTimer();
 			}
@@ -1194,38 +1490,68 @@ import Badge from '../../components/Badge.astro';
 		document.getElementById('edit-words-btn').addEventListener('click', window.editWords);
 		document.getElementById('confirm-round-btn').addEventListener('click', window.confirmRound);
 		document.getElementById('apply-adjustment-btn').addEventListener('click', window.applyManualAdjustment);
+		document.getElementById('toggle-sound-btn').addEventListener('click', window.toggleSound);
 		document.getElementById('play-again-btn').addEventListener('click', window.playAgain);
+		document.getElementById('share-recap-btn').addEventListener('click', window.shareResults);
 		document.getElementById('end-game-btn').addEventListener('click', () => {
 			const confirmed = confirm('End entire game? This will reset all progress.');
 			if (confirmed) {
-				state = {
-					gameState: 'setup',
-					players: [],
-					currentPlayerIndex: 0,
-					roundTime: state.roundTime,
-					scoreLimit: state.scoreLimit,
-					timer: {
-						secondsRemaining: state.roundTime,
-						isRunning: false,
-						intervalId: null
-					},
-					winner: null,
-					dictionaryLoaded: state.dictionaryLoaded,
-					dictionary: state.dictionary
-				};
-				saveState();
-				showPhase('setup');
-				renderSetup();
-				updateTimerDisplay();
-				showStandings();
+				const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+				if (sorted.length > 0 && sorted[0].totalScore > 0) {
+					state.winner = sorted[0];
+					state.gameState = 'game_over';
+					saveState();
+					showPhase('game-over');
+					renderGameOver();
+					showStandings();
+				} else {
+					state = {
+						gameState: 'setup',
+						players: [],
+						currentPlayerIndex: 0,
+						roundTime: state.roundTime,
+						scoreLimit: state.scoreLimit,
+						timer: {
+							secondsRemaining: state.roundTime,
+							isRunning: false,
+							intervalId: null
+						},
+						winner: null,
+						dictionaryLoaded: state.dictionaryLoaded,
+						dictionary: state.dictionary,
+						soundEnabled: state.soundEnabled
+					};
+					saveState();
+					showPhase('setup');
+					renderSetup();
+					updateTimerDisplay();
+					showStandings();
+				}
 			}
 		});
 		document.getElementById('new-game-btn').addEventListener('click', () => {
 			const confirmed = confirm('Start new game? Current settings will be preserved.');
 			if (confirmed) {
+				stopTimer();
 				state.gameState = 'setup';
 				state.currentPlayerIndex = 0;
 				state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
+				state.timer.isRunning = false;
+				state.timer.intervalId = null;
+				state.players = state.players.map(p => ({
+					name: p.name,
+					id: p.id,
+					totalScore: 0,
+					currentRoundScore: 0,
+					manualScoreAdjustment: 0,
+					words: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+					currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+					vulnerable: false,
+					redDice: false,
+					penaltyApplied: false,
+					roundHistory: [],
+					allWordsPlayed: []
+				}));
 				saveState();
 				showPhase('setup');
 				renderSetup();
