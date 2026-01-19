@@ -45,7 +45,11 @@ import Badge from '../../components/Badge.astro';
 
 			<Window title="Controls">
 				<div class="controls-row">
-					<button id="end-round-btn" class="retro-button primary">End Round</button>
+					<button id="start-timer-btn" class="retro-button primary">Start Timer</button>
+					<button id="pause-timer-btn" class="retro-button secondary" style="display: none;">Pause Timer</button>
+				</div>
+				<div class="controls-row">
+					<button id="end-round-btn" class="retro-button">End Round</button>
 					<button id="restart-round-btn" class="retro-button secondary">Restart Round</button>
 					<button id="forfeit-round-btn" class="retro-button danger">Forfeit Round</button>
 				</div>
@@ -431,13 +435,10 @@ import Badge from '../../components/Badge.astro';
 			return validation;
 		}
 
-		if (/[A-Z]/.test(word) && word !== word.toLowerCase()) {
-			const hasMultipleCapitals = (word.match(/[A-Z]/g) || []).length > 1;
-			if (hasMultipleCapitals || word[0] === word[0].toUpperCase()) {
-				validation.valid = false;
-				validation.message = 'Proper nouns not allowed';
-				return validation;
-			}
+		if (/[A-Z]/.test(word)) {
+			validation.valid = false;
+			validation.message = 'Proper nouns not allowed';
+			return validation;
 		}
 
 		const baseWord = word.endsWith('s') ? word.slice(0, -1) : null;
@@ -857,21 +858,46 @@ import Badge from '../../components/Badge.astro';
 			renderCurrentWords();
 			updateTimerDisplay();
 			showStandings();
-			startTimer();
 			loadDictionary();
 		}
 	};
 
 	window.endRound = endRound;
 
+	window.startTimer = () => {
+		startTimer();
+		updateTimerButtons();
+		saveState();
+	};
+
+	window.pauseTimer = () => {
+		stopTimer();
+		updateTimerButtons();
+		saveState();
+	};
+
+	function updateTimerButtons() {
+		const startBtn = document.getElementById('start-timer-btn');
+		const pauseBtn = document.getElementById('pause-timer-btn');
+		if (startBtn && pauseBtn) {
+			if (state.timer.isRunning) {
+				startBtn.style.display = 'none';
+				pauseBtn.style.display = 'inline-block';
+			} else {
+				startBtn.style.display = 'inline-block';
+				pauseBtn.style.display = 'none';
+			}
+		}
+	}
+
 	window.restartRound = () => {
 		const player = getCurrentPlayer();
 		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
 		state.timer.secondsRemaining = ROUND_TIME;
+		stopTimer();
 		saveState();
 		renderCurrentWords();
 		updateTimerDisplay();
-		startTimer();
 	};
 
 	window.forfeitRound = () => {
@@ -890,14 +916,15 @@ import Badge from '../../components/Badge.astro';
 		} else {
 			state.currentPlayerIndex = nextPlayerIndex;
 			state.timer.secondsRemaining = ROUND_TIME;
+			stopTimer();
 			state.gameState = 'playing';
 			saveState();
 			showPhase('playing');
 			renderCurrentPlayer();
 			renderCurrentWords();
 			updateTimerDisplay();
+			updateTimerButtons();
 			showStandings();
-			startTimer();
 		}
 	};
 
@@ -935,6 +962,7 @@ import Badge from '../../components/Badge.astro';
 			updateTimerDisplay();
 			showStandings();
 			loadDictionary();
+			updateTimerButtons();
 			if (state.timer.isRunning) {
 				startTimer();
 			}
@@ -950,6 +978,8 @@ import Badge from '../../components/Badge.astro';
 		
 		document.getElementById('add-player-btn').addEventListener('click', window.addPlayer);
 		document.getElementById('start-game-btn').addEventListener('click', window.startGame);
+		document.getElementById('start-timer-btn').addEventListener('click', window.startTimer);
+		document.getElementById('pause-timer-btn').addEventListener('click', window.pauseTimer);
 		document.getElementById('end-round-btn').addEventListener('click', window.endRound);
 		document.getElementById('restart-round-btn').addEventListener('click', window.restartRound);
 		document.getElementById('forfeit-round-btn').addEventListener('click', window.forfeitRound);
