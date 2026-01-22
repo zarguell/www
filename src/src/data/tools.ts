@@ -5,7 +5,8 @@
 
 export interface Tool {
 	title: string;
-	slug: string;
+	slug?: string;
+	url?: string;
 	description: string;
 	badge: string;
 	features: string[];
@@ -337,6 +338,41 @@ export const toolsData: ToolCategory[] = [
 					"Virtual dice mode (classic & modern sets)"
 				],
 				lastModified: "2026-01-19",
+			},
+		],
+	},
+	{
+		name: "External Tools",
+		id: "external",
+		description: "Related tools hosted externally.",
+		tools: [
+			{
+				title: "Browsermark",
+				url: "https://browsermark.useast01.workers.dev/",
+				description: "A simple, browser-based markdown to document converter that generates high-quality PDF, DOCX, and MHTML files directly in your browser.",
+				badge: "EXTERNAL",
+				features: [
+					"Live markdown preview",
+					"PDF, DOCX, MHTML export",
+					"Custom headers, footers, page numbers",
+					"Custom filenames",
+					"Auto-filename from headers",
+				],
+				lastModified: "2026-01-22",
+			},
+			{
+				title: "PhishMonger",
+				url: "https://phishmonger.useast01.workers.dev/",
+				description: "A client-side SPA that enables security trainers to annotate phishing emails with technique explanations and generate visual slides.",
+				badge: "EXTERNAL",
+				features: [
+					"Email editor with Tiptap",
+					"MITRE ATT&CK technique annotations",
+					"Visual slides with numbered badges",
+					"NIST Phish Scale scoring",
+					"PNG and JSON export",
+				],
+				lastModified: "2026-01-22",
 			},
 		],
 	},
