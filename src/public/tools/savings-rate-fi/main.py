@@ -6,11 +6,11 @@ Shows the relationship between savings rate and time to FI.
 import numpy as np
 import matplotlib.pyplot as plt
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
+from chart_helpers import chart_img, setup_style
+from datetime import datetime
 
-plt.rcParams['figure.figsize'] = [10, 6]
-plt.rcParams['figure.autolayout'] = True
+
+setup_style((10, 6))
 
 def calculate_fi(event=None):
     """Calculate years to FI across different savings rates."""
@@ -34,15 +34,19 @@ def calculate_fi(event=None):
     annual_spending = annual_income * (1 - savings_rate)
     fi_target = annual_spending / withdrawal_rate
 
-    # Years to FI formula (closed-form solution)
-    # Using: FV = PV(1+r)^n + PMT[((1+r)^n - 1)/r]
-    # Solve for n using numerical method
+    # Years to FI: solve the annuity equation for n
+    # FV = PV(1+r)^n + PMT[((1+r)^n - 1)/r]  =>  n = log((FV*r + PMT)/(PV*r + PMT)) / log(1+r)
+    # where PV = current savings, PMT = annual contribution, FV = FI target
     def years_to_fi(current_savings, annual_contribution, fi_target, real_return):
         if current_savings >= fi_target:
             return 0
 
-        # Logarithmic approximation
-        n = np.log((fi_target * real_return / annual_contribution) + 1) / np.log(1 + real_return)
+        if abs(real_return) < 1e-12:
+            # Zero real return: FI comes from straight-line contribution accumulation
+            return (fi_target - current_savings) / annual_contribution if annual_contribution > 0 else np.inf
+
+        n = np.log((fi_target * real_return + annual_contribution) /
+                   (current_savings * real_return + annual_contribution)) / np.log(1 + real_return)
         return max(0, n)
 
     user_years = years_to_fi(current_savings, annual_income * savings_rate, fi_target, real_return)
@@ -98,38 +102,32 @@ def calculate_fi(event=None):
     plt.tight_layout()
 
     # Export
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display
-    img_html = f'<img id="chartImg" src="data:image/png;base64,{img_data}" alt="Savings Rate to FI" style="max-width: 100%; height: auto; display: block;">'
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Savings Rate to FI')), target="#chart")
 
     # Summary
-    fi_age = 2025 + user_years  # Assuming current year is 2025
+    fi_age = datetime.now().year + user_years
 
     summary_html = f'''
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Your Savings Rate</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{savings_rate*100:.0f}%</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">${annual_income * savings_rate:,.0f}/year saved</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">FI Target</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${fi_target:,.0f}</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">{annual_spending:,.0f}/year spending</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Years to FI</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{user_years:.1f} years</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Around {int(fi_age)}</div>
         </div>
     </div>
 
-    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
         <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--accent);">The Power of Saving More:</div>
         <ul style="margin: 0; padding-left: 1.5rem; color: var(--text);">
             <li>At 20% savings: FI in ~{years_to_fi_curve[np.argmin(np.abs(savings_rates - 0.20))]:.0f} years</li>

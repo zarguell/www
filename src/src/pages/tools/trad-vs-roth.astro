@@ -3,7 +3,7 @@ import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
 import Window from '../../components/Window.astro';
 ---
 
-<PythonToolLayout title="Traditional vs Roth Analyzer - ARGUELLES.ME">
+<PythonToolLayout title="Traditional vs Roth Analyzer - ARGUELLES.ME" plotly>
 	<div class="tool-header">
 		<h1>Traditional vs Roth Analyzer</h1>
 		<p class="tool-subtitle">Compare Traditional and Roth IRA outcomes across different future tax rates</p>
@@ -13,7 +13,7 @@ import Window from '../../components/Window.astro';
 		<form id="simulationForm">
 
 		<script>
-			document.getElementById("simulationForm").addEventListener("submit", (e) => e.preventDefault());
+			document.getElementById("simulationForm")?.addEventListener("submit", (e) => e.preventDefault());
 		</script>
 			<Window title="Account Parameters" badgeText="INPUTS">
 				<div class="form-group">
@@ -53,7 +53,7 @@ import Window from '../../components/Window.astro';
 				</div>
 
 				<div class="button-group">
-					<button type="button" class="retro-button retro-button-primary" py-click="run_analysis">
+					<button type="button" class="retro-button retro-button--primary" py-click="run_analysis">
 						Compare Accounts
 					</button>
 				</div>
@@ -74,32 +74,9 @@ import Window from '../../components/Window.astro';
 	</div>
 </PythonToolLayout>
 
-<script define:vars={{}}>
-	const initZoomableChart = (imgId, checkboxId) => {
-		const chartImg = document.getElementById(imgId);
-		if (chartImg && !chartImg.dataset.zoomInitialized) {
-			chartImg.dataset.zoomInitialized = 'true';
-			const clickZoom = document.createElement('div');
-			clickZoom.className = 'click-zoom';
-			const checkbox = document.createElement('input');
-			checkbox.type = 'checkbox';
-			checkbox.id = checkboxId;
-			const label = document.createElement('label');
-			label.htmlFor = checkboxId;
-			label.className = 'zoom-label';
-			chartImg.parentNode.insertBefore(clickZoom, chartImg);
-			clickZoom.appendChild(checkbox);
-			clickZoom.appendChild(label);
-			label.appendChild(chartImg);
-		}
-	};
-
-	const observer = new MutationObserver(() => {
-		if (document.getElementById('chartImg')) {
-			initZoomableChart('chartImg', 'zoom-checkbox-chart');
-		}
-	});
-	observer.observe(document.getElementById('chart'), { childList: true });
+<script>
+	import { watchForChart } from '../../scripts/zoomable-chart';
+	watchForChart('chart', [{ img: 'chartImg', checkbox: 'zoom-checkbox-chart' }]);
 </script>
 
 <style>
@@ -115,16 +92,10 @@ import Window from '../../components/Window.astro';
 	.form-group small { display: block; margin-top: 0.5rem; color: var(--muted); font-size: 0.95rem; }
 	.button-group { display: flex; gap: 1rem; margin-top: 1rem; }
 	.retro-button { flex: 1; padding: 1rem 2rem; font-family: 'VT323', monospace; font-size: 1.2rem; border: 3px solid var(--border); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-weight: bold; }
-	.retro-button-primary { background: var(--accent); color: var(--bg); box-shadow: 4px 4px 0 var(--shadow); }
-	.retro-button-primary:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow); }
-	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel-bg); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); margin-bottom: 1.5rem; }
+	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); margin-bottom: 1.5rem; }
 	.chart-container h3 { margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--accent); }
 	:global(#chart img) { max-width: 100% !important; height: auto !important; display: block !important; }
 	:global(#plotlyChart) { min-height: 500px; height: 60vh; }
-	:global(.click-zoom input[type="checkbox"]) { display: none; }
-	:global(.click-zoom input:checked + .zoom-label) { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; cursor: zoom-out; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-	:global(.click-zoom input:checked + .zoom-label img) { max-width: 95vw !important; max-height: 95vh !important; object-fit: contain; }
-	:global(#summary) { margin-top: 2rem; }
 
 	@media (max-width: 768px) {
 		.tool-header h1 { font-size: 2rem; }
@@ -133,4 +104,4 @@ import Window from '../../components/Window.astro';
 	}
 </style>
 
-<script type="py" src="/tools/trad-vs-roth/main.py" config="/tools/trad-vs-roth/config.json"></script>
+<Fragment set:html={`<script type="py" src="/tools/trad-vs-roth/main.py" config="/tools/trad-vs-roth/config.json"></script>`} />

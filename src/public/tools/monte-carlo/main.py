@@ -6,15 +6,11 @@ Demonstrates sequence-of-returns risk and portfolio survival probabilities.
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-import json
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
-from js import Plotly, JSON
+from chart_helpers import chart_img, render_plotly, setup_style
 
 # Configure matplotlib for responsive output
-plt.rcParams['figure.figsize'] = [10, 8]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 8))
 
 def run_simulation(event=None):
     """
@@ -193,20 +189,8 @@ def run_simulation(event=None):
 
     plt.tight_layout()
 
-    # Export to base64 PNG
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display chart
-    img_html = f'''
-    <img id="chartImg"
-         src="data:image/png;base64,{img_data}"
-         alt="Monte Carlo Simulation Results"
-         style="max-width: 100%; height: auto; display: block;">
-    '''
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Monte Carlo Simulation Results')), target="#chart")
 
     # Create interactive Plotly charts
     # Line chart: Sample paths + percentiles
@@ -345,50 +329,30 @@ def run_simulation(event=None):
     plotly_element = document.querySelector("#plotlyChart")
     plotly_element.innerHTML = ""
 
-    spec = fig_combined.to_plotly_json()
-    spec_json = json.dumps(spec)
-    spec_js = JSON.parse(spec_json)
-
-    config = {
-        'displayModeBar': True,
-        'displaylogo': False,
-        'responsive': True,
-        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': 'monte-carlo-simulation',
-            'height': 1200,
-            'width': 1600,
-            'scale': 2
-        }
-    }
-    config_json = json.dumps(config)
-    config_js = JSON.parse(config_json)
-
-    Plotly.react(plotly_element, spec_js.data, spec_js.layout, config_js)
+    render_plotly(fig_combined, plotly_element, 'monte-carlo-simulation')
 
     # Display summary statistics
     summary_html = f'''
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Median Final Value</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${median_final:,.0f}</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Success Rate (to age 95)</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{success_rate*100:.1f}%</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">5th Percentile (Worst Case)</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${worst_case:,.0f}</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">10th-90th Percentile Range</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${percentile_10:,.0f} - ${percentile_90:,.0f}</div>
         </div>
     </div>
 
-    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
         <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--accent);">Key Insights:</div>
         <ul style="margin: 0; padding-left: 1.5rem; color: var(--text);">
             <li>Your portfolio has a <strong>{success_rate*100:.1f}% chance</strong> of lasting to age 95</li>

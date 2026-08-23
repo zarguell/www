@@ -6,14 +6,10 @@ Compares after-tax outcomes across different future tax rates.
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-import json
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
-from js import Plotly, JSON
+from chart_helpers import chart_img, render_plotly, setup_style
 
-plt.rcParams['figure.figsize'] = [10, 6]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 6))
 
 def run_analysis(event=None):
     """Compare Traditional and Roth outcomes."""
@@ -89,14 +85,8 @@ def run_analysis(event=None):
     plt.tight_layout()
 
     # Export
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display
-    img_html = f'<img id="chartImg" src="data:image/png;base64,{img_data}" alt="Trad vs Roth" style="max-width: 100%; height: auto; display: block;">'
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Trad vs Roth')), target="#chart")
 
     # Create interactive Plotly chart
     fig_plotly = go.Figure()
@@ -176,27 +166,7 @@ def run_analysis(event=None):
     plotly_element = document.querySelector("#plotlyChart")
     plotly_element.innerHTML = ""
 
-    spec = fig_plotly.to_plotly_json()
-    spec_json = json.dumps(spec)
-    spec_js = JSON.parse(spec_json)
-
-    config = {
-        'displayModeBar': True,
-        'displaylogo': False,
-        'responsive': True,
-        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': 'trad-vs-roth-analysis',
-            'height': 1200,
-            'width': 1600,
-            'scale': 2
-        }
-    }
-    config_json = json.dumps(config)
-    config_js = JSON.parse(config_json)
-
-    Plotly.react(plotly_element, spec_js.data, spec_js.layout, config_js)
+    render_plotly(fig_plotly, plotly_element, 'trad-vs-roth-analysis')
 
     # Summary
     winner = "Traditional" if trad_at_expected > roth_at_expected else "Roth"
@@ -204,22 +174,22 @@ def run_analysis(event=None):
 
     summary_html = f'''
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Traditional at Expected Rate</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${trad_at_expected:,.0f}</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Roth at Expected Rate</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${roth_at_expected:,.0f}</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Winner at Expected Rate</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{winner}</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">by ${difference:,.0f}</div>
         </div>
     </div>
 
-    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
         <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--accent);">Break-Even Analysis:</div>
         <ul style="margin: 0; padding-left: 1.5rem; color: var(--text);">
             <li>Break-even retirement tax rate: <strong>{breakeven_rate*100:.1f}%</strong></li>

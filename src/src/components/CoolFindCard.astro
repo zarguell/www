@@ -162,7 +162,7 @@ function formatDate(isoDate: string): string {
 <script>
 document.querySelectorAll('.cool-find-card').forEach(card => {
 	const description = card.querySelector('.card-description');
-	const expandBtn = card.querySelector('.expand-btn');
+	const expandBtn = card.querySelector<HTMLElement>('.expand-btn');
 	
 	if (description && expandBtn) {
 		// Check if text is truncated

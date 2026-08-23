@@ -8,6 +8,7 @@ interface Props {
 	variant?: 'primary' | 'secondary' | 'danger';
 	disabled?: boolean;
 	target?: string;
+	rel?: string;
 	type?: 'button' | 'submit' | 'reset';
 	onClick?: string;
 	id?: string;
@@ -18,36 +19,20 @@ const {
 	variant = 'primary',
 	disabled = false,
 	target,
+	rel,
 	type = 'button',
 	onClick,
 	id,
 } = Astro.props;
 
 const Tag = href ? 'a' : 'button';
-
-const variantStyles = {
-	primary: `
-		background: var(--accent);
-		color: var(--sticker-text);
-		border-color: var(--accent);
-	`,
-	secondary: `
-		background: var(--bg2);
-		color: var(--text);
-		border-color: var(--border);
-	`,
-	danger: `
-		background: #ff4444;
-		color: #ffffff;
-		border-color: #ff0000;
-	`,
-};
 ---
 
 {href ? (
 	<a
 		href={href}
 		target={target}
+		rel={rel}
 		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
 		aria-disabled={disabled}
 		id={id}
@@ -59,7 +44,7 @@ const variantStyles = {
 		type={type}
 		disabled={disabled}
 		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
-		onClick={onClick}
+		onclick={onClick}
 		id={id}
 	>
 		<slot />

@@ -167,11 +167,7 @@ import Window from '../../components/Window.astro';
 	</div>
 
 	<!-- PyScript integration -->
-	<script
-		type="py"
-		src="/tools/roth/main.py"
-		config="/tools/roth/config.json"
-	></script>
+	<Fragment set:html={`<script type="py" src="/tools/roth/main.py" config="/tools/roth/config.json"></script>`} />
 </PythonToolLayout>
 
 <style>
@@ -265,9 +261,9 @@ import Window from '../../components/Window.astro';
 		margin-top: 0.25rem;
 		font-family: 'VT323', monospace;
 		font-size: 1.2rem;
-		border: 2px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text);
+		border: 2px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
 	}
 
 	:global(input[type="checkbox"]) {
@@ -279,34 +275,6 @@ import Window from '../../components/Window.astro';
 	.button-group {
 		margin: 2rem 0;
 		text-align: center;
-	}
-
-	.retro-button {
-		font-family: 'VT323', monospace;
-		font-size: 1.25rem;
-		padding: 0.75rem 1.5rem;
-		border: 3px solid;
-		cursor: pointer;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
-		transition: all 0.1s ease;
-	}
-
-	.retro-button--primary {
-		background: var(--color-primary);
-		border-color: var(--color-primary-dark);
-		color: var(--color-primary-text);
-	}
-
-	.retro-button:hover {
-		transform: translate(2px, 2px);
-		box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
-	}
-
-	.retro-button:active {
-		transform: translate(4px, 4px);
-		box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.3);
 	}
 
 	/* Mobile-specific adjustments */
@@ -322,34 +290,6 @@ import Window from '../../components/Window.astro';
 	}
 
 	/* Click-to-zoom styles for both charts */
-	:global(.click-zoom input[type="checkbox"]) {
-		display: none;
-	}
-
-	:global(.zoom-label) {
-		cursor: zoom-in;
-		display: block;
-	}
-
-	:global(.click-zoom input:checked + .zoom-label) {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.95);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 9999;
-		cursor: zoom-out;
-		padding: 2rem;
-	}
-
-	:global(.click-zoom input:checked + .zoom-label #chartImg),
-	:global(.click-zoom input:checked + .zoom-label #chartImg2) {
-		max-width: 100%;
-		max-height: 95vh;
-		object-fit: contain;
-		cursor: zoom-out;
-	}
 
 	:global(#chartImg),
 	:global(#chartImg2) {
@@ -361,64 +301,8 @@ import Window from '../../components/Window.astro';
 	}
 </style>
 
-<script define:vars={{}}>
-	// Initialize click-to-zoom when charts are generated
-	const initZoomableChart = (imgId, checkboxId) => {
-		const chartImg = document.getElementById(imgId);
-		if (chartImg && !chartImg.dataset.zoomInitialized) {
-			chartImg.dataset.zoomInitialized = 'true';
-
-			// Wrap in click-zoom structure
-			const clickZoom = document.createElement('div');
-			clickZoom.className = 'click-zoom';
-
-			const checkbox = document.createElement('input');
-			checkbox.type = 'checkbox';
-			checkbox.id = checkboxId;
-			checkbox.className = 'zoom-checkbox';
-
-			const label = document.createElement('label');
-			label.htmlFor = checkboxId;
-			label.className = 'zoom-label';
-
-			// Move image into label
-			chartImg.parentNode.insertBefore(clickZoom, chartImg);
-			clickZoom.appendChild(checkbox);
-			clickZoom.appendChild(label);
-			label.appendChild(chartImg);
-
-			// Add zoom hint
-			const hint = document.createElement('div');
-			hint.className = 'zoom-hint';
-			hint.style.fontFamily = 'VT323, monospace';
-			hint.style.fontSize = '1rem';
-			hint.style.color = 'var(--color-text)';
-			hint.style.opacity = '0.7';
-			hint.style.marginBottom = '0.5rem';
-			hint.style.textAlign = 'center';
-			hint.textContent = '🔍 Click image to view fullscreen';
-			clickZoom.parentNode.insertBefore(hint, clickZoom);
-		}
-	};
-
-	// Watch for chart generation
-	const observer = new MutationObserver((mutations) => {
-		mutations.forEach((mutation) => {
-			if (mutation.addedNodes.length) {
-				const chartImg = document.getElementById('chartImg');
-				if (chartImg) {
-					initZoomableChart('chartImg', 'zoom-checkbox-chart');
-				}
-
-				const chartImg2 = document.getElementById('chartImg2');
-				if (chartImg2) {
-					initZoomableChart('chartImg2', 'zoom-checkbox-chart2');
-				}
-			}
-		});
-	});
-
-	// Observe both chart containers
-	observer.observe(document.getElementById('chart'), { childList: true });
-	observer.observe(document.getElementById('chart2'), { childList: true });
+<script>
+	import { watchForChart } from '../../scripts/zoomable-chart';
+	watchForChart('chart', [{ img: 'chartImg', checkbox: 'zoom-checkbox-chart' }]);
+	watchForChart('chart2', [{ img: 'chartImg2', checkbox: 'zoom-checkbox-chart2' }]);
 </script>

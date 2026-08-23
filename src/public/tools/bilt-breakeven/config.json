@@ -5,5 +5,8 @@
     "plotly"
   ],
   "terminal": false,
-  "splashscreen": false
+  "splashscreen": false,
+  "files": {
+    "/tools/shared/chart_helpers.py": "/home/pyodide/chart_helpers.py"
+  }
 }

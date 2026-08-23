@@ -13,15 +13,11 @@ Based on rumored Bilt 2.0 changes:
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-import json
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
-from js import Plotly, JSON
+from chart_helpers import chart_img, render_plotly, setup_style
 
 # Configure matplotlib for responsive output
-plt.rcParams['figure.figsize'] = [10, 6]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 6))
 
 # Constants
 RENT_POINTS_CAP = 100000  # Maximum points per year on rent (Bilt constant)
@@ -76,9 +72,24 @@ def calculate_breakeven(event=None):
     def format_currency(value):
         return f"${value:,.0f}" if value >= 0 else f"-${abs(value):,.0f}"
 
+    # Everyday rewards rate on non-housing spend (Bilt Cash + points value)
+    everyday_reward_rate = everyday_points_rate * point_value
+
+    # Zero-reward guard (the page input allows 0% rates): if neither Bilt
+    # Cash nor everyday points earn anything and rent points don't cover the
+    # fee, no amount of spending can break even. Say so instead of dividing
+    # by a zero rate further down.
+    if bilt_cash_rate == 0 and everyday_reward_rate == 0 and monthly_rent_fee > rent_points_value_monthly:
+        display(HTML(f'<p style="color: var(--accent);">With a 0% Bilt Cash rate and everyday points worth $0, no amount of non-housing spending offsets the {format_currency(monthly_rent_fee)}/mo rent fee. Enter a non-zero reward rate to see the analysis.</p>'), target="#summary")
+        return
+
     # Create spending range for chart (0 to show break-even)
-    # Start with a reasonable range
-    max_spending = max(5000, monthly_rent_fee / bilt_cash_rate * 3)
+    # Start with a reasonable range. The rate-scaled term estimates the
+    # spend needed to offset the fee with Bilt Cash, but a 0% cash rate
+    # (allowed by the page input) would divide by zero — fall back to the
+    # everyday points rate, then to a plain default range when no rewards exist.
+    range_rate = bilt_cash_rate if bilt_cash_rate > 0 else everyday_reward_rate
+    max_spending = max(5000, monthly_rent_fee / range_rate * 3) if range_rate > 0 else 5000
     spending_range = np.linspace(0, max_spending, 100)
 
     # Calculate values at each spending level
@@ -128,8 +139,13 @@ def calculate_breakeven(event=None):
         annual_breakeven_fee = monthly_breakeven_fee * 12
     else:
         # If no sign change, estimate properly including points
-        effective_rate = bilt_cash_rate + everyday_points_rate * point_value
-        monthly_breakeven_fee = max(0, (monthly_rent_fee - rent_points_value_monthly) / effective_rate)
+        effective_rate = bilt_cash_rate + everyday_reward_rate
+        if effective_rate > 0:
+            monthly_breakeven_fee = max(0, (monthly_rent_fee - rent_points_value_monthly) / effective_rate)
+        else:
+            # Zero reward rate: the guard above means rent points already
+            # cover the fee, so the user breaks even without any spending
+            monthly_breakeven_fee = 0
         annual_breakeven_fee = monthly_breakeven_fee * 12
 
     # 2) Where everyday rewards tie (opportunity cost = 0)
@@ -244,20 +260,8 @@ def calculate_breakeven(event=None):
 
     plt.tight_layout()
 
-    # Export to base64 PNG
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display static chart
-    img_html = f'''
-    <img id="chartImg"
-         src="data:image/png;base64,{img_data}"
-         alt="Break-even analysis chart"
-         style="max-width: 100%; height: auto; display: block;">
-    '''
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Break-even analysis chart')), target="#chart")
 
     # ===== PLOTLY INTERACTIVE CHART =====
     fig_plotly = go.Figure()
@@ -347,19 +351,4 @@ def calculate_breakeven(event=None):
     # Render Plotly chart
     plotly_element = document.querySelector("#plotlyChart")
 
-    spec = fig_plotly.to_plotly_json()
-    spec_json = json.dumps(spec)
-    spec_js = JSON.parse(spec_json)
-
-    Plotly.newPlot(plotly_element, spec_js.data, spec_js.layout, {
-        'displayModeBar': True,
-        'displaylogo': False,
-        'responsive': True,
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': 'bilt-breakeven-analysis',
-            'height': 600,
-            'width': 1000,
-            'scale': 1
-        }
-    })
+    render_plotly(fig_plotly, plotly_element, 'bilt-breakeven-analysis', width=1000, height=600, scale=1, method='new', remove_buttons=False)

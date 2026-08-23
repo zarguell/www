@@ -6,12 +6,10 @@ Compares three withdrawal strategies: Constant, Percentage, and Guardrails.
 import numpy as np
 import matplotlib.pyplot as plt
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
+from chart_helpers import chart_img, setup_style
 
 # Configure matplotlib for responsive output
-plt.rcParams['figure.figsize'] = [10, 10]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 10))
 
 def run_simulation(event=None):
     """
@@ -178,42 +176,30 @@ def run_simulation(event=None):
 
     plt.tight_layout()
 
-    # Export to base64 PNG
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display chart
-    img_html = f'''
-    <img id="chartImg"
-         src="data:image/png;base64,{img_data}"
-         alt="Safe Withdrawal Rate Comparison"
-         style="max-width: 100%; height: auto; display: block;">
-    '''
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Safe Withdrawal Rate Comparison')), target="#chart")
 
     # Display summary
     summary_html = f'''
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Constant Dollar Success</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{constant_success*100:.1f}%</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">${initial_withdrawal:,.0f}/year fixed</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Percentage Success</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{percentage_success*100:.1f}%</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">{withdrawal_rate*100:.1f}% of portfolio</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Guardrails Success</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{guardrails_success*100:.1f}%</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Dynamic +/-20% bands</div>
         </div>
     </div>
 
-    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
         <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--accent);">Strategy Comparison:</div>
         <ul style="margin: 0; padding-left: 1.5rem; color: var(--text);">
             <li><strong>Constant Dollar:</strong> Stable income, highest failure risk if portfolio declines early</li>

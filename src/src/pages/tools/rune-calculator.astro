@@ -191,7 +191,16 @@ import RetroButton from '../../components/RetroButton.astro';
 	}
 
 	.results-section tbody tr:nth-child(even) {
-		background: var(--bg3);
+		background: var(--bg2);
+	}
+	.results-section .error-message {
+		padding: 1rem;
+		text-align: center;
+		background: var(--bg2);
+		border: 3px solid var(--border);
+		color: var(--text);
+		font-family: 'VT323', monospace;
+		font-size: 1.2rem;
 	}
 
 	@media (max-width: 768px) {
@@ -212,67 +221,7 @@ import RetroButton from '../../components/RetroButton.astro';
 </style>
 
 <script>
-	function calculateRunes(runesNeeded: number, runesHave: number, availableRunes: number[]) {
-		// Subtract the number of runes you already have from the number of runes needed
-		runesNeeded -= runesHave;
-
-		// Initialize the array to store the number of each type of golden runes needed
-		const numGoldenRunes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-		// Calculate the number of each type of golden runes needed
-		while (runesNeeded > 0) {
-			if (runesNeeded >= 5000 && availableRunes[10] > 0) {
-				numGoldenRunes[10]++;
-				runesNeeded -= 5000;
-				availableRunes[10]--;
-			} else if (runesNeeded >= 3800 && availableRunes[9] > 0) {
-				numGoldenRunes[9]++;
-				runesNeeded -= 3800;
-				availableRunes[9]--;
-			} else if (runesNeeded >= 3000 && availableRunes[8] > 0) {
-				numGoldenRunes[8]++;
-				runesNeeded -= 3000;
-				availableRunes[8]--;
-			} else if (runesNeeded >= 2500 && availableRunes[7] > 0) {
-				numGoldenRunes[7]++;
-				runesNeeded -= 2500;
-				availableRunes[7]--;
-			} else if (runesNeeded >= 2000 && availableRunes[6] > 0) {
-				numGoldenRunes[6]++;
-				runesNeeded -= 2000;
-				availableRunes[6]--;
-			} else if (runesNeeded >= 1600 && availableRunes[5] > 0) {
-				numGoldenRunes[5]++;
-				runesNeeded -= 1600;
-				availableRunes[5]--;
-			} else if (runesNeeded >= 1200 && availableRunes[4] > 0) {
-				numGoldenRunes[4]++;
-				runesNeeded -= 1200;
-				availableRunes[4]--;
-			} else if (runesNeeded >= 800 && availableRunes[3] > 0) {
-				numGoldenRunes[3]++;
-				runesNeeded -= 800;
-				availableRunes[3]--;
-			} else if (runesNeeded >= 400 && availableRunes[2] > 0) {
-				numGoldenRunes[2]++;
-				runesNeeded -= 400;
-				availableRunes[2]--;
-			} else if (runesNeeded >= 200 && availableRunes[1] > 0) {
-				numGoldenRunes[1]++;
-				runesNeeded -= 200;
-				availableRunes[1]--;
-			} else if (availableRunes[0] > 0) {
-				numGoldenRunes[0]++;
-				runesNeeded -= 100;
-				availableRunes[0]--;
-			} else {
-				// Return an empty array if there are not enough runes available
-				return [];
-			}
-		}
-
-		return numGoldenRunes;
-	}
+	import { RUNE_VALUES, calculateRunes } from '../../lib/rune-calculator';
 
 	// Add event listener when DOM is ready
 	document.addEventListener('DOMContentLoaded', () => {
@@ -293,33 +242,40 @@ import RetroButton from '../../components/RetroButton.astro';
 				const availableRunes: number[] = [];
 
 				// Get the # of each type of golden runes
-				for (let i = 0; i < 13; i++) {
+				for (let i = 0; i < RUNE_VALUES.length; i++) {
 					const inputField = document.getElementById(`rune-${i + 1}`) as HTMLInputElement;
 					availableRunes.push(parseInt(inputField?.value) || 0);
 				}
 
 				const numGoldenRunes = calculateRunes(runesNeeded, runesHave, availableRunes);
 
-				const table = document.createElement('table');
-				table.innerHTML = `
-					<thead>
-						<tr>
-							<th>Golden Rune</th>
-							<th>Quantity Needed</th>
-						</tr>
-					</thead>
-					<tbody>
-						${numGoldenRunes.map((quantity, index) => `
-							<tr>
-								<td style="text-align: center;">${index + 1}</td>
-								<td style="text-align: center">${quantity}</td>
-							</tr>
-						`).join('')}
-					</tbody>
-				`;
-
 				resultDiv.innerHTML = '';
-				resultDiv.appendChild(table);
+
+				if (numGoldenRunes.length === 0) {
+					const message = document.createElement('p');
+					message.className = 'error-message';
+					message.textContent = 'Not enough Golden Runes available to reach your target.';
+					resultDiv.appendChild(message);
+				} else {
+					const table = document.createElement('table');
+					table.innerHTML = `
+						<thead>
+							<tr>
+								<th>Golden Rune</th>
+								<th>Quantity Needed</th>
+							</tr>
+						</thead>
+						<tbody>
+							${numGoldenRunes.map((quantity, index) => `
+								<tr>
+									<td style="text-align: center;">${index + 1}</td>
+									<td style="text-align: center">${quantity}</td>
+								</tr>
+							`).join('')}
+						</tbody>
+					`;
+					resultDiv.appendChild(table);
+				}
 
 				// Scroll to results
 				resultDiv.scrollIntoView({ behavior: 'smooth' });

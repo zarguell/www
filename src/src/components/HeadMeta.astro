@@ -1,0 +1,30 @@
+---
+/**
+ * Shared <head> meta block: Open Graph tags + RSS alternate.
+ * Single source for BaseLayout / ToolLayout / PythonToolLayout.
+ */
+interface Props {
+	title: string;
+	description: string;
+	canonicalURL: URL | string;
+	ogImage?: string;
+	ogImageAlt?: string;
+}
+
+const { title, description, canonicalURL, ogImage, ogImageAlt = 'Preview image' } = Astro.props;
+---
+
+<!-- Open Graph meta tags -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL} />
+{ogImage && (
+	<>
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:alt" content={ogImageAlt} />
+	</>
+)}
+
+<!-- RSS Feed -->
+<link rel="alternate" type="application/rss+xml" title={title} href="/rss.xml" />

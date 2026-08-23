@@ -103,7 +103,51 @@ jobs:
       - name: Check TypeScript types
         run: |
           cd src
-          npx tsc --noEmit || echo "TypeScript check complete"
+          npx tsc --noEmit
+
+      - name: Type-check .astro files
+        run: |
+          npx astro check
+
+      - name: Check CSS custom properties are defined
+        run: |
+          python3 - <<'EOF'
+          import pathlib, re, sys
+
+          use_re = re.compile(r'var\(\s*(--[\w-]+)')
+          def_re = re.compile(r'(--[\w-]+)\s*:\s*[^;{}\s]')
+          setprop_re = re.compile(r"setProperty\(\s*['\"](--[\w-]+)['\"]")
+          jsdef_re = re.compile(r"['\"](--[\w-]+)['\"]\s*:\s*['\"]")
+          exts = {'.astro', '.css', '.ts', '.js', '.mjs', '.cjs', '.py', '.html'}
+          global_css = pathlib.Path('src/src/styles/global.css')
+          global_defs, local_defs, usages = set(), {}, {}
+
+          for base in ('src/src', 'src/public'):
+              for p in sorted(pathlib.Path(base).rglob('*')):
+                  if not p.is_file() or p.suffix.lower() not in exts:
+                      continue
+                  text = p.read_text(encoding='utf-8', errors='replace')
+                  defs, uses = set(), set()
+                  for line in text.splitlines():
+                      defs.update(def_re.findall(line))
+                      defs.update(setprop_re.findall(line))
+                      defs.update(jsdef_re.findall(line))
+                      uses.update(use_re.findall(line))
+                  if p == global_css:
+                      global_defs |= defs
+                  local_defs[p] = defs
+                  if uses:
+                      usages[p] = uses
+
+          bad = [f"{p}: {tok}" for p in sorted(usages) for tok in sorted(usages[p])
+                 if tok not in global_defs and tok not in local_defs[p]]
+          if bad:
+              print("Undefined CSS custom properties (not defined in global.css or the same file):")
+              for entry in bad:
+                  print(f"  {entry}")
+              sys.exit(1)
+          print(f"OK: every var() custom property is defined ({len(global_defs)} global tokens).")
+          EOF
 
       - name: Check for console.log in production code
         run: |

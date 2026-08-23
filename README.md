@@ -7,7 +7,7 @@ A personal website with a **90s retro web** aesthetic — fashion-forward, playf
 - **Home & About** - Hero sections with retro window styling
 - **Links Page** - Curated corners of the internet, organized by category
 - **Blog** - Themed posts with tag support and draft filtering
-- **Tools** - Interactive calculators (401k, Elden Ring runes, more coming)
+- **Tools** - 18 interactive tools (finance calculators, games, and text/image utilities)
 - **Styleguide** - Complete design system reference
 - **Theme Toggle** - Switch between "Neon Night" (dark) and "Mall Pastel" (light)
 - **Static & Fast** - No backend, no database, deployable anywhere
@@ -16,7 +16,7 @@ A personal website with a **90s retro web** aesthetic — fashion-forward, playf
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 22.12+ and npm
 
 ### Installation
 
@@ -49,48 +49,78 @@ The built site will be in `src/dist/` and can be deployed to any static host (Ne
 
 ```
 ./
-├── AGENTS.md           # Agent instructions (single source of truth)
-├── CLAUDE.md           # Symlink to AGENTS.md
-├── GEMINI.md           # Symlink to AGENTS.md
-├── README.md           # This file (human-friendly documentation)
-├── docs/               # Additional documentation
-│   ├── mistakes.md     # Mistakes & lessons learned
-│   ├── theme.md        # Theme tokens and styling
-│   ├── content.md      # Content structure
-│   └── tool-dev-guide.md # Tool development guide
-└── src/                # Astro project root
-    ├── astro.config.mjs    # Astro configuration
-    ├── package.json        # Dependencies
-    ├── src/                # Source code
-    │   ├── pages/          # File-based routing
-    │   │   ├── index.astro        # Home page
-    │   │   ├── about.astro        # About page
-    │   │   ├── links.astro        # Links page
-    │   │   ├── blog/               # Blog routes
-    │   │   │   ├── index.astro           # Blog index
-    │   │   │   └── [slug].astro          # Blog post pages
-    │   │   ├── tools/              # Tools routes
-    │   │   │   ├── index.astro           # Tools index
-    │   │   │   ├── 401k-calculator.astro # 401k calculator
-    │   │   │   └── rune-calculator.astro # Rune calculator
-    │   │   └── styleguide.astro    # Design system reference
-    │   ├── components/     # Astro components
-    │   │   ├── Window.astro        # Retro panel wrapper
-    │   │   ├── RetroButton.astro   # Beveled buttons
-    │   │   ├── Badge.astro         # Small inline badges
-    │   │   ├── Sticker.astro       # Loud callout labels
-    │   │   └── Tag.astro           # Blog post tag links
-    │   ├── layouts/        # Layout components
-    │   │   └── BaseLayout.astro    # Main layout (head, header, footer)
-    │   ├── styles/         # Global CSS
-    │   │   └── global.css          # Theme tokens and global styles
-    │   ├── content/        # Content collections
-    │   │   └── blog/               # Blog posts (collection: "blog")
-    │   ├── data/           # Data files
-    │   │   └── links.ts            # Links data
-    │   └── scripts/        # Client-side scripts
+├── AGENTS.md             # Agent instructions (single source of truth)
+├── CLAUDE.md             # Symlink to AGENTS.md
+├── GEMINI.md             # Symlink to AGENTS.md
+├── README.md             # This file (human-friendly documentation)
+├── docs/                 # Additional documentation
+│   ├── mistakes.md       # Mistakes & lessons learned
+│   ├── tool-dev-guide.md # Tool development guide (JavaScript + PyScript)
+│   └── plans/            # Design & implementation plans
+└── src/                  # Astro project root
+    ├── astro.config.mjs      # Astro configuration
+    ├── package.json          # Dependencies
+    ├── src/                  # Source code
+    │   ├── consts.ts             # Site-wide constants
+    │   ├── content.config.ts    # Content collection schema (blog)
+    │   ├── pages/               # File-based routing
+    │   │   ├── index.astro              # Home page
+    │   │   ├── about.astro              # About page
+    │   │   ├── links.astro              # Links page
+    │   │   ├── styleguide.astro         # Design system reference
+    │   │   ├── rss.xml.js               # RSS feed
+    │   │   ├── blog/                    # Blog routes
+    │   │   │   ├── index.astro              # Blog index
+    │   │   │   └── [...slug].astro          # Blog post pages
+    │   │   └── tools/                   # Tool routes (18 tools + index)
+    │   │       ├── index.astro              # Tools index (generated from data/tools.ts)
+    │   │       ├── 401k-calculator.astro    # 401(k) calculator
+    │   │       ├── bilt-breakeven.astro     # Bilt 2.0 break-even calculator (PyScript)
+    │   │       ├── cocktail-recipe.astro    # Cocktail recipe maker
+    │   │       ├── exif-marker.astro        # EXIF explorer & marker
+    │   │       ├── expense-ratio.astro      # Expense ratio impact visualizer (PyScript)
+    │   │       ├── heic-converter.astro     # HEIC to JPG/PNG converter
+    │   │       ├── monte-carlo.astro        # Monte Carlo retirement lab (PyScript)
+    │   │       ├── perquackey.astro         # Perquackey word game tracker
+    │   │       ├── roth-calculator.astro    # Roth vs taxable calculator (PyScript)
+    │   │       ├── rune-calculator.astro    # Elden Ring rune calculator
+    │   │       ├── safe-withdrawal.astro    # Safe withdrawal rate comparison (PyScript)
+    │   │       ├── sankey-builder.astro     # Cash flow Sankey builder (PyScript)
+    │   │       ├── sanitext.astro           # Text sanitization tool
+    │   │       ├── savings-rate-fi.astro    # Savings rate to FI calculator (PyScript)
+    │   │       ├── sequence-risk.astro      # Sequence of returns explorer (PyScript)
+    │   │       ├── splitcheck.astro         # Expense splitting tool
+    │   │       ├── super-juice.astro        # Super juice calculator
+    │   │       └── trad-vs-roth.astro       # Traditional vs Roth analyzer (PyScript)
+    │   ├── components/          # Astro components
+    │   │   ├── Window.astro         # Retro panel wrapper
+    │   │   ├── RetroButton.astro    # Beveled buttons
+    │   │   ├── Badge.astro          # Small inline badges
+    │   │   ├── Sticker.astro        # Loud callout labels
+    │   │   ├── Tag.astro            # Blog post tag links
+    │   │   ├── SiteHeader.astro     # Site header with theme toggle
+    │   │   ├── SiteFooter.astro     # Site footer
+    │   │   ├── AimChat.astro        # Floating chat widget
+    │   │   └── ...                  # Tool-specific components (CoolFindCard, DiceConfig, DiceRoller)
+    │   ├── layouts/             # Layout components
+    │   │   ├── BaseLayout.astro       # Main layout (head, header, footer)
+    │   │   ├── ToolLayout.astro       # Layout for JavaScript tool pages
+    │   │   ├── PythonToolLayout.astro # Layout for PyScript tool pages
+    │   │   └── BlogPost.astro        # Blog post layout
+    │   ├── styles/              # Global CSS
+    │   │   └── global.css           # Theme tokens and global styles
+    │   ├── content/             # Content collections
+    │   │   └── blog/                # Blog posts (collection: "blog")
+    │   ├── data/                # Data files
+    │   │   ├── tools.ts             # Tool registry (drives the /tools index)
+    │   │   ├── links.ts            # Links data
+    │   │   └── perquackey-dice.ts  # Perquackey dice data
+    │   └── scripts/             # Client-side scripts
     │       └── theme.ts            # Theme toggle logic
-    └── dist/              # Build output (generated)
+    ├── public/                 # Static assets served at the site root
+    │   ├── favicon.svg
+    │   └── tools/                  # PyScript tool files (main.py + config.json per tool)
+    └── dist/                   # Build output (generated)
 ```
 
 ## Development
@@ -122,22 +152,22 @@ draft: false
 2. Use the `Window` component for the main interface
 3. Use `RetroButton` for actions
 4. Add client-side logic in a `<script>` tag for calculations
-5. Add your tool to `src/src/pages/tools/index.astro`
+5. Register your tool in `src/src/data/tools.ts` (the `/tools` index page is generated from this registry)
 
 Example:
 
 ```astro
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
 import Window from '../../components/Window.astro';
 import RetroButton from '../../components/RetroButton.astro';
 ---
 
-<BaseLayout title="My Tool - ARGUELLES.ME">
+<ToolLayout title="My Tool - ARGUELLES.ME">
 	<Window title="My Tool">
 		<!-- Your tool interface here -->
 	</Window>
-</BaseLayout>
+</ToolLayout>
 
 <script>
 	// Client-side logic here
@@ -150,19 +180,21 @@ Theme tokens are defined in `src/src/styles/global.css`. Edit the token values i
 
 ```css
 [data-theme="neon-night"] {
-  --bg: #0a0e1a;
-  --accent: #00ffff;
+  --bg: #0a0a12;
+  --accent: #ff00ff;
+  --accent2: #00ffff;
   /* ... other tokens */
 }
 
 [data-theme="mall-pastel"] {
   --bg: #fef6f6;
-  --accent: #ffb6d9;
+  --accent: #ff99cc;
+  --accent2: #99ccff;
   /* ... other tokens */
 }
 ```
 
-See `docs/theme.md` for the complete token list and usage guidelines.
+The complete token list lives in the `[data-theme="..."]` blocks at the top of `src/src/styles/global.css`.
 
 ### Adding a New Page
 
@@ -292,8 +324,7 @@ Build the site locally and deploy the `src/dist/` folder to any static hosting s
 - **[AGENTS.md](./AGENTS.md)** - Single source of truth for AI agents working on this codebase
 - **[docs/tool-dev-guide.md](./docs/tool-dev-guide.md)** - Tool development guide (JavaScript + PyScript)
 - **[docs/mistakes.md](./docs/mistakes.md)** - Mistakes encountered and lessons learned
-- **[docs/theme.md](./src/docs/theme.md)** - Complete theme token reference and styling guidelines
-- **[docs/content.md](./src/docs/content.md)** - Content structure and writing guidelines
+- **[docs/plans/](./docs/plans)** - Design and implementation plans
 
 ## Contributing
 

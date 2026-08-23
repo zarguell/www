@@ -203,6 +203,33 @@ When using custom components like `RetroButton`:
 5. **Error handling** - Validate inputs, show user-friendly messages
 6. **Always use event listeners** - Avoid inline `onclick`, `onchange`, etc.
 
+### Script Structure: lib vs scripts (the two-layer pattern)
+
+Anything beyond a few dozen lines of page JS must NOT live inline in the `.astro` file.
+Split it:
+
+- **Pure logic** (math, validation, transforms, data shaping) → `src/src/lib/<tool>.ts`.
+  No `document`/`window`/`localStorage` access. Unit-tested in `src/src/lib/__tests__/`.
+  Existing examples: `lib/splitcheck.ts`, `lib/cocktail.ts`, `lib/sanitext-engine.ts`,
+  `lib/finance.ts`.
+- **DOM wiring** (listeners, rendering, localStorage, URL state) →
+  `src/src/scripts/<tool>-app.ts`. Exports `init<Tool>App()`. Typed, `tsc --noEmit` clean
+  (CI enforces). Examples: `scripts/sanitext-app.ts`, `scripts/perquackey-app.ts`.
+- **The page** keeps a thin script:
+
+```astro
+<script>
+	import { initMyToolApp } from '../../scripts/my-tool-app';
+
+	document.addEventListener('DOMContentLoaded', () => initMyToolApp());
+</script>
+```
+
+Why: inline `.astro` scripts are invisible to `tsc` (type-check theater); extracted
+modules get strict-mode checking — which has repeatedly surfaced real bugs (null crashes,
+state-shape corruption, dead keyboard paths). Cross-file imports in a page `<script>` are
+bundled by Vite into shared chunks automatically.
+
 ### Quick Reference
 
 | Need | Solution |
@@ -359,9 +386,14 @@ import Window from '../../components/Window.astro';
 **`public/tools/roth/config.json`**:
 ```json
 {
-  "packages": ["numpy", "matplotlib"]
+  "packages": ["numpy", "matplotlib"],
+  "files": {
+    "/tools/shared/chart_helpers.py": "/home/pyodide/chart_helpers.py"
+  }
 }
 ```
+
+The `files` map fetches each URL (relative to the site root) and writes it into the Pyodide filesystem before `main.py` runs — this is how the shared [`chart_helpers`](#adding-click-to-zoom-to-pyscript-charts) module becomes importable.
 
 ### Common Gotchas
 
@@ -369,7 +401,7 @@ import Window from '../../components/Window.astro';
 2. **Chart accumulation**: Always `innerHTML = ""` the chart container before displaying a new chart
 3. **Auto-running**: If you want user input first, remove the function call at the bottom of the Python file
 4. **Timing issues**: `py-click` is preferred over `addEventListener` (avoids DOM-not-ready errors)
-5. **Responsive charts**: PyScript renders matplotlib as `<img>` tag. Use `plt.rcParams` at module level and target `#chart img` in CSS with `max-width: 100% !important; height: auto !important`
+5. **Responsive charts**: Call `setup_style(figsize)` from `chart_helpers` at module level (applies the shared rcParams); `chart_img()` already emits a responsive `<img>` with `max-width: 100%; height: auto`
 
 ### When to Use PyScript vs JavaScript
 
@@ -380,245 +412,156 @@ Note: PyScript adds 2-5 seconds to page load for Python runtime initialization.
 
 ### Adding Click-to-Zoom to PyScript Charts
 
-For matplotlib charts that users need to view in fullscreen, add click-to-zoom functionality using the CSS checkbox hack.
+Static matplotlib charts get click-to-zoom (CSS checkbox hack) automatically via two shared modules — no per-page export or observer code needed.
 
-#### Option 1: Use the ZoomableImage Component (Static Images)
+#### 1. Render the chart with `chart_helpers`
 
-For static images or when you can pre-generate the chart:
+`public/tools/shared/chart_helpers.py` is the single source of truth for matplotlib style + PNG export. Mount it via your tool's `config.json` (`files` key) so PyScript writes it into the Pyodide filesystem before `main.py` runs:
 
-```astro
----
-import ZoomableImage from '../../components/ZoomableImage.astro';
----
-
-<ZoomableImage
-  id="my-chart"
-  src="/path/to/chart.png"
-  alt="My Chart"
-  hint="🔍 Click to view fullscreen"
-/>
+**`public/tools/<tool>/config.json`**:
+```json
+{
+  "packages": ["numpy", "matplotlib"],
+  "files": {
+    "/tools/shared/chart_helpers.py": "/home/pyodide/chart_helpers.py"
+  }
+}
 ```
 
-#### Option 2: Dynamic PyScript Charts with Click-to-Zoom
+Then in `main.py`:
 
-For charts generated dynamically by PyScript:
-
-**Python code** - Export high-DPI PNG:
 ```python
-from io import BytesIO
-import base64
+from pyscript import display, HTML
+from chart_helpers import chart_img, setup_style
 
-# Create figure with high DPI
-fig, ax = plt.subplots(dpi=200)
+setup_style((10, 6))  # replaces the old plt.rcParams figsize/autolayout lines
 
-# ... your plotting code ...
+def calculate(event=None):
+    fig, ax = plt.subplots()
+    # ... your plotting code ...
 
-# Save to base64 data URI
-buf = BytesIO()
-fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-buf.seek(0)
-img_data = base64.b64encode(buf.read()).decode()
-
-# Display as image
-img_html = f'''
-<img id="chartImg"
-     src="data:image/png;base64,{img_data}"
-     alt="Chart"
-     style="max-width: 100%; height: auto; display: block;">
-'''
-display(HTML(img_html), target="#chart")
+    # Renders at dpi=200 as a responsive <img id="chartImg"> with alt text
+    display(HTML(chart_img(fig, 'Chart description')), target="#chart")
 ```
 
-**Astro template** - Add click-to-zoom with MutationObserver:
+Helpers:
+
+| Function | Purpose |
+|---|---|
+| `setup_style(figsize=(10, 6))` | Apply shared rcParams (responsive figures, autolayout) |
+| `fig_to_data_uri(fig, dpi=200)` | Render figure to base64 PNG payload (multi-chart pages — see `public/tools/roth/main.py`) |
+| `chart_img(fig, alt, img_id='chartImg')` | Full responsive `<img>` tag HTML string |
+
+#### 2. Wire the shared zoom observer
+
+One script tag per page — the logic lives in `src/src/scripts/zoomable-chart.ts` and the CSS (`.click-zoom`, `.zoom-hint`) in `src/src/styles/global.css`:
+
 ```astro
 <div id="chart"></div>
 
-<script define:vars={{}}>
-  const initZoomableChart = () => {
-    const chartImg = document.getElementById('chartImg');
-    if (chartImg && !chartImg.dataset.zoomInitialized) {
-      chartImg.dataset.zoomInitialized = 'true';
-
-      // Wrap in click-zoom structure
-      const clickZoom = document.createElement('div');
-      clickZoom.className = 'click-zoom';
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = 'zoom-checkbox-chart';
-      checkbox.className = 'zoom-checkbox';
-
-      const label = document.createElement('label');
-      label.htmlFor = 'zoom-checkbox-chart';
-      label.className = 'zoom-label';
-
-      // Move image into label
-      chartImg.parentNode.insertBefore(clickZoom, chartImg);
-      clickZoom.appendChild(checkbox);
-      clickZoom.appendChild(label);
-      label.appendChild(chartImg);
-
-      // Add hint
-      const hint = document.createElement('div');
-      hint.className = 'zoom-hint';
-      hint.textContent = '🔍 Click image to view fullscreen';
-      clickZoom.parentNode.insertBefore(hint, clickZoom);
-    }
-  };
-
-  // Watch for dynamic chart generation
-  const observer = new MutationObserver(() => {
-    if (document.getElementById('chartImg')) {
-      initZoomableChart();
-    }
-  });
-  observer.observe(document.getElementById('chart'), { childList: true });
+<script>
+	import { watchForChart } from '../../scripts/zoomable-chart';
+	watchForChart('chart', [{ img: 'chartImg', checkbox: 'zoom-checkbox-chart' }]);
 </script>
 ```
 
-**CSS** - Add to your component styles:
-```css
-.zoom-hint {
-  font-family: 'VT323', monospace;
-  font-size: 1rem;
-  color: var(--color-text);
-  opacity: 0.7;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-.click-zoom input[type="checkbox"] {
-  display: none;
-}
-
-.zoom-label {
-  cursor: zoom-in;
-  display: block;
-}
-
-.click-zoom input:checked + .zoom-label {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  cursor: zoom-out;
-  padding: 2rem;
-}
-
-.click-zoom input:checked + .zoom-label #chartImg {
-  max-width: 100%;
-  max-height: 95vh;
-  object-fit: contain;
-  cursor: zoom-out;
-}
-```
+`watchForChart` uses a MutationObserver to wrap the PyScript-rendered image in the CSS-only fullscreen zoom modal as soon as it appears. Keep `img_id="chartImg"` (the default) so the observer finds it; for a second chart use `chartImg2` with its own container (see `roth-calculator.astro`).
 
 #### Key Points:
 
-1. **High DPI**: Always use `dpi=200` when saving figures for crisp zoom
-2. **Base64 encoding**: Use `fig.savefig(buf, format='png')` + base64 for embedding
-3. **CSS checkbox hack**: Click-to-zoom fullscreen modal without JavaScript modal logic
-4. **MutationObserver**: Required for detecting when PyScript generates content
-5. **No JavaScript modal**: The entire fullscreen functionality is CSS-only
+1. **High DPI**: `chart_img`/`fig_to_data_uri` save at `dpi=200` for crisp zoom
+2. **Alt text**: always pass a meaningful `alt` — required for accessibility
+3. **CSS checkbox hack**: fullscreen zoom with zero JS modal logic
+4. **Keep ids stable**: the observer matches images by id (`chartImg`, `chartImg2`)
+5. **No inline exports**: never re-declare the BytesIO/base64 pipeline in `main.py` — a vitest guard (`src/src/data/__tests__/python-tools.test.ts`) fails the build if the duplication returns
 
-See [roth-calculator.astro](src/pages/tools/roth-calculator.astro) for complete working example.
+See [roth-calculator.astro](../src/src/pages/tools/roth-calculator.astro) for a complete working example (two charts: `chartImg` + `chartImg2`).
 
 ### Working with Plotly in PyScript
 
 When using Plotly for interactive charts in PyScript, you must avoid injecting `<script>` tags via `innerHTML` (browsers don't execute scripts inserted this way). Instead, use the Plotly.js API directly from Python.
 
-#### Step 1: Load Plotly.js in Your Layout
+#### Step 1: Opt In to Plotly.js via `PythonToolLayout`
 
-Add Plotly.js CDN to your Python tool layout (or individual page):
+`PythonToolLayout` loads the PyScript core (and, only when requested, Plotly.js) from the CDN. Pass the `plotly` prop on your tool page:
 
 ```astro
-<!-- In PythonToolLayout.astro or your tool page -->
-<head>
-  <!-- PyScript Core CSS/JS -->
-  <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.2/core.css" />
-  <script is:inline type="module" src="https://pyscript.net/releases/2024.5.2/core.js"></script>
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+---
 
-  <!-- Plotly.js for interactive charts -->
-  <script is:inline src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-</head>
+<PythonToolLayout title="My Tool - ARGUELLES.ME" plotly>
+	<!-- ... -->
+</PythonToolLayout>
 ```
 
-#### Step 2: Use Plotly.react() from Python
+Loaded versions (see `src/src/layouts/PythonToolLayout.astro`): PyScript `2024.5.2`, Plotly `2.27.0`.
 
-In your Python code, import the `js` module and call Plotly's JavaScript API:
+#### Step 2: Render with `render_plotly()` from `chart_helpers`
+
+Never hand-roll the JSON round-trip + `Plotly.react` call in `main.py` — five tools once duplicated that pipeline and it drifted apart. The shared helper handles serialization, container clearing, and the toolbar config:
 
 ```python
 import plotly.graph_objects as go
-from pyscript import display, document, HTML
-from js import Plotly  # Import Plotly from js module
+from chart_helpers import render_plotly
 
 def build_chart(event=None):
     # ... your data preparation ...
 
-    # Create Plotly figure
     fig = go.Figure(data=[go.Sankey(
-        node=dict(
-            label=nodes,
-            color=node_colors,
-        ),
-        link=dict(
-            source=sources,
-            target=targets,
-            value=values,
-        ),
+        node=dict(label=nodes, color=node_colors),
+        link=dict(source=sources, target=targets, value=values),
     )])
-
     fig.update_layout(title_text="My Chart", height=600)
 
-    # Clear previous chart
     chart_element = document.querySelector("#chart")
-    chart_element.innerHTML = ""
-
-    # Render using Plotly.react() with proper JSON serialization
-    spec = fig.to_plotly_json()
-    spec_json = json.dumps(spec)  # Convert to JSON string
-    spec_js = JSON.parse(spec_json)  # Parse in JS to get plain JS objects
-
-    # Access properties via attributes (not subscript) on JsProxy
-    Plotly.react(chart_element, spec_js.data, spec_js.layout)
+    render_plotly(fig, chart_element, 'my-tool-chart')
 ```
+
+`render_plotly(fig, element, filename, width=1600, height=1200, scale=2, method="react", remove_buttons=True)`:
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `fig` | — | any `plotly.graph_objects.Figure` |
+| `element` | — | DOM node to render into (cleared first) |
+| `filename` | — | base name for the toolbar's PNG download button |
+| `width`/`height`/`scale` | 1600/1200/2 | PNG export sizing |
+| `method` | `"react"` | `"new"` for a fresh plot (used by tools that re-create the figure) |
+| `remove_buttons` | `True` | drops pan/lasso/select from the mode bar |
+
+The helper serializes the spec and config through a JSON round-trip so Pyodide proxy objects become plain JS values (required on PyScript 2024.x), then calls `Plotly.react`/`Plotly.newPlot`.
+
+**Guard**: the vitest suite (`src/src/data/__tests__/python-tools.test.ts`) fails if `to_plotly_json()` reappears in any `main.py` — always go through `chart_helpers`.
 
 #### Why This Approach?
 
-1. **Avoids innerHTML script issue**: Browsers ignore `<script>` tags inserted via `innerHTML`
+1. **Avoids innerHTML script issue**: browsers ignore `<script>` tags inserted via `innerHTML`
 2. **No HTML injection**: `to_plotly_json()` returns pure JSON, not HTML with script tags
 3. **Direct JS API**: `Plotly.react()` updates the chart in-place (great for repeated clicks)
-4. **Reliable**: Works consistently across browsers without timing issues
+4. **Shared toolbar config**: every tool gets the same download button + button set, no per-page drift
 
 #### Wrong Way (Don't Do This):
 
 ```python
-# ❌ This won't work - script tags won't execute
+# ❌ Won't work - script tags won't execute
 chart_element.innerHTML = fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+# ❌ Banned - duplicating the serialization pipeline (vitest guard trips)
+spec = JSON.parse(json.dumps(fig.to_plotly_json()))
+Plotly.react(chart_element, spec.data, spec.layout)
 ```
 
 #### Right Way:
 
 ```python
-# ✅ Correct - use Plotly.js API from Python with proper JSON handling
-import json
-from js import Plotly, JSON
-
-spec = fig.to_plotly_json()
-spec_json = json.dumps(spec)
-spec_js = JSON.parse(spec_json)
-Plotly.react(chart_element, spec_js.data, spec_js.layout)  # Use .data/.layout, not ["data"]/["layout"]
+# ✅ Shared helper: serialization + toolbar config in one call
+from chart_helpers import render_plotly
+render_plotly(fig, chart_element, 'my-tool-chart')
 ```
 
-**Important**: After `JSON.parse()`, you get a Pyodide `JsProxy` object. Use attribute access (`.data`, `.layout`) not subscript (`["data"]`, `["layout"]`), as JsProxy objects don't support `getitem`.
-
-See [sankey-builder.astro](src/pages/tools/sankey-builder.astro) and [main.py](src/public/tools/sankey-builder/main.py) for a complete working example.
+See [sankey-builder.astro](../src/src/pages/tools/sankey-builder.astro) and [main.py](../src/public/tools/sankey-builder/main.py) for a complete working example.
 
 ### Additional Resources
 
 - [PyScript Documentation](https://pyscript.net/)
-- [ZoomableImage Component](src/components/ZoomableImage.astro) - Reusable zoom component
-- [roth-calculator.astro](src/pages/tools/roth-calculator.astro) - Complete PyScript + zoom example
+- [roth-calculator.astro](../src/src/pages/tools/roth-calculator.astro) - Complete PyScript + zoom example

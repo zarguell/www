@@ -11,6 +11,7 @@ export async function GET(context) {
 		site: context.site,
 		items: posts
 			.filter((post) => post.data.draft !== true)
+			.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 			.map((post) => ({
 				title: post.data.title,
 				description: post.data.description,

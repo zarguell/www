@@ -20,12 +20,6 @@ const {
 	'data-tool-desc': dataToolDesc,
 	'data-date': dataDate,
 } = Astro.props;
-
-const variantStyles = {
-	default: 'background: var(--panel);',
-	primary: 'background: var(--accent); color: var(--sticker-text);',
-	secondary: 'background: var(--accent2); color: var(--bg);',
-};
 ---
 
 <div class={`window window--${variant}`} data-tool-title={dataToolTitle} data-tool-desc={dataToolDesc} data-date={dataDate}>

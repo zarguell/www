@@ -21,9 +21,11 @@
     "wordlist-js": "^2.0.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
     "jsdom": "^29.0.0",
+    "typescript": "^6.0.3",
     "vitest": "^4.0.16"
   }
 }

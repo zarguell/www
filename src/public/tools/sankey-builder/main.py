@@ -5,9 +5,8 @@ Creates interactive Sankey diagrams from simple text input using Plotly.
 
 import numpy as np
 import plotly.graph_objects as go
-import json
 from pyscript import display, document, HTML
-from js import Plotly, JSON
+from chart_helpers import render_plotly
 
 def parse_sankey_text(text):
     """Parse SankeyMatic-style text format into flows."""
@@ -38,6 +37,9 @@ def aggregate_flows(flows):
         aggregated[key] = aggregated.get(key, 0) + flow['value']
     return [{'source': k[0], 'target': k[1], 'value': v} for k, v in aggregated.items()]
 
+# Keywords identifying savings-type nodes (shared by get_color and summary stats)
+SAVINGS_KEYWORDS = ['savings', 'investment', '401k', 'ira', 'roth', 'hsa', 'brokerage']
+
 def get_color(label):
     """Assign colors based on node type."""
     label_lower = label.lower()
@@ -46,7 +48,7 @@ def get_color(label):
         return '#808080'  # Gray for income
     elif any(word in label_lower for word in ['tax', 'irs', 'fica', 'federal', 'state']):
         return '#ff6b6b'  # Red for taxes
-    elif any(word in label_lower for word in ['savings', 'investment', '401k', 'ira', 'roth', 'hsa', 'brokerage']):
+    elif any(word in label_lower for word in SAVINGS_KEYWORDS):
         return '#51cf66'  # Green for savings
     elif any(word in label_lower for word in ['expense', 'housing', 'food', 'transport', 'utilities', 'spending']):
         return '#339af0'  # Blue for expenses
@@ -142,41 +144,20 @@ def build_sankey(event=None):
         autosize=True,
     )
 
-    # Render using Plotly.react() with proper JSON serialization
-    # This avoids Pyodide proxy objects and ensures clean JS types
-    spec = fig.to_plotly_json()
-    spec_json = json.dumps(spec)  # Convert to JSON string
-    spec_js = JSON.parse(spec_json)  # Parse in JS to get plain JS objects
-
-    # Plotly configuration for toolbar and responsive behavior
-    config = {
-        'displayModeBar': True,
-        'displaylogo': False,
-        'responsive': True,
-        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': 'sankey-diagram',
-            'height': 1200,
-            'width': 1600,
-            'scale': 2
-        }
-    }
-    config_json = json.dumps(config)
-    config_js = JSON.parse(config_json)
-
-    # Render with fullscreen support
-    Plotly.react(chart_element, spec_js.data, spec_js.layout, config_js)
+    render_plotly(fig, chart_element, 'sankey-diagram')
 
     # Summary statistics
-    total_income = sum([inflows.get(node, 0) for node in nodes if outflows.get(node, 0) == 0 or inflows.get(node, 0) > outflows.get(node, 0)])
-    total_savings = sum([outflows.get(node, 0) for node in nodes if 'savings' in node.lower() or 'investment' in node.lower() or '401k' in node.lower() or 'ira' in node.lower() or 'roth' in node.lower()])
+    # Income = outflows of source nodes (nodes with no inflow);
+    # savings = inflows received by savings-type nodes
+    total_income = sum(outflows.get(node, 0) for node in nodes if inflows.get(node, 0) == 0)
+    total_savings = sum(inflows.get(node, 0) for node in nodes
+                        if any(word in node.lower() for word in SAVINGS_KEYWORDS))
     savings_rate = (total_savings / total_income * 100) if total_income > 0 else 0
 
     imbalance_warning = ''
     if imbalances:
         imbalance_warning = f'''
-        <div style="margin-top: 1rem; padding: 1rem; border: 2px solid orange; background: var(--panel-bg);">
+        <div style="margin-top: 1rem; padding: 1rem; border: 2px solid orange; background: var(--panel);">
             <div style="font-weight: bold; margin-bottom: 0.5rem; color: orange;">Flow Imbalances Detected:</div>
             <ul style="margin: 0; padding-left: 1.5rem; color: var(--text);">
         '''
@@ -187,21 +168,21 @@ def build_sankey(event=None):
 
     summary_html = f'''
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Total Nodes</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{len(nodes)}</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Total Flows</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{len(aggregated)}</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Est. Savings Rate</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{savings_rate:.1f}%</div>
         </div>
     </div>
 
-    <div style="margin-top: 1rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+    <div style="margin-top: 1rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
         <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--accent);">Flow Summary:</div>
         <p style="margin: 0; color: var(--text);">
             Diagram shows <strong>{len(nodes)} nodes</strong> with <strong>{len(aggregated)} flows</strong>.

@@ -22,6 +22,9 @@
 	--link: #ff66ff;
 	--visited: #cc66cc;
 	--focus: #ffff00;
+	--success: #00cc66;
+	--warning: #ffcc00;
+	--danger: #ff4444;
 	--sticker-bg: #ff00ff;
 	--sticker-text: #000000;
 
@@ -44,6 +47,9 @@
 	--link: #cc6699;
 	--visited: #996699;
 	--focus: #ffcc00;
+	--success: #007a3d;
+	--warning: #b45309;
+	--danger: #cc0000;
 	--sticker-bg: #ff99cc;
 	--sticker-text: #ffffff;
 
@@ -197,9 +203,9 @@ a:visited {
 }
 
 .retro-button--danger {
-	background: #ff4444;
+	background: var(--danger);
 	color: #ffffff;
-	border-color: #ff0000;
+	border-color: color-mix(in srgb, var(--danger) 70%, black);
 }
 
 .retro-button--outline {
@@ -457,6 +463,29 @@ a:visited {
 		transform: translate(1px, 1px);
 	}
 
+	/* Click-to-zoom chart overlay (shared by PyScript tool pages) */
+	.click-zoom input[type="checkbox"] {
+		display: none;
+	}
+
+	.click-zoom input:checked + .zoom-label {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.95);
+		z-index: 9999;
+		cursor: zoom-out;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem;
+	}
+
+	.click-zoom input:checked + .zoom-label img {
+		max-width: 95vw !important;
+		max-height: 95vh !important;
+		object-fit: contain;
+	}
+
 	/* Virtual Dice Styles */
 	.dice-grid {
 		display: grid;
@@ -469,9 +498,9 @@ a:visited {
 	.die {
 		width: 70px;
 		height: 70px;
-		border: 6px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text);
+		border: 6px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
 		font-family: 'VT323', monospace;
 		font-size: 2.5rem;
 		font-weight: bold;
@@ -529,23 +558,36 @@ a:visited {
 
 	.die.black.selected {
 		background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-		border-color: var(--color-accent);
+		border-color: var(--accent);
 		border-width: 8px;
 		box-shadow:
-			0 0 15px var(--color-accent),
+			0 0 15px var(--accent),
 			6px 6px 0 rgba(0, 0, 0, 0.4),
 			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
 		transform: scale(1.08);
 	}
 
+	.die:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 3px;
+	}
+
 	.die.red {
-		background: linear-gradient(135deg, #aa0000 0%, #880000 100%);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--danger) 85%, black) 0%,
+			color-mix(in srgb, var(--danger) 60%, black) 100%
+		);
 		color: #ffffff;
-		border-color: #770000;
+		border-color: color-mix(in srgb, var(--danger) 55%, black);
 	}
 
 	.die.red:hover {
-		background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
+		background: linear-gradient(
+			135deg,
+			var(--danger) 0%,
+			color-mix(in srgb, var(--danger) 75%, black) 100%
+		);
 		transform: translate(-3px, -3px);
 		box-shadow:
 			9px 9px 0 rgba(0, 0, 0, 0.4),
@@ -553,11 +595,15 @@ a:visited {
 	}
 
 	.die.red.selected {
-		background: linear-gradient(135deg, #dd0000 0%, #bb0000 100%);
-		border-color: var(--color-accent);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--danger) 95%, white) 0%,
+			var(--danger) 100%
+		);
+		border-color: var(--accent);
 		border-width: 8px;
 		box-shadow:
-			0 0 15px var(--color-accent),
+			0 0 15px var(--accent),
 			6px 6px 0 rgba(0, 0, 0, 0.4),
 			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
 		transform: scale(1.08);
@@ -606,15 +652,15 @@ a:visited {
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem;
-		background: var(--color-bg-secondary);
-		border: 2px solid var(--color-border);
+		background: var(--bg2);
+		border: 2px solid var(--border);
 		min-height: 3rem;
 	}
 
 	.selected-word-label {
 		font-size: 1.1rem;
 		font-weight: bold;
-		color: var(--color-accent);
+		color: var(--accent);
 		white-space: nowrap;
 	}
 
@@ -625,12 +671,12 @@ a:visited {
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		flex: 1;
-		color: var(--color-text);
+		color: var(--text);
 	}
 
 	.selected-word-value:empty::before {
 		content: 'Click dice to select letters';
-		color: var(--color-border);
+		color: var(--border);
 		font-size: 1rem;
 		letter-spacing: normal;
 		text-transform: none;
@@ -694,10 +740,10 @@ a:visited {
 
 @keyframes reorder-pulse {
 	0%, 100% { 
-		box-shadow: 0 0 15px var(--color-accent);
+		box-shadow: 0 0 15px var(--accent);
 	}
 	50% { 
-		box-shadow: 0 0 25px var(--focus), 0 0 35px var(--color-accent);
+		box-shadow: 0 0 25px var(--focus), 0 0 35px var(--accent);
 	}
 }
 

@@ -12,13 +12,6 @@ const {
 	text,
 	variant = 'default',
 } = Astro.props;
-
-const variantStyles = {
-	default: 'background: var(--sticker-bg); color: var(--sticker-text);',
-	accent: 'background: var(--accent); color: var(--sticker-text);',
-	success: 'background: #00cc00; color: #ffffff;',
-	warning: 'background: #ffaa00; color: #000000;',
-};
 ---
 
 <span class={`badge badge--${variant}`}>{text}</span>

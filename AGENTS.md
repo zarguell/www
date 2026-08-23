@@ -23,9 +23,8 @@ npm run test:run # Run tests
 ├── README.md              # Human-friendly documentation
 ├── docs/                  # Additional documentation
 │   ├── mistakes.md        # Mistakes & lessons learned
-│   ├── theme.md           # Theme tokens and styling
-│   ├── content.md         # Content structure
-│   └── tool-dev-guide.md  # Tool development guide (JavaScript + PyScript)
+│   ├── tool-dev-guide.md  # Tool development guide (JavaScript + PyScript)
+│   └── plans/             # Design & implementation plans
 └── src/                   # Astro project root
     ├── src/
     │   ├── pages/         # File-based routing
@@ -136,7 +135,7 @@ draft: false
 1. Edit `./src/src/styles/global.css`
 2. Add/modify tokens in `[data-theme="neon-night"]` or `[data-theme="mall-pastel"]`
 3. Test changes in both themes
-4. Document new tokens in `docs/theme.md`
+4. Document new tokens alongside the existing ones in `./src/src/styles/global.css`
 
 ## Guardrails
 
@@ -188,8 +187,7 @@ draft: false
 | `README.md` | Human-friendly project overview |
 | `docs/tool-dev-guide.md` | **Source of truth for tool development** (JavaScript + PyScript) |
 | `docs/mistakes.md` | Mistakes encountered and lessons learned |
-| `docs/theme.md` | Theme tokens and styling guidelines |
-| `docs/content.md` | Content structure and writing guidelines |
+| `docs/plans/` | Design and implementation plans |
 
 ## Project Constraints
 

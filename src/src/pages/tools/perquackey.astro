@@ -9,7 +9,7 @@ import DiceRoller from '../../components/DiceRoller.astro';
 const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 ---
 
-<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management" ogImage={ogImage} hideAimChat={true}>
+<BaseLayout title="Perquackey Tracker" description="Track your Perquackey word game scores with automatic timer, dictionary validation, and complete game state management" ogImage={ogImage.toString()} hideAimChat={true}>
 	<div class="tool-hero">
 		<h1>PERQUACKEY TRACKER</h1>
 		<p>Word Game Score Tracker with Timer & Dictionary</p>
@@ -41,7 +41,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 				</div>
 
 				<div id="setup-actions">
-					<button id="start-game-btn" class="retro-button primary" disabled>Start Game</button>
+					<button id="start-game-btn" class="retro-button retro-button--primary" disabled>Start Game</button>
 				</div>
 			</Window>
 		</div>
@@ -71,17 +71,17 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 
 			<Window title="Controls">
 				<div class="controls-row">
-					<button id="start-timer-btn" class="retro-button primary">Start Timer</button>
-					<button id="pause-timer-btn" class="retro-button secondary" style="display: none;">Pause Timer</button>
+					<button id="start-timer-btn" class="retro-button retro-button--primary">Start Timer</button>
+					<button id="pause-timer-btn" class="retro-button retro-button--secondary" style="display: none;">Pause Timer</button>
 				</div>
 				<div class="controls-row">
 					<button id="end-round-btn" class="retro-button">End Round</button>
-					<button id="restart-round-btn" class="retro-button secondary">Restart Round</button>
-					<button id="forfeit-round-btn" class="retro-button danger">Forfeit Round</button>
+					<button id="restart-round-btn" class="retro-button retro-button--secondary">Restart Round</button>
+					<button id="forfeit-round-btn" class="retro-button retro-button--danger">Forfeit Round</button>
 				</div>
 				<div class="controls-row">
 					<button id="toggle-sound-btn" class="mute-btn">🔊 Sound On</button>
-					<button id="end-game-btn" class="retro-button danger">End Game</button>
+					<button id="end-game-btn" class="retro-button retro-button--danger">End Game</button>
 				</div>
 			</Window>
 		</div>
@@ -98,8 +98,8 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 
 			<Window title="Actions">
 				<div class="controls-row">
-					<button id="edit-words-btn" class="retro-button secondary">Edit Words</button>
-					<button id="confirm-round-btn" class="retro-button primary">Confirm & Next</button>
+					<button id="edit-words-btn" class="retro-button retro-button--secondary">Edit Words</button>
+					<button id="confirm-round-btn" class="retro-button retro-button--primary">Confirm & Next</button>
 				</div>
 			</Window>
 		</div>
@@ -114,9 +114,9 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 					<div id="recap-best-round" class="recap-section"></div>
 				</div>
 				<div class="recap-actions">
-					<button id="share-recap-btn" class="retro-button primary">📤 Share Results</button>
+					<button id="share-recap-btn" class="retro-button retro-button--primary">📤 Share Results</button>
 					<button id="play-again-btn" class="retro-button">Play Again</button>
-					<button id="new-game-btn" class="retro-button secondary">New Game</button>
+					<button id="new-game-btn" class="retro-button retro-button--secondary">New Game</button>
 				</div>
 			</Window>
 		</div>
@@ -156,7 +156,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 					<h4>Vulnerability & Penalty</h4>
 					<ul>
 						<li>At 2000+ points: 3-letter words disabled (RED DICE active)</li>
-						<li>If round score < 500 while vulnerable: -500 penalty</li>
+						<li>If round score &lt; 500 while vulnerable: -500 penalty</li>
 					</ul>
 				</div>
 			</Window>
@@ -210,9 +210,9 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		padding: 0.75rem;
 		font-size: 1.2rem;
 		font-family: 'VT323', monospace;
-		border: 2px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text);
+		border: 2px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
 	}
 
 	#player-name, #word-input, #manual-adjustment {
@@ -230,8 +230,8 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem;
-		border: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
+		border: 1px solid var(--border);
+		background: var(--bg2);
 	}
 
 	.player-item, .standing-item {
@@ -249,7 +249,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	.word-length-header {
 		font-weight: bold;
 		margin-bottom: 0.5rem;
-		color: var(--color-accent);
+		color: var(--accent);
 	}
 
 	.controls-row {
@@ -262,23 +262,23 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		font-size: 4rem;
 		text-align: center;
 		padding: 1rem;
-		border: 3px solid var(--color-border);
-		background: var(--color-bg-secondary);
+		border: 3px solid var(--border);
+		background: var(--bg2);
 		margin-bottom: 1rem;
 	}
 
 	.timer-display.warning {
-		color: #ff9500;
+		color: var(--warning);
 	}
 
 	.timer-display.danger {
-		color: #ff0000;
+		color: var(--danger);
 		animation: pulse 0.5s infinite;
 	}
 
 	.timer-display.time-up {
 		animation: blinkRed 0.5s infinite;
-		background: #ff0000 !important;
+		background: var(--danger) !important;
 		color: #ffffff !important;
 	}
 
@@ -296,7 +296,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		font-size: 2rem;
 		text-align: center;
 		margin-bottom: 1rem;
-		color: var(--color-accent);
+		color: var(--accent);
 	}
 
 	.validation-message {
@@ -306,20 +306,20 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	}
 
 	.validation-message.error {
-		color: var(--color-error);
+		color: var(--danger);
 	}
 
 	.validation-message.success {
-		color: var(--color-success);
+		color: var(--success);
 	}
 
 	.validation-message.info {
-		color: var(--color-info);
+		color: var(--accent2);
 	}
 
 	.override-btn {
-		background: var(--color-error);
-		border: 2px solid var(--color-border);
+		background: var(--danger);
+		border: 2px solid var(--border);
 		color: white;
 		padding: 0.5rem 1rem;
 		font-family: 'VT323', monospace;
@@ -330,7 +330,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	}
 
 	.override-btn:hover {
-		background: #cc0000;
+		background: var(--danger);
 		transform: scale(1.02);
 	}
 
@@ -338,11 +338,11 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		display: flex;
 		justify-content: space-between;
 		padding: 0.25rem 0;
-		border-bottom: 1px solid var(--color-border);
+		border-bottom: 1px solid var(--border);
 	}
 
 	.bonus-highlight {
-		color: var(--color-success);
+		color: var(--success);
 		font-weight: bold;
 	}
 
@@ -351,20 +351,20 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		font-weight: bold;
 		text-align: right;
 		margin-top: 1rem;
-		color: var(--color-accent);
+		color: var(--accent);
 	}
 
 	.winner-text {
 		font-size: 2.5rem;
 		text-align: center;
-		color: var(--color-accent);
+		color: var(--accent);
 		margin-bottom: 1rem;
 	}
 
 	.vulnerability-badge {
 		display: inline-block;
 		padding: 0.25rem 0.5rem;
-		background: var(--color-error);
+		background: var(--danger);
 		color: white;
 		font-size: 0.8rem;
 		margin-left: 0.5rem;
@@ -373,7 +373,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	.red-dice-badge {
 		display: inline-block;
 		padding: 0.25rem 0.5rem;
-		background: #ff0000;
+		background: var(--danger);
 		color: white;
 		font-size: 0.8rem;
 		margin-left: 0.5rem;
@@ -408,13 +408,13 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	.standings-title {
 		font-size: 0.9rem;
 		font-weight: bold;
-		color: var(--color-accent);
+		color: var(--accent);
 	}
 
 	.toggle-btn {
-		background: var(--color-bg);
-		border: 1px solid var(--color-border);
-		color: var(--color-text);
+		background: var(--bg);
+		border: 1px solid var(--border);
+		color: var(--text);
 		font-family: 'VT323', monospace;
 		font-size: 1.2rem;
 		line-height: 1;
@@ -424,7 +424,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	}
 
 	.toggle-btn:hover {
-		background: var(--color-accent);
+		background: var(--accent);
 		color: var(--sticker-text);
 	}
 
@@ -443,8 +443,8 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		gap: 0.5rem;
 		padding: 0.25rem 0.5rem;
 		font-size: 0.85rem;
-		border-bottom: 1px solid var(--color-border);
-		background: var(--color-bg-secondary);
+		border-bottom: 1px solid var(--border);
+		background: var(--bg2);
 	}
 
 	.rules-reference {
@@ -460,7 +460,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 
 	.rules-content h4 {
 		margin: 0;
-		color: var(--color-accent);
+		color: var(--accent);
 		font-size: 1.1rem;
 	}
 
@@ -481,14 +481,14 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		background: var(--color-bg-secondary);
+		background: var(--bg2);
 		padding: 0.5rem;
-		border: 1px solid var(--color-border);
+		border: 1px solid var(--border);
 	}
 
 	.recap-card {
-		background: var(--color-bg-secondary);
-		border: 2px solid var(--color-accent);
+		background: var(--bg2);
+		border: 2px solid var(--accent);
 		padding: 1.5rem;
 		margin-bottom: 1rem;
 	}
@@ -496,7 +496,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	.recap-section {
 		margin-bottom: 1rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--color-border);
+		border-bottom: 1px solid var(--border);
 	}
 
 	.recap-section:last-child {
@@ -506,7 +506,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	}
 
 	.recap-label {
-		color: var(--color-accent);
+		color: var(--accent);
 		font-weight: bold;
 		font-size: 1.1rem;
 		margin-bottom: 0.5rem;
@@ -518,9 +518,9 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	}
 
 	.mute-btn {
-		background: var(--color-bg);
-		border: 2px solid var(--color-border);
-		color: var(--color-text);
+		background: var(--bg);
+		border: 2px solid var(--border);
+		color: var(--text);
 		padding: 0.5rem 1rem;
 		font-family: 'VT323', monospace;
 		font-size: 1rem;
@@ -529,7 +529,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 	}
 
 	.mute-btn:hover {
-		background: var(--color-accent);
+		background: var(--accent);
 		color: var(--sticker-text);
 	}
 
@@ -553,106 +553,6 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		min-height: 100px;
 	}
 
-	.die {
-		width: 70px;
-		height: 70px;
-		border: 6px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text);
-		font-family: 'VT323', monospace;
-		font-size: 2.5rem;
-		font-weight: bold;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		user-select: none;
-		position: relative;
-		box-shadow:
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-		transition: all 0.1s ease;
-		image-rendering: pixelated;
-		border-radius: 8px;
-	}
-
-	.die::before {
-		content: '';
-		position: absolute;
-		top: 6px;
-		left: 6px;
-		right: 6px;
-		bottom: 6px;
-		border: 3px solid rgba(0, 0, 0, 0.3);
-		border-radius: 4px;
-		pointer-events: none;
-	}
-
-	.die::after {
-		content: '';
-		position: absolute;
-		bottom: 3px;
-		right: 3px;
-		width: 8px;
-		height: 8px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 50%;
-		pointer-events: none;
-	}
-
-	.die.black {
-		background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-		color: #ffffff;
-		border-color: #000000;
-	}
-
-	.die.black:hover {
-		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-		transform: translate(-3px, -3px);
-		box-shadow:
-			9px 9px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-	}
-
-	.die.black.selected {
-		background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-		border-color: var(--color-accent);
-		border-width: 8px;
-		box-shadow:
-			0 0 15px var(--color-accent),
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
-		transform: scale(1.08);
-	}
-
-	.die.red {
-		background: linear-gradient(135deg, #aa0000 0%, #880000 100%);
-		color: #ffffff;
-		border-color: #770000;
-	}
-
-	.die.red:hover {
-		background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
-		transform: translate(-3px, -3px);
-		box-shadow:
-			9px 9px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-	}
-
-	.die.red.selected {
-		background: linear-gradient(135deg, #dd0000 0%, #bb0000 100%);
-		border-color: var(--color-accent);
-		border-width: 8px;
-		box-shadow:
-			0 0 15px var(--color-accent),
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
-		transform: scale(1.08);
-	}
-
-	.die.rolling {
-		animation: roll 0.5s ease-in-out;
-	}
 
 	@keyframes roll {
 		0% {
@@ -683,15 +583,15 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem;
-		background: var(--color-bg-secondary);
-		border: 2px solid var(--color-border);
+		background: var(--bg2);
+		border: 2px solid var(--border);
 		min-height: 3rem;
 	}
 
 	.selected-word-label {
 		font-size: 1.1rem;
 		font-weight: bold;
-		color: var(--color-accent);
+		color: var(--accent);
 		white-space: nowrap;
 	}
 
@@ -702,12 +602,12 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		flex: 1;
-		color: var(--color-text);
+		color: var(--text);
 	}
 
 	.selected-word-value:empty::before {
 		content: 'Click dice to select letters';
-		color: var(--color-border);
+		color: var(--border);
 		font-size: 1rem;
 		letter-spacing: normal;
 		text-transform: none;
@@ -780,1632 +680,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 </style>
 
 <script>
-	const SCORING_TABLE = {
-		3: {1:60, 2:70, 3:80, 4:90, 5:100},
-		4: {1:120, 2:140, 3:160, 4:180, 5:200},
-		5: {1:200, 2:250, 3:300, 4:350, 5:400},
-		6: {1:300, 2:400, 3:500, 4:600, 5:700},
-		7: {1:500, 2:650, 3:800, 4:950, 5:1100},
-		8: {1:750, 2:1000, 3:1250, 4:1500, 5:1750}
-	};
+	import { initPerquackeyApp } from '../../scripts/perquackey-app';
 
-	const BONUS_TABLE = {
-		'3-4': 300,
-		'4-5': 500,
-		'5-6': 800,
-		'6-7': 1200,
-		'7-8': 1850
-	};
-
-	const VULNERABILITY_THRESHOLD = 2000;
-	const PENALTY_AMOUNT = -500;
-	const MIN_SCORE_THRESHOLD = 500;
-	const DEFAULT_ROUND_TIME = 180;
-	const DEFAULT_SCORE_LIMIT = 5000;
-
-	
-	let lastTapTime = 0;
-	const DOUBLE_TAP_THRESHOLD = 200;
-	let audioContext = null;
-	let userInteracted = false;
-
-	let state = {
-		gameState: 'setup',
-		players: [],
-		currentPlayerIndex: 0,
-		roundTime: DEFAULT_ROUND_TIME,
-		scoreLimit: DEFAULT_SCORE_LIMIT,
-		timer: {
-			secondsRemaining: DEFAULT_ROUND_TIME,
-			isRunning: false,
-			intervalId: null
-		},
-		winner: null,
-		dictionaryLoaded: false,
-		dictionary: null,
-		soundEnabled: true,
-		diceMode: 'manual',
-		diceSet: 'classic',
-		currentDice: [],
-		diceRolled: false,
-		selectedDiceOrder: [],
-		reorderMode: {
-			active: false,
-			sourceIndex: null
-		}
-	};
-
-	function saveState() {
-		const saveData = {
-			gameState: state.gameState,
-			players: state.players,
-			currentPlayerIndex: state.currentPlayerIndex,
-			roundTime: state.roundTime,
-			scoreLimit: state.scoreLimit,
-			timer: {
-				secondsRemaining: state.timer.secondsRemaining,
-				isRunning: state.timer.isRunning
-			},
-			winner: state.winner,
-			soundEnabled: state.soundEnabled,
-			diceSoundEnabled: state.diceSoundEnabled,
-			diceMode: state.diceMode,
-			diceSet: state.diceSet
-		};
-		localStorage.setItem('perquackey-state', JSON.stringify(saveData));
-	}
-
-	function loadState() {
-		const saved = localStorage.getItem('perquackey-state');
-		if (saved) {
-			const data = JSON.parse(saved);
-			state = {
-				...state,
-				...data,
-				roundTime: data.roundTime || DEFAULT_ROUND_TIME,
-				scoreLimit: data.scoreLimit || DEFAULT_SCORE_LIMIT,
-				timer: {
-					...state.timer,
-					...data.timer,
-					intervalId: null
-				},
-				soundEnabled: data.soundEnabled !== undefined ? data.soundEnabled : true,
-				diceSoundEnabled: data.diceSoundEnabled !== undefined ? data.diceSoundEnabled : false,
-				diceMode: data.diceMode || 'manual',
-				diceSet: data.diceSet || 'classic'
-			};
-		}
-	}
-
-	function getCurrentPlayer() {
-		return state.players[state.currentPlayerIndex];
-	}
-
-	function formatTime(seconds) {
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
-	}
-
-	function updateTimerDisplay() {
-		const timerEl = document.getElementById('timer');
-		if (timerEl) {
-			timerEl.textContent = formatTime(state.timer.secondsRemaining);
-			timerEl.className = 'timer-display';
-			const warningThreshold = Math.max(30, Math.floor(parseInt(state.roundTime) * 0.17));
-			const dangerThreshold = Math.max(10, Math.floor(parseInt(state.roundTime) * 0.05));
-			if (state.timer.secondsRemaining <= 0) {
-				timerEl.classList.add('time-up');
-			} else if (state.timer.secondsRemaining <= dangerThreshold) {
-				timerEl.classList.add('danger');
-			} else if (state.timer.secondsRemaining <= warningThreshold) {
-				timerEl.classList.add('warning');
-			}
-		}
-	}
-
-	function playTimerEndSound() {
-		if (!state.soundEnabled) return;
-		
-		try {
-			// Create or reuse AudioContext
-			if (!audioContext) {
-				audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			}
-			
-			// Resume if suspended (required after user gesture)
-			if (audioContext.state === 'suspended') {
-				audioContext.resume();
-			}
-			
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			oscillator.frequency.value = 800;
-			oscillator.type = 'square';
-			gainNode.gain.value = 0.3;
-			
-			oscillator.start();
-			oscillator.stop(audioContext.currentTime + 0.5);
-		} catch (error) {
-			// Silently fail if audio not supported
-		}
-	}
-
-	function playDiceSelectSound() {
-		if (!state.soundEnabled || !state.diceSoundEnabled) return;
-		
-		try {
-			// Create or reuse AudioContext
-			if (!audioContext) {
-				audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			}
-			
-			// Resume if suspended (required after user gesture)
-			if (audioContext.state === 'suspended') {
-				audioContext.resume();
-			}
-			
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			oscillator.frequency.value = 1200;
-			oscillator.type = 'sine';
-			gainNode.gain.value = 0.15;
-			
-			oscillator.start();
-			oscillator.stop(audioContext.currentTime + 0.05);
-		} catch (error) {
-			// Silently fail if audio not supported
-		}
-	}
-
-	function startTimer() {
-		if (state.timer.intervalId) return;
-		state.timer.isRunning = true;
-		state.timer.intervalId = setInterval(() => {
-			if (state.timer.secondsRemaining > 0) {
-				state.timer.secondsRemaining--;
-				updateTimerDisplay();
-				saveState();
-			} else {
-				stopTimer();
-				playTimerEndSound();
-				endRound();
-			}
-		}, 1000);
-	}
-
-	function stopTimer() {
-		if (state.timer.intervalId) {
-			clearInterval(state.timer.intervalId);
-			state.timer.intervalId = null;
-		}
-		state.timer.isRunning = false;
-	}
-
-	async function loadDictionary() {
-		if (state.dictionaryLoaded) return;
-		try {
-			const wordlist = await import('wordlist-js');
-			state.dictionary = new Set(wordlist.englishAll);
-			state.dictionaryLoaded = true;
-			console.log('Dictionary loaded with', wordlist.englishAll.length, 'words');
-		} catch (error) {
-			console.error('Failed to load dictionary:', error);
-		}
-	}
-
-	function validateWord(word) {
-		const validation = { valid: true, message: '' };
-
-		if (!word) {
-			validation.valid = false;
-			validation.message = '';
-			return validation;
-		}
-
-		if (word.length < 3 || word.length > 8) {
-			validation.valid = false;
-			validation.message = 'Word must be 3-8 letters';
-			return validation;
-		}
-
-		const player = getCurrentPlayer();
-		const currentLength = player.currentRoundWords[word.length];
-		
-		if (currentLength && currentLength.length >= 5) {
-			validation.valid = false;
-			validation.message = `Already have 5 words of ${word.length} letters`;
-			return validation;
-		}
-
-		const baseWord = word.endsWith('s') ? word.slice(0, -1) : null;
-		if (baseWord && player.currentRoundWords[baseWord.length]?.includes(baseWord)) {
-			validation.valid = false;
-			validation.message = `Cannot add "${word}" when "${baseWord}" exists`;
-			return validation;
-		}
-
-		if (player.currentRoundWords[word.length]?.includes(word)) {
-			validation.valid = false;
-			validation.message = 'Word already added';
-			return validation;
-		}
-
-		if (!state.dictionaryLoaded) {
-			validation.valid = false;
-			validation.message = 'Loading dictionary...';
-			return validation;
-		}
-
-		if (!state.dictionary.has(word.toLowerCase())) {
-			validation.valid = false;
-			validation.message = 'Not in dictionary';
-			return validation;
-		}
-
-		if (player.vulnerable && word.length === 3) {
-			validation.valid = false;
-			validation.message = '3-letter words disabled when vulnerable';
-			return validation;
-		}
-
-		validation.message = '✓ Valid word';
-		return validation;
-	}
-
-	function rollDiceForRound() {
-		const player = getCurrentPlayer();
-		const includeRedDice = player.vulnerable;
-
-		const diceConfig = {
-			classic: {
-				black: [
-					['A','A','A','E','E','E'], ['A','A','A','E','E','E'],
-					['B','H','I','K','R','T'], ['F','H','I','R','S','U'],
-					['G','I','M','R','S','U'], ['E','J','Q','V','X','Z'],
-					['F','I','N','P','T','U'], ['C','M','O','O','P','W'],
-					['D','L','N','O','R','T'], ['B','L','O','O','W','Y']
-				],
-				red: [
-					['Q','S','S','V','W','Y'],
-					['B','F','H','L','N','P'],
-					['C','D','G','J','K','M']
-				]
-			},
-			modern: {
-				black: [
-					['A','A','A','E','E','E'], ['A','A','A','E','E','E'],
-					['B','H','I','K','R','T'], ['F','H','I','R','S','U'],
-					['G','I','M','R','S','U'], ['E','J','Q','V','X','Z'],
-					['F','I','N','P','T','U'], ['C','M','O','O','P','W'],
-					['D','L','N','O','R','T'], ['B','L','O','O','W','Y']
-				],
-				red: [
-					['B','F','P','Q','S','Y'],
-					['C','D','G','J','K','M'],
-					['H','L','N','S','V','W']
-				]
-			}
-		};
-
-		const config = diceConfig[state.diceSet];
-		const rolled = [];
-
-		let index = 0;
-		for (const die of config.black) {
-			const randomIndex = Math.floor(Math.random() * die.length);
-			rolled.push({
-				letter: die[randomIndex],
-				color: 'black',
-				selected: false,
-				index: index++
-			});
-		}
-
-		if (includeRedDice) {
-			for (const die of config.red) {
-				const randomIndex = Math.floor(Math.random() * die.length);
-				rolled.push({
-					letter: die[randomIndex],
-					color: 'red',
-					selected: false,
-					index: index++
-				});
-			}
-		}
-
-		state.currentDice = rolled;
-		state.diceRolled = true;
-		state.selectedDiceOrder = [];
-		saveState();
-		renderDice();
-		
-		const undoBtn = document.getElementById('undo-last-die-btn');
-		if (undoBtn) {
-			undoBtn.disabled = true;
-		}
-	}
-
-	function toggleDiceSelection(index) {
-		const die = state.currentDice[index];
-
-		if (die.selected) {
-			die.selected = false;
-			state.selectedDiceOrder = state.selectedDiceOrder.filter(i => i !== index);
-		} else {
-			die.selected = true;
-			state.selectedDiceOrder.push(index);
-		}
-
-		renderDice();
-		updateSelectedWord();
-		playDiceSelectSound();
-		validateDiceWord();
-		
-		const undoBtn = document.getElementById('undo-last-die-btn');
-		if (undoBtn) {
-			undoBtn.disabled = state.selectedDiceOrder.length === 0;
-		}
-	}
-
-	function handleDiceReorder(index) {
-		const die = state.currentDice[index];
-		
-		if (!state.reorderMode.active) {
-			if (die.selected) {
-				state.reorderMode.active = true;
-				state.reorderMode.sourceIndex = index;
-				highlightReorderTarget(index);
-			} else {
-				toggleDiceSelection(index);
-			}
-		} else if (state.reorderMode.sourceIndex === index) {
-			state.reorderMode.active = false;
-			state.reorderMode.sourceIndex = null;
-			clearReorderHighlight();
-		} else {
-			if (die.selected) {
-				swapDiceInSelection(state.reorderMode.sourceIndex, index);
-			} else {
-				replaceDieInSelection(state.reorderMode.sourceIndex, index);
-			}
-			state.reorderMode.active = false;
-			state.reorderMode.sourceIndex = null;
-			clearReorderHighlight();
-		}
-	}
-
-	function swapDiceInSelection(fromIndex, toIndex) {
-		const fromPos = state.selectedDiceOrder.indexOf(fromIndex);
-		const toPos = state.selectedDiceOrder.indexOf(toIndex);
-		
-		if (fromPos !== -1 && toPos !== -1 && fromPos !== toPos) {
-			const temp = state.selectedDiceOrder[fromPos];
-			state.selectedDiceOrder[fromPos] = state.selectedDiceOrder[toPos];
-			state.selectedDiceOrder[toPos] = temp;
-			
-			renderDice();
-			updateSelectedWord();
-			validateDiceWord();
-		}
-	}
-
-	function replaceDieInSelection(sourceIndex, newIndex) {
-		const sourcePos = state.selectedDiceOrder.indexOf(sourceIndex);
-		
-		if (sourcePos !== -1) {
-			state.currentDice[sourceIndex].selected = false;
-			state.currentDice[newIndex].selected = true;
-			state.selectedDiceOrder[sourcePos] = newIndex;
-			
-			renderDice();
-			updateSelectedWord();
-			validateDiceWord();
-		}
-	}
-
-	function highlightReorderTarget(index) {
-		const dieElements = document.querySelectorAll('.die');
-		dieElements[index].classList.add('reorder-target');
-		showReorderHelp();
-	}
-
-	function clearReorderHighlight() {
-		document.querySelectorAll('.die').forEach(die => {
-			die.classList.remove('reorder-target');
-		});
-		hideReorderHelp();
-	}
-
-	function showReorderHelp() {
-		const container = document.querySelector('.dice-controls');
-		if (!document.getElementById('reorder-help')) {
-			const help = document.createElement('div');
-			help.id = 'reorder-help';
-			help.className = 'reorder-help-text';
-			help.textContent = '🔄 Tap another die to swap or replace, or tap again to cancel';
-			container.insertBefore(help, container.firstChild);
-		}
-	}
-
-	function hideReorderHelp() {
-		const help = document.getElementById('reorder-help');
-		if (help) help.remove();
-	}
-
-	function handleDicePointerDown(event, index) {
-		if (!event.isPrimary) return;
-		event.preventDefault();
-
-		const now = Date.now();
-		if (now - lastTapTime < DOUBLE_TAP_THRESHOLD) {
-			return;
-		}
-		lastTapTime = now;
-
-		const dieElement = event.target.closest('.die');
-		if (dieElement) {
-			dieElement.classList.add('touch-active');
-			setTimeout(() => {
-				dieElement.classList.remove('touch-active');
-			}, 150);
-		}
-
-		handleDiceReorder(index);
-		const die = state.currentDice[index];
-		if (die && die.selected) {
-			provideHapticFeedback('selection');
-		}
-	}
-
-	function clearDiceSelection() {
-		state.currentDice.forEach(die => die.selected = false);
-		state.selectedDiceOrder = [];
-		renderDice();
-		updateSelectedWord();
-		document.getElementById('add-word-btn').disabled = true;
-		
-		const undoBtn = document.getElementById('undo-last-die-btn');
-		if (undoBtn) {
-			undoBtn.disabled = true;
-		}
-	}
-
-	function getSelectedDiceWord() {
-		return state.selectedDiceOrder
-			.map(index => state.currentDice[index].letter)
-			.join('');
-	}
-
-	function validateDiceWord() {
-		const word = getSelectedDiceWord();
-		const validation = validateWord(word);
-		const validationEl = document.getElementById('dice-validation-message');
-		const addBtn = document.getElementById('add-word-btn');
-
-		if (!word) {
-			validationEl.textContent = '';
-			validationEl.className = 'validation-message';
-			addBtn.disabled = true;
-			return;
-		}
-
-		validationEl.textContent = validation.message;
-		validationEl.className = `validation-message ${validation.valid ? 'success' : 'error'}`;
-		addBtn.disabled = !validation.valid;
-		
-		const undoBtn = document.getElementById('undo-last-die-btn');
-		if (undoBtn) {
-			undoBtn.disabled = state.selectedDiceOrder.length === 0;
-		}
-	}
-
-	function provideHapticFeedback(pattern = 'selection') {
-		// Check for vibration support AND user interaction
-		if (!navigator.vibrate || !userInteracted) return;
-		
-		try {
-			switch(pattern) {
-				case 'selection':
-					navigator.vibrate(10);
-					break;
-				case 'success':
-					navigator.vibrate([10, 50, 10]);
-					break;
-				case 'undo':
-					navigator.vibrate(15);
-					break;
-			}
-		} catch (error) {
-			// Silently fail if vibration not supported
-		}
-	}
-
-	function clearAllDice() {
-		state.currentDice.forEach(die => die.selected = false);
-		state.selectedDiceOrder = [];
-		state.reorderMode.active = false;
-		state.reorderMode.sourceIndex = null;
-		clearReorderHighlight();
-		
-		renderDice();
-		updateSelectedWord();
-		validateDiceWord();
-		provideHapticFeedback('undo');
-	}
-
-	function undoLastDie() {
-		if (state.selectedDiceOrder.length === 0) return;
-		
-		const lastIndex = state.selectedDiceOrder.pop();
-		state.currentDice[lastIndex].selected = false;
-		
-		state.reorderMode.active = false;
-		state.reorderMode.sourceIndex = null;
-		clearReorderHighlight();
-		
-		renderDice();
-		updateSelectedWord();
-		validateDiceWord();
-		provideHapticFeedback('selection');
-	}
-
-	function addDiceWord() {
-		const word = getSelectedDiceWord();
-		if (word) {
-			addWord(word);
-			provideHapticFeedback('success');
-			state.currentDice.forEach(die => die.selected = false);
-			state.selectedDiceOrder = [];
-			renderDice();
-			updateSelectedWord();
-			validateDiceWord();
-			
-			const undoBtn = document.getElementById('undo-last-die-btn');
-			if (undoBtn) {
-				undoBtn.disabled = true;
-			}
-		}
-	}
-
-	function renderDice() {
-		const diceGrid = document.getElementById('dice-grid');
-		if (!diceGrid) return;
-
-		diceGrid.innerHTML = state.currentDice.map(die => `
-			<div class="die ${die.color} ${die.selected ? 'selected' : ''}"
-			     onpointerdown="window.handleDicePointerDown(event, ${die.index})"
-			     data-index="${die.index}">
-				${die.letter}
-			</div>
-		`).join('');
-	}
-
-	function updateSelectedWord() {
-		const wordEl = document.getElementById('selected-word');
-		if (wordEl) {
-			wordEl.textContent = getSelectedDiceWord();
-		}
-	}
-
-	function showWordEntryMode() {
-		const manualEntry = document.getElementById('manual-word-entry');
-		const diceEntry = document.getElementById('virtual-dice-entry');
-
-		if (state.diceMode === 'virtual') {
-			manualEntry.style.display = 'none';
-			diceEntry.style.display = 'block';
-		} else {
-			manualEntry.style.display = 'block';
-			diceEntry.style.display = 'none';
-		}
-	}
-
-	function addWord(word) {
-		const player = getCurrentPlayer();
-		const length = word.length;
-		
-		if (!player.currentRoundWords[length]) {
-			player.currentRoundWords[length] = [];
-		}
-		player.currentRoundWords[length].push(word);
-		
-		saveState();
-		renderCurrentWords();
-		checkVulnerability();
-	}
-
-	function removeWord(length, index) {
-		const player = getCurrentPlayer();
-		player.currentRoundWords[length].splice(index, 1);
-		saveState();
-		renderCurrentWords();
-		checkVulnerability();
-	}
-
-	function calculateScore(words) {
-		let totalScore = 0;
-		let bonuses = [];
-
-		for (const [length, wordList] of Object.entries(words)) {
-			const len = parseInt(length);
-			const count = wordList.length;
-			if (count > 0 && SCORING_TABLE[len]) {
-				totalScore += SCORING_TABLE[len][count] || 0;
-			}
-		}
-
-		if (words[7]?.length >= 5 && words[8]?.length >= 5) {
-			totalScore += BONUS_TABLE['7-8'];
-			bonuses.push('7-8 Bonus: +1850');
-		} else if (words[6]?.length >= 5 && words[7]?.length >= 5) {
-			totalScore += BONUS_TABLE['6-7'];
-			bonuses.push('6-7 Bonus: +1200');
-		} else if (words[5]?.length >= 5 && words[6]?.length >= 5) {
-			totalScore += BONUS_TABLE['5-6'];
-			bonuses.push('5-6 Bonus: +800');
-		} else if (words[4]?.length >= 5 && words[5]?.length >= 5) {
-			totalScore += BONUS_TABLE['4-5'];
-			bonuses.push('4-5 Bonus: +500');
-		} else if (words[3]?.length >= 5 && words[4]?.length >= 5) {
-			totalScore += BONUS_TABLE['3-4'];
-			bonuses.push('3-4 Bonus: +300');
-		}
-
-		return { totalScore, bonuses };
-	}
-
-	function checkVulnerability() {
-		const player = getCurrentPlayer();
-		const roundScore = calculateScore(player.currentRoundWords).totalScore + player.totalScore;
-		
-		if (roundScore + player.totalScore >= state.scoreLimit && !player.vulnerable) {
-			player.vulnerable = true;
-			player.redDice = true;
-			showStandings();
-		}
-	}
-
-	function applyPenalty(player) {
-		if (player.vulnerable && !player.penaltyApplied) {
-			const roundScore = calculateScore(player.currentRoundWords).totalScore;
-			if (roundScore < MIN_SCORE_THRESHOLD) {
-				player.totalScore += PENALTY_AMOUNT;
-				player.penaltyApplied = true;
-			}
-		}
-	}
-
-	function advanceToNextPlayer() {
-		const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-		state.currentPlayerIndex = nextPlayerIndex;
-		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-		state.timer.isRunning = false;
-		state.timer.intervalId = null;
-		state.gameState = 'playing';
-		state.diceRolled = false;
-		state.selectedDiceOrder = [];
-		saveState();
-		showPhase('playing');
-		showWordEntryMode();
-		renderCurrentPlayer();
-		renderCurrentWords();
-		updateTimerDisplay();
-		updateTimerButtons();
-		showStandings();
-
-		if (state.diceMode === 'virtual') {
-			rollDiceForRound();
-		}
-	}
-
-	function endRound() {
-		stopTimer();
-		const player = getCurrentPlayer();
-		applyPenalty(player);
-		
-		const roundScore = calculateScore(player.currentRoundWords).totalScore;
-		player.currentRoundScore = roundScore;
-		
-		state.gameState = 'round_complete';
-		saveState();
-		showPhase('round-complete');
-		renderRoundSummary();
-		showStandings();
-	}
-
-		function confirmRound() {
-		const player = getCurrentPlayer();
-		
-		const roundWords = [];
-		for (const [length, wordList] of Object.entries(player.currentRoundWords)) {
-			if (!player.words[length]) {
-				player.words[length] = [];
-			}
-			player.words[length].push(...wordList);
-			roundWords.push(...wordList);
-		}
-		
-		player.roundHistory.push({
-			roundNumber: player.roundHistory.length + 1,
-			score: player.currentRoundScore,
-			words: roundWords
-		});
-		player.allWordsPlayed.push(...roundWords);
-		
-		player.totalScore += player.currentRoundScore + player.manualScoreAdjustment;
-		
-		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
-		player.currentRoundScore = 0;
-		player.manualScoreAdjustment = 0;
-		player.penaltyApplied = false;
-
-		if (player.totalScore >= state.scoreLimit) {
-			state.winner = player;
-			state.gameState = 'game_over';
-			saveState();
-			showPhase('game-over');
-			renderGameOver();
-			showStandings();
-		} else {
-			const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-			state.currentPlayerIndex = nextPlayerIndex;
-			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-			state.timer.isRunning = false;
-			state.timer.intervalId = null;
-			state.gameState = 'playing';
-			state.diceRolled = false;
-			state.selectedDiceOrder = [];
-			saveState();
-			showPhase('playing');
-			showWordEntryMode();
-			renderCurrentPlayer();
-			renderCurrentWords();
-			updateTimerDisplay();
-			updateTimerButtons();
-			showStandings();
-
-			if (state.diceMode === 'virtual') {
-				rollDiceForRound();
-			}
-		}
-	}
-
-	function getLongestWord() {
-		let longest = { word: '', length: 0, player: null };
-		
-		for (const player of state.players) {
-			for (const word of player.allWordsPlayed) {
-				if (word.length > longest.length) {
-					longest = { word, length: word.length, player: player.name };
-				}
-			}
-		}
-		
-		return longest.word ? longest : null;
-	}
-
-	function getHighestRound() {
-		let highest = { score: 0, player: null, round: 0 };
-		
-		for (const player of state.players) {
-			for (const round of player.roundHistory) {
-				if (round.score > highest.score) {
-					highest = { score: round.score, player: player.name, round: round.roundNumber };
-				}
-			}
-		}
-		
-		return highest.score > 0 ? highest : null;
-	}
-
-	function generateShareText() {
-		const winner = state.winner;
-		const totalRounds = Math.max(...state.players.map(p => p.roundHistory.length), 0);
-		const longest = getLongestWord();
-		const highestRound = getHighestRound();
-		const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-		
-		let shareText = `🎮 Perquackey Results - ${today}\n\n`;
-		
-		if (winner) {
-			shareText += `🏆 Winner: ${winner.name}\n`;
-			shareText += `⭐ Score: ${winner.totalScore}\n`;
-		} else {
-			const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-			shareText += `🤝 Tie Game!\n`;
-			shareText += `⭐ Top Score: ${sorted[0].totalScore}\n`;
-		}
-		
-		shareText += `🔢 Rounds: ${totalRounds}\n\n`;
-		
-		shareText += `📊 Final Scores:\n`;
-		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-		sorted.forEach((player, index) => {
-			shareText += `${index + 1}. ${player.name}: ${player.totalScore}\n`;
-		});
-		
-		if (longest) {
-			shareText += `\n📝 Longest Word: "${longest.word}" (${longest.length} letters) by ${longest.player}\n`;
-		}
-		
-		if (highestRound) {
-			shareText += `🎯 Best Round: ${highestRound.score} pts by ${highestRound.player} (Round ${highestRound.round})\n`;
-		}
-		
-		shareText += `\nPlay at: https://www.arguelles.me/tools/perquackey/`;
-		
-		return shareText;
-	}
-
-	async function shareResults() {
-		const shareText = generateShareText();
-		
-		if (navigator.share) {
-			try {
-				await navigator.share({
-					text: shareText
-				});
-			} catch (err) {
-				if (err.name !== 'AbortError') {
-					console.error('Share failed:', err);
-				}
-			}
-		} else {
-			try {
-				await navigator.clipboard.writeText(shareText);
-				const shareBtn = document.getElementById('share-recap-btn');
-				const originalText = shareBtn.textContent;
-				shareBtn.textContent = '✅ Copied!';
-				setTimeout(() => {
-					shareBtn.textContent = originalText;
-				}, 2000);
-			} catch (err) {
-				console.error('Clipboard copy failed:', err);
-				alert('Could not copy to clipboard. Please manually copy results.');
-			}
-		}
-	}
-
-	function determineWinner() {
-		let maxScore = -Infinity;
-		let winners = [];
-		
-		for (const player of state.players) {
-			if (player.totalScore > maxScore) {
-				maxScore = player.totalScore;
-				winners = [player];
-			} else if (player.totalScore === maxScore) {
-				winners.push(player);
-			}
-		}
-		
-		return winners.length === 1 ? winners[0] : null;
-	}
-
-	function renderSetup() {
-		const playersList = document.getElementById('players-list');
-		const startBtn = document.getElementById('start-game-btn');
-		
-		playersList.innerHTML = state.players.map((player, index) => `
-			<div class="player-item">
-				<span>${player.name}</span>
-				<div>
-					<button class="retro-button" onclick="movePlayer(${index}, -1)">↑</button>
-					<button class="retro-button" onclick="movePlayer(${index}, 1)">↓</button>
-					<button class="retro-button danger" onclick="removePlayer(${index})">✕</button>
-				</div>
-			</div>
-		`).join('');
-		
-		startBtn.disabled = state.players.length < 1;
-	}
-
-	function renderCurrentPlayer() {
-		const player = getCurrentPlayer();
-		const nameEl = document.getElementById('current-player-name');
-		nameEl.textContent = `${player.name}'s Turn`;
-	}
-
-	function renderCurrentWords() {
-		const player = getCurrentPlayer();
-		const container = document.getElementById('current-words');
-		
-		container.innerHTML = '';
-		
-		for (let length = 3; length <= 8; length++) {
-			const words = player.currentRoundWords[length] || [];
-			if (words.length > 0) {
-				const group = document.createElement('div');
-				group.className = 'word-length-group';
-				
-				const header = document.createElement('div');
-				header.className = 'word-length-header';
-				header.textContent = `${length}-letter words (${words.length}/5)`;
-				group.appendChild(header);
-				
-				words.forEach((word, index) => {
-					const wordEl = document.createElement('div');
-					wordEl.className = 'word-item';
-					wordEl.innerHTML = `
-						<span>${word}</span>
-						<button class="retro-button danger" onclick="removeWord(${length}, ${index})">✕</button>
-					`;
-					group.appendChild(wordEl);
-				});
-				
-				container.appendChild(group);
-			}
-		}
-		
-		if (container.children.length === 0) {
-			container.innerHTML = '<div class="info-message">No words added yet</div>';
-		}
-	}
-
-	function renderRoundSummary() {
-		const player = getCurrentPlayer();
-		const container = document.getElementById('round-summary');
-		const { totalScore, bonuses } = calculateScore(player.currentRoundWords);
-		
-		let html = '<h3>Score Breakdown</h3>';
-		
-		for (let length = 3; length <= 8; length++) {
-			const words = player.currentRoundWords[length] || [];
-			if (words.length > 0) {
-				const score = SCORING_TABLE[length][words.length];
-				html += `<div class="score-row">
-					<span>${length}-letter (${words.length}/5)</span>
-					<span>+${score}</span>
-				</div>`;
-			}
-		}
-		
-		if (bonuses.length > 0) {
-			html += '<div style="margin-top: 1rem;">';
-			bonuses.forEach(bonus => {
-				html += `<div class="bonus-highlight">${bonus}</div>`;
-			});
-			html += '</div>';
-		}
-		
-		if (player.manualScoreAdjustment !== 0) {
-			html += `<div class="score-row">
-				<span>Manual Adjustment</span>
-				<span>${player.manualScoreAdjustment > 0 ? '+' : ''}${player.manualScoreAdjustment}</span>
-			</div>`;
-		}
-		
-		html += `<div class="total-score">Round Total: ${totalScore + player.manualScoreAdjustment}</div>`;
-		html += `<div style="margin-top: 1rem;">Game Total: ${player.totalScore + totalScore + player.manualScoreAdjustment}</div>`;
-		
-		if (player.vulnerable) {
-			html += '<div class="red-dice-badge">RED DICE ACTIVE</div>';
-			if (player.penaltyApplied) {
-				html += `<div class="vulnerability-badge">Penalty Applied: ${PENALTY_AMOUNT}</div>`;
-			}
-		}
-		
-		container.innerHTML = html;
-	}
-
-	function renderStandings() {
-		const container = document.getElementById('standings-list');
-		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-		
-		container.innerHTML = sorted.map((player, index) => {
-			const isVulnerable = player.vulnerable ? '<span class="vulnerability-badge">VULNERABLE</span>' : '';
-			const isRedDice = player.redDice ? '<span class="red-dice-badge">RED DICE</span>' : '';
-			return `
-			<div class="standing-item">
-				<span>${index + 1}. ${player.name}</span>
-				<span>
-					${player.totalScore}
-					${isVulnerable}
-					${isRedDice}
-				</span>
-			</div>
-		`;
-		}).join('');
-	}
-
-	function renderGameOver() {
-		const winnerEl = document.getElementById('recap-winner');
-		const statsEl = document.getElementById('recap-stats');
-		const scoresEl = document.getElementById('recap-scores');
-		const longestWordEl = document.getElementById('recap-longest-word');
-		const bestRoundEl = document.getElementById('recap-best-round');
-		
-		const totalRounds = Math.max(...state.players.map(p => p.roundHistory.length), 0);
-		const longest = getLongestWord();
-		const highestRound = getHighestRound();
-		
-		if (state.winner) {
-			winnerEl.innerHTML = `
-				<div class="winner-text">🎉 ${state.winner.name} Wins! 🎉</div>
-				<div class="recap-value" style="text-align: center;">Score: ${state.winner.totalScore}</div>
-			`;
-		} else {
-			const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-			const topScores = sorted.filter(p => p.totalScore === sorted[0].totalScore);
-			winnerEl.innerHTML = `
-				<div class="winner-text">🤝 Tie: ${topScores.map(p => p.name).join(' & ')} 🤝</div>
-				<div class="recap-value" style="text-align: center;">Score: ${sorted[0].totalScore}</div>
-			`;
-		}
-		
-		statsEl.innerHTML = `
-			<div class="recap-label">🔢 Rounds Played</div>
-			<div class="recap-value">${totalRounds}</div>
-		`;
-		
-		const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-		scoresEl.innerHTML = `
-			<div class="recap-label">📊 Final Scores</div>
-			${sorted.map((player, index) => `
-				<div class="standing-item">
-					<span>${index + 1}. ${player.name}</span>
-					<span>${player.totalScore}</span>
-				</div>
-			`).join('')}
-		`;
-		
-		if (longest) {
-			longestWordEl.innerHTML = `
-				<div class="recap-label">📝 Longest Word</div>
-				<div class="recap-value">"${longest.word}" (${longest.length} letters) by ${longest.player}</div>
-			`;
-		} else {
-			longestWordEl.innerHTML = '';
-		}
-		
-		if (highestRound) {
-			bestRoundEl.innerHTML = `
-				<div class="recap-label">🎯 Best Single Round</div>
-				<div class="recap-value">${highestRound.score} points by ${highestRound.player} (Round ${highestRound.round})</div>
-			`;
-		} else {
-			bestRoundEl.innerHTML = '';
-		}
-	}
-
-	function showPhase(phase) {
-		document.querySelectorAll('.phase').forEach(el => el.style.display = 'none');
-		document.getElementById(`${phase}-phase`).style.display = 'flex';
-		
-		if (phase === 'playing' || phase === 'round-complete' || phase === 'game-over') {
-			document.getElementById('standings-window').style.display = 'block';
-		} else {
-			document.getElementById('standings-window').style.display = 'none';
-		}
-	}
-
-	function showStandings() {
-		if (state.gameState !== 'setup') {
-			renderStandings();
-		}
-	}
-
-	function resetGame() {
-		state = {
-			gameState: 'setup',
-			players: state.players.map(p => ({
-				...p,
-				name: p.name,
-				id: p.id,
-				totalScore: 0,
-				currentRoundScore: 0,
-				manualScoreAdjustment: 0,
-				words: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
-				currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
-				vulnerable: false,
-				redDice: false,
-				penaltyApplied: false,
-				roundHistory: [],
-				allWordsPlayed: []
-			})),
-			currentPlayerIndex: 0,
-			timer: {
-				secondsRemaining: parseInt(state.roundTime) || DEFAULT_ROUND_TIME,
-				isRunning: false,
-				intervalId: null
-			},
-			winner: null,
-			dictionaryLoaded: state.dictionaryLoaded,
-			dictionary: state.dictionary,
-			soundEnabled: state.soundEnabled,
-			diceMode: state.diceMode,
-			diceSet: state.diceSet,
-			currentDice: [],
-			diceRolled: false,
-			diceSoundEnabled: state.diceSoundEnabled,
-			selectedDiceOrder: []
-		};
-	}
-
-	window.addPlayer = () => {
-		const input = document.getElementById('player-name');
-		const name = input.value.trim();
-		if (name && !state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-			state.players.push({
-				id: Date.now().toString(),
-				name,
-				totalScore: 0,
-				currentRoundScore: 0,
-				manualScoreAdjustment: 0,
-				words: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
-				currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
-				vulnerable: false,
-				redDice: false,
-				penaltyApplied: false,
-				roundHistory: [],
-				allWordsPlayed: []
-			});
-			input.value = '';
-			saveState();
-			renderSetup();
-		}
-	};
-
-	window.removePlayer = (index) => {
-		state.players.splice(index, 1);
-		saveState();
-		renderSetup();
-	};
-
-	window.movePlayer = (index, direction) => {
-		const newIndex = index + direction;
-		if (newIndex >= 0 && newIndex < state.players.length) {
-			[state.players[index], state.players[newIndex]] = [state.players[newIndex], state.players[index]];
-			saveState();
-			renderSetup();
-		}
-	};
-
-	window.removeWord = removeWord;
-	window.toggleDiceSelection = toggleDiceSelection;
-	window.addDiceWord = addDiceWord;
-	window.clearDiceSelection = clearDiceSelection;
-	window.clearAllDice = clearAllDice;
-	window.undoLastDie = undoLastDie;
-	window.handleDicePointerDown = handleDicePointerDown;
-
-	window.startGame = () => {
-		if (state.players.length > 0) {
-			state.gameState = 'playing';
-			state.currentPlayerIndex = 0;
-			state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-			state.diceRolled = false;
-			state.selectedDiceOrder = [];
-			saveState();
-			showPhase('playing');
-			showWordEntryMode();
-			renderCurrentPlayer();
-			renderCurrentWords();
-			updateTimerDisplay();
-			showStandings();
-			loadDictionary();
-
-			if (state.diceMode === 'virtual' && !state.diceRolled) {
-				rollDiceForRound();
-			}
-
-			if (state.timer.isRunning) {
-				startTimer();
-			}
-		}
-	};
-
-	window.endRound = endRound;
-
-	window.startTimer = () => {
-		startTimer();
-		updateTimerButtons();
-		saveState();
-	};
-
-	window.pauseTimer = () => {
-		stopTimer();
-		updateTimerButtons();
-		saveState();
-	};
-
-	function updateTimerButtons() {
-		const startBtn = document.getElementById('start-timer-btn');
-		const pauseBtn = document.getElementById('pause-timer-btn');
-		if (startBtn && pauseBtn) {
-			if (state.timer.isRunning) {
-				startBtn.style.display = 'none';
-				pauseBtn.style.display = 'inline-block';
-			} else {
-				startBtn.style.display = 'inline-block';
-				pauseBtn.style.display = 'none';
-			}
-		}
-	}
-
-	window.restartRound = () => {
-		const player = getCurrentPlayer();
-		player.currentRoundWords = { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
-		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-		stopTimer();
-		saveState();
-		renderCurrentWords();
-		updateTimerDisplay();
-	};
-
-	window.forfeitRound = () => {
-		const player = getCurrentPlayer();
-		player.currentRoundScore = 0;
-		player.totalScore += 0;
-
-		state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-		state.timer.isRunning = false;
-		state.timer.intervalId = null;
-		state.diceRolled = false;
-		state.selectedDiceOrder = [];
-
-		advanceToNextPlayer();
-	};
-
-	window.editWords = () => {
-		state.gameState = 'playing';
-		saveState();
-		showPhase('playing');
-		renderCurrentPlayer();
-		renderCurrentWords();
-		updateTimerDisplay();
-	};
-
-	window.confirmRound = confirmRound;
-
-	window.applyManualAdjustment = () => {
-		const input = document.getElementById('manual-adjustment');
-		const player = getCurrentPlayer();
-		player.manualScoreAdjustment = parseInt(input.value) || 0;
-		saveState();
-		renderRoundSummary();
-	};
-
-		window.playAgain = resetGame;
-
-		window.toggleSound = () => {
-			state.soundEnabled = !state.soundEnabled;
-			saveState();
-			
-			const btn = document.getElementById('toggle-sound-btn');
-			if (state.soundEnabled) {
-				btn.textContent = '🔊 Sound On';
-				btn.classList.remove('muted');
-			} else {
-				btn.textContent = '🔇 Muted';
-				btn.classList.add('muted');
-			}
-		};
-
-		function updateSoundButton() {
-			const btn = document.getElementById('toggle-sound-btn');
-			if (btn) {
-				if (state.soundEnabled) {
-					btn.textContent = '🔊 Sound On';
-					btn.classList.remove('muted');
-				} else {
-					btn.textContent = '🔇 Muted';
-					btn.classList.add('muted');
-				}
-			}
-		}
-
-		window.shareResults = shareResults;
-
-		function makeDraggable(element, handle) {
-		let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-		handle.onmousedown = dragMouseDown;
-
-		function dragMouseDown(e) {
-			e = e || window.event;
-			e.preventDefault();
-			pos3 = e.clientX;
-			pos4 = e.clientY;
-			document.onmouseup = closeDragElement;
-			document.onmousemove = elementDrag;
-		}
-
-		function elementDrag(e) {
-			e = e || window.event;
-			e.preventDefault();
-			pos1 = pos3 - e.clientX;
-			pos2 = pos4 - e.clientY;
-			pos3 = e.clientX;
-			pos4 = e.clientY;
-			element.style.top = (element.offsetTop - pos2) + "px";
-			element.style.left = (element.offsetLeft - pos1) + "px";
-		}
-
-		function closeDragElement() {
-			document.onmouseup = null;
-			document.onmousemove = null;
-		}
-	}
-
-	document.addEventListener('DOMContentLoaded', () => {
-		// Mark user as interacted on first click/touch anywhere on page
-		const enableUserInteraction = () => {
-			userInteracted = true;
-			document.removeEventListener('click', enableUserInteraction);
-			document.removeEventListener('touchstart', enableUserInteraction);
-		};
-		document.addEventListener('click', enableUserInteraction);
-		document.addEventListener('touchstart', enableUserInteraction);
-		
-		loadState();
-		
-		if (state.gameState === 'setup') {
-			showPhase('setup');
-			renderSetup();
-			document.getElementById('round-time').value = state.roundTime || DEFAULT_ROUND_TIME;
-			document.getElementById('score-limit').value = state.scoreLimit || DEFAULT_SCORE_LIMIT;
-
-			document.getElementById(`mode-${state.diceMode}`).checked = true;
-			document.getElementById(`set-${state.diceSet}`).checked = true;
-			const virtualSettings = document.getElementById('virtual-dice-settings');
-			virtualSettings.style.display = state.diceMode === 'virtual' ? 'block' : 'none';
-		} else if (state.gameState === 'playing') {
-			showPhase('playing');
-			showWordEntryMode();
-			renderCurrentPlayer();
-			renderCurrentWords();
-			updateTimerDisplay();
-			showStandings();
-			loadDictionary();
-			updateTimerButtons();
-			updateSoundButton();
-
-			if (state.diceMode === 'virtual' && !state.diceRolled) {
-				rollDiceForRound();
-			}
-
-			if (state.timer.isRunning) {
-				startTimer();
-			}
-		} else if (state.gameState === 'round_complete') {
-			showPhase('round-complete');
-			renderRoundSummary();
-			showStandings();
-		} else if (state.gameState === 'game_over') {
-			showPhase('game-over');
-			renderGameOver();
-			showStandings();
-		}
-		
-		document.getElementById('add-player-btn').addEventListener('click', window.addPlayer);
-		document.getElementById('start-game-btn').addEventListener('click', window.startGame);
-
-		document.getElementById('round-time').addEventListener('input', () => {
-			const input = document.getElementById('round-time');
-			state.roundTime = parseInt(input.value) || DEFAULT_ROUND_TIME;
-			saveState();
-		});
-		document.getElementById('score-limit').addEventListener('input', () => {
-			const input = document.getElementById('score-limit');
-			state.scoreLimit = parseInt(input.value) || DEFAULT_SCORE_LIMIT;
-			saveState();
-		});
-
-		document.querySelectorAll('input[name="dice-mode"]').forEach(radio => {
-			radio.addEventListener('change', (e) => {
-				state.diceMode = e.target.value;
-				saveState();
-				const virtualSettings = document.getElementById('virtual-dice-settings');
-				virtualSettings.style.display = state.diceMode === 'virtual' ? 'block' : 'none';
-			});
-		});
-
-		document.querySelectorAll('input[name="dice-set"]').forEach(radio => {
-			radio.addEventListener('change', (e) => {
-				state.diceSet = e.target.value;
-				saveState();
-			});
-		});
-		document.getElementById('start-timer-btn').addEventListener('click', window.startTimer);
-		document.getElementById('pause-timer-btn').addEventListener('click', window.pauseTimer);
-		document.getElementById('end-round-btn').addEventListener('click', window.endRound);
-		document.getElementById('restart-round-btn').addEventListener('click', window.restartRound);
-		document.getElementById('forfeit-round-btn').addEventListener('click', window.forfeitRound);
-		document.getElementById('edit-words-btn').addEventListener('click', window.editWords);
-		document.getElementById('confirm-round-btn').addEventListener('click', window.confirmRound);
-		document.getElementById('apply-adjustment-btn').addEventListener('click', window.applyManualAdjustment);
-		document.getElementById('toggle-sound-btn').addEventListener('click', window.toggleSound);
-		document.getElementById('play-again-btn').addEventListener('click', window.playAgain);
-		document.getElementById('share-recap-btn').addEventListener('click', window.shareResults);
-		document.getElementById('end-game-btn').addEventListener('click', () => {
-			const confirmed = confirm('End entire game? This will reset all progress.');
-			if (confirmed) {
-				const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
-				if (sorted.length > 0 && sorted[0].totalScore > 0) {
-					state.winner = sorted[0];
-					state.gameState = 'game_over';
-					saveState();
-					showPhase('game-over');
-					renderGameOver();
-					showStandings();
-				} else {
-					state = {
-						gameState: 'setup',
-						players: [],
-						currentPlayerIndex: 0,
-						roundTime: state.roundTime,
-						scoreLimit: state.scoreLimit,
-						timer: {
-							secondsRemaining: state.roundTime,
-							isRunning: false,
-							intervalId: null
-						},
-						winner: null,
-						dictionaryLoaded: state.dictionaryLoaded,
-						dictionary: state.dictionary,
-						soundEnabled: state.soundEnabled
-					};
-					saveState();
-					showPhase('setup');
-					renderSetup();
-					updateTimerDisplay();
-					showStandings();
-				}
-			}
-		});
-		document.getElementById('new-game-btn').addEventListener('click', () => {
-			const confirmed = confirm('Start new game? Current settings will be preserved.');
-			if (confirmed) {
-				stopTimer();
-				state.gameState = 'setup';
-				state.currentPlayerIndex = 0;
-				state.timer.secondsRemaining = parseInt(state.roundTime) || DEFAULT_ROUND_TIME;
-				state.timer.isRunning = false;
-				state.timer.intervalId = null;
-				state.players = state.players.map(p => ({
-					name: p.name,
-					id: p.id,
-					totalScore: 0,
-					currentRoundScore: 0,
-					manualScoreAdjustment: 0,
-					words: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
-					currentRoundWords: { 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
-					vulnerable: false,
-					redDice: false,
-					penaltyApplied: false,
-					roundHistory: [],
-					allWordsPlayed: []
-				}));
-				saveState();
-				showPhase('setup');
-				renderSetup();
-				updateTimerDisplay();
-				showStandings();
-			}
-		});
-
-		const standingsWindow = document.getElementById('standings-window');
-		const toggleStandingsBtn = document.getElementById('toggle-standings-btn');
-		let standingsCollapsed = false;
-
-		toggleStandingsBtn.addEventListener('click', () => {
-			standingsCollapsed = !standingsCollapsed;
-			standingsWindow.classList.toggle('collapsed');
-			toggleStandingsBtn.textContent = standingsCollapsed ? '+' : '−';
-		});
-
-		makeDraggable(standingsWindow, toggleStandingsBtn);
-
-		window.toggleStandings = () => {
-			standingsCollapsed = !standingsCollapsed;
-			standingsWindow.classList.toggle('collapsed');
-			toggleStandingsBtn.textContent = standingsCollapsed ? '+' : '−';
-		};
-		
-		const wordInput = document.getElementById('word-input');
-		const validationMsg = document.getElementById('validation-message');
-		const overrideBtn = document.getElementById('override-btn');
-		let lastValidation = null;
-		let currentWord = '';
-		
-		async function validateAndUpdate() {
-			currentWord = wordInput.value.trim().toUpperCase();
-			validationMsg.className = 'validation-message info';
-			overrideBtn.style.display = 'none';
-			
-			if (currentWord) {
-				await loadDictionary();
-				lastValidation = validateWord(currentWord);
-				validationMsg.textContent = lastValidation.message;
-				validationMsg.className = `validation-message ${lastValidation.valid ? 'success' : 'error'}`;
-				
-				if (!lastValidation.valid && lastValidation.message === 'Not in dictionary') {
-					overrideBtn.style.display = 'inline-block';
-				}
-			} else {
-				validationMsg.textContent = '';
-				lastValidation = null;
-			}
-		}
-		
-		wordInput.addEventListener('input', validateAndUpdate);
-		
-		wordInput.addEventListener('keydown', async (e) => {
-			if (e.key === 'Enter') {
-				if (currentWord) {
-					if (!lastValidation) {
-						await validateAndUpdate();
-					}
-					
-					if (lastValidation && lastValidation.valid) {
-						addWord(currentWord);
-						wordInput.value = '';
-						currentWord = '';
-						validationMsg.textContent = '';
-						lastValidation = null;
-						overrideBtn.style.display = 'none';
-					} else {
-						validationMsg.textContent = lastValidation.message;
-						validationMsg.className = 'validation-message error';
-					}
-				}
-			}
-		});
-		
-		overrideBtn.addEventListener('click', () => {
-			if (currentWord && lastValidation && !lastValidation.valid) {
-				addWord(currentWord);
-				wordInput.value = '';
-				currentWord = '';
-				validationMsg.textContent = '';
-				lastValidation = null;
-				overrideBtn.style.display = 'none';
-			}
-		});
-		
-		const playerNameInput = document.getElementById('player-name');
-		playerNameInput.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter') {
-				window.addPlayer();
-			}
-		});
-
-		const rollDiceBtn = document.getElementById('roll-dice-btn');
-		const clearSelectionBtn = document.getElementById('clear-all-btn');
-		const addWordBtn = document.getElementById('add-word-btn');
-		const undoBtn = document.getElementById('undo-last-die-btn');
-
-		rollDiceBtn?.addEventListener('click', () => {
-			rollDiceForRound();
-		});
-
-		clearSelectionBtn?.addEventListener('click', () => {
-			clearAllDice();
-		});
-
-		addWordBtn?.addEventListener('click', () => {
-			addDiceWord();
-		});
-		
-		undoBtn?.addEventListener('click', window.undoLastDie);
-
-		const diceSoundCheckbox = document.getElementById('dice-sound-checkbox');
-		if (diceSoundCheckbox) {
-			diceSoundCheckbox.checked = state.diceSoundEnabled;
-			diceSoundCheckbox.addEventListener('change', (e) => {
-				state.diceSoundEnabled = e.target.checked;
-				saveState();
-			});
-		}
-	});
+	document.addEventListener('DOMContentLoaded', () => initPerquackeyApp());
 </script>

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { rollDice, toggleDiceSelection, clearDiceSelections, getSelectedWord, canFormWord } from '../../../data/perquackey-dice';
 import type { RolledDie } from '../../../data/perquackey-dice';
 
@@ -183,9 +183,9 @@ describe('Perquackey Dice - Word Functions', () => {
 
 		it('handles dice with multiple same letters', () => {
 			const multiDice = [
-				{ letter: 'A', color: 'black', selected: false, index: 0 },
-				{ letter: 'A', color: 'black', selected: false, index: 1 },
-				{ letter: 'A', color: 'black', selected: false, index: 2 }
+				{ letter: 'A', color: 'black' as const, selected: false, index: 0 },
+				{ letter: 'A', color: 'black' as const, selected: false, index: 1 },
+				{ letter: 'A', color: 'black' as const, selected: false, index: 2 }
 			];
 			const result = canFormWord('AAA', multiDice);
 			expect(result).toBe(true);

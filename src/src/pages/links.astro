@@ -93,172 +93,172 @@ const coolFindsWithDomains = coolFindsData.map((find) => ({
 
 <script>
 	// Get all cool finds data from the rendered cards
-	const coolFindsGrid = document.getElementById('cool-finds-grid');
-	const searchInput = document.getElementById('cool-finds-search');
-	const tagsContainer = document.getElementById('tags-container');
-	const noResults = document.getElementById('no-results');
+	const coolFindsGrid = document.getElementById('cool-finds-grid') as HTMLElement;
+	const searchInput = document.getElementById('cool-finds-search') as HTMLInputElement;
+	const tagsContainer = document.getElementById('tags-container') as HTMLElement;
+	const noResults = document.getElementById('no-results') as HTMLElement;
 	const clearFiltersBtn = document.getElementById('clear-filters');
 
 	// Ensure all required elements exist
-	if (!coolFindsGrid || !searchInput || !tagsContainer || !noResults || !clearFiltersBtn) {
-		console.error('Required DOM elements not found for cool finds filtering');
-	} else {
-		// Extract cool finds data from the DOM
-	function getCoolFindsData() {
-		const cards = Array.from(coolFindsGrid.children);
-		return cards.map(card => ({
-			element: card,
-			title: card.querySelector('.card-title')?.textContent.toLowerCase() || '',
-			description: card.querySelector('.card-description')?.textContent.toLowerCase() || '',
-			domain: card.querySelector('.domain-badge')?.textContent.toLowerCase() || '',
-			tags: Array.from(card.querySelectorAll('.tag')).map(tag => tag.dataset.tag || '')
-		}));
-	}
-
-	// Get all unique tags from the dataset
-	function getAllTags(data) {
-		const tagSet = new Set();
-		data.forEach(item => {
-			item.tags.forEach(tag => tagSet.add(tag));
-		});
-		return Array.from(tagSet).sort();
-	}
-
-	// Create tag chips
-	function renderTagChips(tags) {
-		tagsContainer.innerHTML = '';
-		tags.forEach(tag => {
-			const button = document.createElement('button');
-			button.className = 'tag-chip';
-			button.textContent = tag;
-			button.setAttribute('aria-pressed', 'false');
-			button.addEventListener('click', () => toggleTag(tag, button));
-			tagsContainer.appendChild(button);
-		});
-	}
-
-	// Toggle tag filter
-	let activeTag = null;
-	function toggleTag(tag, button) {
-		const buttons = tagsContainer.querySelectorAll('.tag-chip');
-
-		if (activeTag === tag) {
-			// Deselect
-			activeTag = null;
-			button.setAttribute('aria-pressed', 'false');
-			button.classList.remove('active');
+		if (!coolFindsGrid || !searchInput || !tagsContainer || !noResults || !clearFiltersBtn) {
+			console.error('Required DOM elements not found for cool finds filtering');
 		} else {
-			// Select new tag
-			activeTag = tag;
-			buttons.forEach(btn => {
+			// Extract cool finds data from the DOM
+		function getCoolFindsData() {
+			const cards = Array.from(coolFindsGrid.children) as HTMLElement[];
+			return cards.map(card => ({
+				element: card,
+				title: card.querySelector<HTMLElement>('.card-title')?.textContent.toLowerCase() || '',
+				description: card.querySelector<HTMLElement>('.card-description')?.textContent.toLowerCase() || '',
+				domain: card.querySelector<HTMLElement>('.domain-badge')?.textContent.toLowerCase() || '',
+				tags: Array.from(card.querySelectorAll<HTMLElement>('.tag')).map((tag) => tag.dataset.tag || '')
+			}));
+		}
+
+		// Get all unique tags from the dataset
+		function getAllTags(data: Array<{ tags: string[] }>): string[] {
+			const tagSet = new Set<string>();
+			data.forEach((item: { tags: string[] }) => {
+				item.tags.forEach((tag: string) => tagSet.add(tag));
+			});
+			return Array.from(tagSet).sort();
+		}
+
+		// Create tag chips
+		function renderTagChips(tags: string[]): void {
+			tagsContainer.innerHTML = '';
+			tags.forEach(tag => {
+				const button = document.createElement('button');
+				button.className = 'tag-chip';
+				button.textContent = tag;
+				button.setAttribute('aria-pressed', 'false');
+				button.addEventListener('click', () => toggleTag(tag, button));
+				tagsContainer.appendChild(button);
+			});
+		}
+
+		// Toggle tag filter
+		let activeTag: string | null = null;
+		function toggleTag(tag: string, button: HTMLElement): void {
+			const buttons = tagsContainer.querySelectorAll('.tag-chip');
+
+			if (activeTag === tag) {
+				// Deselect
+				activeTag = null;
+				button.setAttribute('aria-pressed', 'false');
+				button.classList.remove('active');
+			} else {
+				// Select new tag
+				activeTag = tag;
+				buttons.forEach(btn => {
+					btn.setAttribute('aria-pressed', 'false');
+					btn.classList.remove('active');
+				});
+				button.setAttribute('aria-pressed', 'true');
+				button.classList.add('active');
+			}
+
+			applyFilters();
+			updateURL();
+		}
+
+		// Apply filters to the grid
+		function applyFilters() {
+			const data = getCoolFindsData();
+			const searchText = searchInput.value.toLowerCase().trim();
+
+			let visibleCount = 0;
+
+			data.forEach(item => {
+				const matchesSearch =
+					searchText === '' ||
+					item.title.includes(searchText) ||
+					item.description.includes(searchText) ||
+					item.domain.includes(searchText);
+
+				const matchesTag = activeTag === null || item.tags.includes(activeTag);
+
+				if (matchesSearch && matchesTag) {
+					item.element.hidden = false;
+					visibleCount++;
+				} else {
+					item.element.hidden = true;
+				}
+			});
+
+			// Show/hide no results message
+			noResults.hidden = visibleCount > 0;
+		}
+
+		// Update URL params
+		function updateURL() {
+			const params = new URLSearchParams();
+
+			const searchValue = searchInput.value.trim();
+			if (searchValue) {
+				params.set('q', searchValue);
+			}
+
+			if (activeTag) {
+				params.set('tag', activeTag);
+			}
+
+			const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
+			window.history.replaceState({}, '', newURL);
+		}
+
+		// Restore state from URL
+		function restoreFromURL() {
+			const params = new URLSearchParams(window.location.search);
+			const searchQuery = params.get('q') || '';
+			const tagParam = params.get('tag');
+
+			searchInput.value = searchQuery;
+
+			if (tagParam) {
+				const tagButton = Array.from(tagsContainer.querySelectorAll<HTMLElement>('.tag-chip'))
+					.find(btn => btn.textContent === tagParam);
+				if (tagButton) {
+					toggleTag(tagParam, tagButton);
+				}
+			}
+
+			applyFilters();
+		}
+
+		// Clear all filters
+		clearFiltersBtn.addEventListener('click', () => {
+			searchInput.value = '';
+			activeTag = null;
+			document.querySelectorAll('.tag-chip').forEach(btn => {
 				btn.setAttribute('aria-pressed', 'false');
 				btn.classList.remove('active');
 			});
-			button.setAttribute('aria-pressed', 'true');
-			button.classList.add('active');
-		}
-
-		applyFilters();
-		updateURL();
-	}
-
-	// Apply filters to the grid
-	function applyFilters() {
-		const data = getCoolFindsData();
-		const searchText = searchInput.value.toLowerCase().trim();
-
-		let visibleCount = 0;
-
-		data.forEach(item => {
-			const matchesSearch =
-				searchText === '' ||
-				item.title.includes(searchText) ||
-				item.description.includes(searchText) ||
-				item.domain.includes(searchText);
-
-			const matchesTag = activeTag === null || item.tags.includes(activeTag);
-
-			if (matchesSearch && matchesTag) {
-				item.element.hidden = false;
-				visibleCount++;
-			} else {
-				item.element.hidden = true;
-			}
+			applyFilters();
+			updateURL();
 		});
 
-		// Show/hide no results message
-		noResults.hidden = visibleCount > 0;
-	}
-
-	// Update URL params
-	function updateURL() {
-		const params = new URLSearchParams();
-
-		const searchValue = searchInput.value.trim();
-		if (searchValue) {
-			params.set('q', searchValue);
-		}
-
-		if (activeTag) {
-			params.set('tag', activeTag);
-		}
-
-		const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
-		window.history.replaceState({}, '', newURL);
-	}
-
-	// Restore state from URL
-	function restoreFromURL() {
-		const params = new URLSearchParams(window.location.search);
-		const searchQuery = params.get('q') || '';
-		const tagParam = params.get('tag');
-
-		searchInput.value = searchQuery;
-
-		if (tagParam) {
-			const tagButton = Array.from(tagsContainer.querySelectorAll('.tag-chip'))
-				.find(btn => btn.textContent === tagParam);
-			if (tagButton) {
-				toggleTag(tagParam, tagButton);
-			}
-		}
-
-		applyFilters();
-	}
-
-	// Clear all filters
-	clearFiltersBtn.addEventListener('click', () => {
-		searchInput.value = '';
-		activeTag = null;
-		document.querySelectorAll('.tag-chip').forEach(btn => {
-			btn.setAttribute('aria-pressed', 'false');
-			btn.classList.remove('active');
+		// Search input listener
+		searchInput.addEventListener('input', () => {
+			applyFilters();
+			updateURL();
 		});
-		applyFilters();
-		updateURL();
-	});
 
-	// Search input listener
-	searchInput.addEventListener('input', () => {
-		applyFilters();
-		updateURL();
-	});
+		// Initialize
+		const coolFindsData = getCoolFindsData();
+		const allTags = getAllTags(coolFindsData);
+		renderTagChips(allTags);
 
-	// Initialize
-	const coolFindsData = getCoolFindsData();
-	const allTags = getAllTags(coolFindsData);
-	renderTagChips(allTags);
+		// Wait for DOM to be ready before restoring from URL
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', restoreFromURL);
+		} else {
+			restoreFromURL();
+		}
+		}
+	</script>
 
-	// Wait for DOM to be ready before restoring from URL
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', restoreFromURL);
-	} else {
-		restoreFromURL();
-	}
-	}
-</script>
-
-<style>
+	<style>
 	.links-hero {
 		text-align: center;
 		padding: 2rem 0;

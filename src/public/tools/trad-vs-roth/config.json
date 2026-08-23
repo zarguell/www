@@ -1,1 +1,10 @@
-{"packages": ["numpy", "matplotlib", "plotly"]}
+{
+  "packages": [
+    "numpy",
+    "matplotlib",
+    "plotly"
+  ],
+  "files": {
+    "/tools/shared/chart_helpers.py": "/home/pyodide/chart_helpers.py"
+  }
+}

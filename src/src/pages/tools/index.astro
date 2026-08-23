@@ -396,16 +396,16 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 </style>
 
 <script>
-	const categoryViewBtn = document.getElementById('categoryViewBtn');
-	const dateViewBtn = document.getElementById('dateViewBtn');
-	const categoryView = document.getElementById('categoryView');
-	const dateView = document.getElementById('dateView');
-	const searchInput = document.getElementById('searchInput');
+	const categoryViewBtn = document.getElementById('categoryViewBtn') as HTMLElement;
+	const dateViewBtn = document.getElementById('dateViewBtn') as HTMLElement;
+	const categoryView = document.getElementById('categoryView') as HTMLElement;
+	const dateView = document.getElementById('dateView') as HTMLElement;
+	const searchInput = document.getElementById('searchInput') as HTMLInputElement;
 	const noResults = document.getElementById('noResults');
-	const categoryNav = document.getElementById('categoryNav');
+	const categoryNav = document.getElementById('categoryNav') as HTMLElement;
 
 	// View toggle functionality
-	const switchView = (view) => {
+	const switchView = (view: string) => {
 		if (view === 'category') {
 			categoryView.style.display = 'block';
 			dateView.style.display = 'none';
@@ -427,9 +427,9 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 	dateViewBtn?.addEventListener('click', () => switchView('date'));
 
 	// Search functionality
-	const filterTools = (searchTerm) => {
+	const filterTools = (searchTerm: string) => {
 		const term = searchTerm.toLowerCase().trim();
-		const toolWindows = document.querySelectorAll('[data-tool-title]');
+		const toolWindows = document.querySelectorAll<HTMLElement>('[data-tool-title]');
 
 		let hasResults = false;
 
@@ -448,7 +448,7 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 
 		// Show/hide categories based on visible tools in category view
 		if (categoryView.style.display !== 'none') {
-			const categories = document.querySelectorAll('.tool-category');
+			const categories = document.querySelectorAll<HTMLElement>('.tool-category');
 			categories.forEach((category) => {
 				const visibleTools = category.querySelectorAll('[data-tool-title]:not([style*="display: none"])');
 				category.style.display = visibleTools.length > 0 ? '' : 'none';
@@ -462,6 +462,6 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 	};
 
 	searchInput?.addEventListener('input', (e) => {
-		filterTools(e.target.value);
+		filterTools((e.target as HTMLInputElement).value);
 	});
 </script>

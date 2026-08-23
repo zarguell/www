@@ -6,11 +6,9 @@ Shows how return timing impacts final wealth.
 import numpy as np
 import matplotlib.pyplot as plt
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
+from chart_helpers import chart_img, setup_style
 
-plt.rcParams['figure.figsize'] = [10, 6]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 6))
 
 def run_explorer(event=None):
     """Compare return sequences with identical average returns."""
@@ -28,15 +26,23 @@ def run_explorer(event=None):
 
     years = np.arange(0, time_horizon + 1)
 
+    # Offsets are weighted so each scenario's AVERAGE return is exactly
+    # target_return: with n years and k = int(n*0.4) early years, the early
+    # years get +((n-k)/n)*sigma and the later years -(k/n)*sigma. For n a
+    # multiple of 5 that is +0.6*sigma on 40% of years and -0.4*sigma on 60%.
+    early_years = int(time_horizon * 0.4)
+    early_offset = volatility * (time_horizon - early_years) / time_horizon
+    late_offset = -volatility * early_years / time_horizon
+
     # Scenario 1: Good early (high returns first, low later)
     good_early_returns = np.full(time_horizon, target_return)
-    good_early_returns[:int(time_horizon*0.4)] = target_return + volatility * 0.8
-    good_early_returns[int(time_horizon*0.4):] = target_return - volatility * 0.4
+    good_early_returns[:early_years] = target_return + early_offset
+    good_early_returns[early_years:] = target_return + late_offset
 
-    # Scenario 2: Bad early (low returns first, high later)
+    # Scenario 2: Bad early (low returns first, high later) — mirrored
     bad_early_returns = np.full(time_horizon, target_return)
-    bad_early_returns[:int(time_horizon*0.4)] = target_return - volatility * 0.8
-    bad_early_returns[int(time_horizon*0.4):] = target_return + volatility * 0.4
+    bad_early_returns[:early_years] = target_return - early_offset
+    bad_early_returns[early_years:] = target_return - late_offset
 
     # Scenario 3: Steady returns
     steady_returns = np.full(time_horizon, target_return)
@@ -82,14 +88,8 @@ def run_explorer(event=None):
     plt.tight_layout()
 
     # Export
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display
-    img_html = f'<img id="chartImg" src="data:image/png;base64,{img_data}" alt="Sequence Risk" style="max-width: 100%; height: auto; display: block;">'
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Sequence Risk')), target="#chart")
 
     # Summary
     good_early_final = portfolios['Good Early'][-1]
@@ -99,7 +99,7 @@ def run_explorer(event=None):
     difference = good_early_final - bad_early_final
 
     summary_html = f'''
-    <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg); margin-top: 1.5rem;">
+    <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel); margin-top: 1.5rem;">
         <div style="font-weight: bold; margin-bottom: 1rem; color: var(--accent);">Final Portfolio Values:</div>
         <table style="width: 100%; text-align: left; border-collapse: collapse;">
             <tr><td style="padding: 0.5rem; color: green; font-weight: bold;">Good Early:</td><td style="padding: 0.5rem;">${good_early_final:,.0f}</td></tr>

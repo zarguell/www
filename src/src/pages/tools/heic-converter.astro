@@ -66,18 +66,23 @@ import Window from '../../components/Window.astro';
 	</Window>
 
 	<!-- Load heic-to and JSZip libraries from CDN -->
-	<script is:inline src="https://cdn.jsdelivr.net/npm/heic-to@1.3.0/dist/iife/heic-to.js"></script>
-	<script is:inline src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+	<script is:inline src="https://cdn.jsdelivr.net/npm/heic-to@1.3.0/dist/iife/heic-to.js" integrity="sha384-R9DMp3OJlMnbM+JPaosqA30W1QqMM+plQMspUZ3KguUAlg9SSVHybSqJQ3zgZMhE" crossorigin="anonymous"></script>
+	<script is:inline src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
 
 	<script>
+		// CDN globals loaded by the is:inline script tags above
+		declare const HeicTo: { isHeic(f: Blob): Promise<boolean>; (opts: { blob: Blob; type: string; quality?: number }): Promise<Blob> };
+		declare const JSZip: new () => { file(name: string, data: Blob): void; generateAsync(opts: { type: string }): Promise<Blob> };
+		import { escapeHtml } from '../../lib/escape-html';
+
 		document.addEventListener('DOMContentLoaded', function() {
-			const fileInput = document.getElementById('fileInput');
-			const fileCount = document.getElementById('fileCount');
-			const convertBtn = document.getElementById('convertBtn');
-			const progress = document.getElementById('progress');
-			const errorMsg = document.getElementById('errorMsg');
-			const formatSelect = document.getElementById('formatSelect');
-			const qualityGroup = document.getElementById('qualityGroup');
+			const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+			const fileCount = document.getElementById('fileCount') as HTMLElement;
+			const convertBtn = document.getElementById('convertBtn') as HTMLButtonElement;
+			const progress = document.getElementById('progress') as HTMLElement;
+			const errorMsg = document.getElementById('errorMsg') as HTMLElement;
+			const formatSelect = document.getElementById('formatSelect') as HTMLSelectElement;
+			const qualityGroup = document.getElementById('qualityGroup') as HTMLElement;
 
 			// Hide/show quality setting based on format
 			formatSelect.addEventListener('change', function() {
@@ -106,9 +111,18 @@ import Window from '../../components/Window.astro';
 					return;
 				}
 
-				const outType = document.getElementById('formatSelect').value;
-				const quality = parseFloat(document.getElementById('qualitySelect').value);
-				const downloadMode = document.getElementById('downloadMode').value;
+				const outType = (document.getElementById('formatSelect') as HTMLSelectElement).value;
+				const quality = parseFloat((document.getElementById('qualitySelect') as HTMLSelectElement).value);
+				const downloadMode = (document.getElementById('downloadMode') as HTMLSelectElement).value;
+				// Fail fast with a clear message if CDN libraries did not load
+				if (typeof HeicTo === 'undefined') {
+					errorMsg.textContent = 'Converter failed to load (heic-to library unavailable). Check your connection or script blocker and reload the page.';
+					return;
+				}
+				if (downloadMode === 'zip' && typeof JSZip === 'undefined') {
+					errorMsg.textContent = 'ZIP support failed to load (JSZip library unavailable). Check your connection or script blocker and reload the page.';
+					return;
+				}
 
 				convertBtn.disabled = true;
 				progress.innerHTML = '';
@@ -120,9 +134,9 @@ import Window from '../../components/Window.astro';
 				for (const file of files) {
 					const row = document.createElement('div');
 					row.className = 'file-item';
-					row.innerHTML = `<span class="file-name">${file.name}</span><span class="status">Queued…</span>`;
+					row.innerHTML = `<span class="file-name">${escapeHtml(file.name)}</span><span class="status">Queued…</span>`;
 					progress.appendChild(row);
-					const statusEl = row.querySelector('.status');
+					const statusEl = row.querySelector<HTMLElement>('.status')!;
 
 					try {
 						setStatus(statusEl, 'Checking…');
@@ -187,18 +201,18 @@ import Window from '../../components/Window.astro';
 			});
 
 			// Helper function to set status
-			function setStatus(el, text, color = '#666') {
+			function setStatus(el: HTMLElement, text: string, color = '#666') {
 				el.textContent = text;
 				el.style.color = color;
 			}
 
 			// Helper function to get base name
-			function baseName(filename) {
+			function baseName(filename: string): string {
 				return filename.replace(/\.[^/.]+$/, '');
 			}
 
 			// Helper function to download blob
-			function downloadBlob(blob, filename) {
+			function downloadBlob(blob: Blob, filename: string): void {
 				const url = URL.createObjectURL(blob);
 				const a = document.createElement('a');
 				a.href = url;
@@ -268,7 +282,7 @@ import Window from '../../components/Window.astro';
 
 	.file-input-label {
 		padding: 0.5rem 1rem;
-		background: var(--panel-bg);
+		background: var(--panel);
 		color: var(--text);
 		border: 2px solid var(--border);
 		font-family: 'VT323', monospace;
@@ -305,7 +319,7 @@ import Window from '../../components/Window.astro';
 	.error-message {
 		margin-top: 0.5rem;
 		padding: 0.5rem;
-		background: var(--panel-bg);
+		background: var(--panel);
 		border: 2px solid var(--border);
 		color: var(--text);
 		font-family: 'VT323', monospace;
@@ -313,40 +327,12 @@ import Window from '../../components/Window.astro';
 		min-height: 1.5rem;
 	}
 
-	.retro-button {
-		width: 100%;
-		padding: 0.75rem 1.5rem;
-		font-family: 'VT323', monospace;
-		font-size: 1.2rem;
-		border: 2px solid;
-		cursor: pointer;
-		text-transform: uppercase;
-		transition: all 0.1s ease;
-		box-shadow: 2px 2px 0 var(--shadow);
-	}
-
-	.retro-button--primary {
-		background: var(--accent);
-		color: var(--bg);
-		border-color: var(--accent);
-	}
-
-	.retro-button--primary:hover {
-		background: var(--bg);
-		color: var(--accent);
-	}
-
-	.retro-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
 	.file-item {
 		display: flex;
 		justify-content: space-between;
 		gap: 1rem;
 		padding: 0.75rem;
-		background: var(--panel-bg);
+		background: var(--panel);
 		border: 1px solid var(--border);
 		font-family: 'VT323', monospace;
 		font-size: 1rem;

@@ -23,162 +23,29 @@ import RetroButton from './RetroButton.astro';
 			</div>
 
 			<div class="dice-actions">
-				<button id="add-word-btn" class="retro-button primary" disabled>Add Word</button>
-				<button id="roll-dice-btn" class="retro-button primary">🎲 Roll Dice</button>
-				<button id="clear-all-btn" class="retro-button danger">🗑 Clear All</button>
-				<button id="undo-last-die-btn" class="retro-button secondary">⌫ Undo</button>
+				<button id="add-word-btn" class="retro-button retro-button--primary" disabled>Add Word</button>
+				<button id="roll-dice-btn" class="retro-button retro-button--primary">🎲 Roll Dice</button>
+				<button id="clear-all-btn" class="retro-button retro-button--danger">🗑 Clear All</button>
+				<button id="undo-last-die-btn" class="retro-button retro-button--secondary">⌫ Undo</button>
 			</div>
 		</div>
 	</Window>
 </div>
 
 <style>
+/* Only container/settings styles live here — the shared die/dice-grid look
+   (including responsive rules) is defined once in global.css. */
 	.dice-roller-container {
 		margin-bottom: 1.5rem;
 	}
-
-	.dice-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		min-height: 100px;
-	}
-
-	.die {
-		width: 70px;
-		height: 70px;
-		border: 6px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text);
-		font-family: 'VT323', monospace;
-		font-size: 2.5rem;
-		font-weight: bold;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		user-select: none;
-		position: relative;
-		box-shadow:
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-		transition: all 0.1s ease;
-		image-rendering: pixelated;
-		border-radius: 8px;
-	}
-
-	.die::before {
-		content: '';
-		position: absolute;
-		top: 6px;
-		left: 6px;
-		right: 6px;
-		bottom: 6px;
-		border: 3px solid rgba(0, 0, 0, 0.3);
-		border-radius: 4px;
-		pointer-events: none;
-	}
-
-	.die::after {
-		content: '';
-		position: absolute;
-		bottom: 3px;
-		right: 3px;
-		width: 8px;
-		height: 8px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 50%;
-		pointer-events: none;
-	}
-
-	.die.black {
-		background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-		color: #ffffff;
-		border-color: #000000;
-	}
-
-	.die.black:hover {
-		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-		transform: translate(-3px, -3px);
-		box-shadow:
-			9px 9px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-	}
-
-	.die.black.selected {
-		background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-		border-color: var(--color-accent);
-		border-width: 8px;
-		box-shadow:
-			0 0 15px var(--color-accent),
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
-		transform: scale(1.08);
-	}
-
-	.die.red {
-		background: linear-gradient(135deg, #aa0000 0%, #880000 100%);
-		color: #ffffff;
-		border-color: #770000;
-	}
-
-	.die.red:hover {
-		background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
-		transform: translate(-3px, -3px);
-		box-shadow:
-			9px 9px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-	}
-
-	.die.red.selected {
-		background: linear-gradient(135deg, #dd0000 0%, #bb0000 100%);
-		border-color: var(--color-accent);
-		border-width: 8px;
-		box-shadow:
-			0 0 15px var(--color-accent),
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
-		transform: scale(1.08);
-	}
-
-	.die.rolling {
-		animation: roll 0.5s ease-in-out;
-	}
-
-	@keyframes roll {
-		0% {
-			transform: rotate(0deg) scale(1);
-		}
-		25% {
-			transform: rotate(90deg) scale(1.1);
-		}
-		50% {
-			transform: rotate(180deg) scale(1);
-		}
-		75% {
-			transform: rotate(270deg) scale(1.1);
-		}
-		100% {
-			transform: rotate(360deg) scale(1);
-		}
-	}
-
-	.dice-controls {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
 	.dice-settings {
 		display: flex;
 		justify-content: center;
 		padding: 0.5rem;
-		background: var(--color-bg-secondary);
+		background: var(--bg2);
 		border-radius: 4px;
 		margin-bottom: 1rem;
 	}
-
 	.dice-sound-toggle {
 		display: flex;
 		align-items: center;
@@ -186,101 +53,9 @@ import RetroButton from './RetroButton.astro';
 		cursor: pointer;
 		font-size: 1rem;
 	}
-
 	.dice-sound-toggle input[type="checkbox"] {
 		width: 1.2rem;
 		height: 1.2rem;
 		cursor: pointer;
-	}
-
-	.selected-word-display {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem;
-		background: var(--color-bg-secondary);
-		border: 2px solid var(--color-border);
-		min-height: 3rem;
-	}
-
-	.selected-word-label {
-		font-size: 1.1rem;
-		font-weight: bold;
-		color: var(--color-accent);
-		white-space: nowrap;
-	}
-
-	.selected-word-value {
-		font-size: 1.3rem;
-		font-family: 'VT323', monospace;
-		font-weight: bold;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		flex: 1;
-		color: var(--color-text);
-	}
-
-	.selected-word-value:empty::before {
-		content: 'Click dice to select letters';
-		color: var(--color-border);
-		font-size: 1rem;
-		letter-spacing: normal;
-		text-transform: none;
-	}
-
-	.dice-actions {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-
-	.dice-actions .retro-button {
-		flex: 1;
-		min-width: 120px;
-	}
-
-	@media (max-width: 768px) {
-		.dice-grid {
-			grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-			gap: 0.75rem;
-		}
-
-		.die {
-			width: 64px;
-			height: 64px;
-			font-size: 1.8rem;
-			border-width: 5px;
-			margin: 2px;
-		}
-
-		.die::before {
-			top: 5px;
-			left: 5px;
-			right: 5px;
-			bottom: 5px;
-			border-width: 2px;
-		}
-
-		.die.selected {
-			border-width: 6px;
-		}
-
-		.dice-actions {
-			flex-direction: column;
-		}
-
-		.dice-actions .retro-button {
-			width: 100%;
-		}
-
-		.selected-word-display {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.25rem;
-		}
-
-		.selected-word-value {
-			font-size: 1.1rem;
-		}
 	}
 </style>

@@ -217,7 +217,9 @@ import RetroButton from '../../components/RetroButton.astro';
 	}
 </style>
 
-<script is:inline>
+<script>
+	import { calcTspMatchPerPay, calc401kMatchPerPay } from '../../lib/finance';
+
 	document.addEventListener("DOMContentLoaded", function() {
 		// ============================
 		// CONFIGURABLE CONSTANTS
@@ -231,52 +233,30 @@ import RetroButton from '../../components/RetroButton.astro';
 		// HELPERS
 		// ============================
 
-		function formatCurrency(amount) {
+		function formatCurrency(amount: number): string {
 			return "$" + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		}
 
-		function formatPercent(value) {
+		function formatPercent(value: number): string {
 			return value.toFixed(2) + "%";
 		}
 
-		// Tiered TSP match: 1:1 on first tier1%, 50% on next tier2%
-		function calcTspMatchPerPay(biWeekly, employeeTspPct, tier1, tier2) {
-			let match = 0;
-
-			// First tier: 1:1 up to tier1%
-			const pctTier1Used = Math.min(employeeTspPct, tier1);
-			match += biWeekly * (pctTier1Used / 100);
-
-			// Second tier: 50% up to tier2% above tier1
-			if (employeeTspPct > tier1) {
-				const pctAboveTier1 = employeeTspPct - tier1;
-				const pctTier2Used = Math.min(pctAboveTier1, tier2);
-				match += biWeekly * (pctTier2Used / 100) * 0.5;
-			}
-
-			return match;
-		}
-
-		// Simple 1:1 match up to k401MatchTier%
-		function calc401kMatchPerPay(biWeekly, employeeK401Pct, matchTier) {
-			const pctUsed = Math.min(employeeK401Pct, matchTier);
-			return biWeekly * (pctUsed / 100);
-		}
+		// Tiered/simple match math imported from lib/finance (tested there)
 
 		// ============================
 		// MAIN CALCULATION
 		// ============================
 
 		function calculate() {
-			const salary        = parseFloat(document.getElementById("salary").value) || 0;
-			const payPeriods    = parseInt(document.getElementById("payPeriods").value, 10) || 26;
-			const strategy      = document.getElementById("strategy").value;
+			const salary        = parseFloat((document.getElementById("salary") as HTMLInputElement).value) || 0;
+			const payPeriods    = parseInt((document.getElementById("payPeriods") as HTMLInputElement).value, 10) || 26;
+			const strategy      = (document.getElementById("strategy") as HTMLInputElement).value;
 
-			const autoTspPct    = parseFloat(document.getElementById("autoTspPct").value) || 0;
-			const autoK401Pct   = parseFloat(document.getElementById("autoK401Pct").value) || 0;
-			const tspMatchTier1 = parseFloat(document.getElementById("tspMatchTier1").value) || 0;
-			const tspMatchTier2 = parseFloat(document.getElementById("tspMatchTier2").value) || 0;
-			const k401MatchTier = parseFloat(document.getElementById("k401MatchTier").value) || 0;
+			const autoTspPct    = parseFloat((document.getElementById("autoTspPct") as HTMLInputElement).value) || 0;
+			const autoK401Pct   = parseFloat((document.getElementById("autoK401Pct") as HTMLInputElement).value) || 0;
+			const tspMatchTier1 = parseFloat((document.getElementById("tspMatchTier1") as HTMLInputElement).value) || 0;
+			const tspMatchTier2 = parseFloat((document.getElementById("tspMatchTier2") as HTMLInputElement).value) || 0;
+			const k401MatchTier = parseFloat((document.getElementById("k401MatchTier") as HTMLInputElement).value) || 0;
 
 			if (salary <= 0 || payPeriods <= 0) {
 				alert("Please enter positive salary and pay periods.");
@@ -321,8 +301,8 @@ import RetroButton from '../../components/RetroButton.astro';
 				`;
 			} else {
 				// Custom: read from inputs
-				const customTsp = parseFloat(document.getElementById("employeeTspPct").value) || 0;
-				const custom401 = parseFloat(document.getElementById("employeeK401Pct").value) || 0;
+				const customTsp = parseFloat((document.getElementById("employeeTspPct") as HTMLInputElement).value) || 0;
+				const custom401 = parseFloat((document.getElementById("employeeK401Pct") as HTMLInputElement).value) || 0;
 				employeeTspPct = customTsp;
 				employeeK401Pct = custom401;
 
@@ -375,7 +355,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			const afterTaxPerPay = afterTaxAnnual / payPeriods;
 
 			// Update DOM
-			document.getElementById("biWeekly").textContent = formatCurrency(biWeekly);
+			(document.getElementById("biWeekly") as HTMLElement).textContent = formatCurrency(biWeekly);
 
 			// Elective details
 			const electiveHtml = `
@@ -391,7 +371,7 @@ import RetroButton from '../../components/RetroButton.astro';
 				</p>
 				${warnings}
 			`;
-			document.getElementById("electiveDetails").innerHTML = electiveHtml;
+			(document.getElementById("electiveDetails") as HTMLElement).innerHTML = electiveHtml;
 
 			// Employer breakdown
 			const employerHtml = `
@@ -412,7 +392,7 @@ import RetroButton from '../../components/RetroButton.astro';
 					<strong>Total employer annual:</strong> ${formatCurrency(totalEmployerAnnual)}
 				</div>
 			`;
-			document.getElementById("employerBreakdown").innerHTML = employerHtml;
+			(document.getElementById("employerBreakdown") as HTMLElement).innerHTML = employerHtml;
 
 			// After-tax details
 			const afterTaxHtml = `
@@ -424,7 +404,7 @@ import RetroButton from '../../components/RetroButton.astro';
 					After-tax space = ${formatCurrency(TOTAL_LIMIT)} − ${formatCurrency(totalElectiveAnnual)} (elective) − ${formatCurrency(totalEmployerAnnual)} (employer).
 				</p>
 			`;
-			document.getElementById("afterTaxDetails").innerHTML = afterTaxHtml;
+			(document.getElementById("afterTaxDetails") as HTMLElement).innerHTML = afterTaxHtml;
 
 			// Annual summary
 			const totalAnnual = totalElectiveAnnual + totalEmployerAnnual + afterTaxAnnual;
@@ -436,22 +416,22 @@ import RetroButton from '../../components/RetroButton.astro';
 					<strong>Total contributions:</strong> ${formatCurrency(totalAnnual)}
 				</div>
 			`;
-			document.getElementById("annualSummary").innerHTML = summaryHtml;
+			(document.getElementById("annualSummary") as HTMLElement).innerHTML = summaryHtml;
 
-			document.getElementById("results").style.display = "block";
+			(document.getElementById("results") as HTMLElement).style.display = "block";
 		}
 
-		// Make calculate available globally
-		window.calculate = calculate;
+		// Make calculate available globally (inline onclick contract)
+		(window as typeof window & { calculate: () => void }).calculate = calculate;
 
 		// Show/hide custom inputs
-		document.getElementById("strategy").addEventListener("change", function() {
+		(document.getElementById("strategy") as HTMLSelectElement).addEventListener("change", function (this: HTMLSelectElement) {
 			const isCustom = this.value === "custom";
-			document.getElementById("customInputs").style.display = isCustom ? "block" : "none";
+			(document.getElementById("customInputs") as HTMLElement).style.display = isCustom ? "block" : "none";
 		});
 
 		// Set last updated text and run initial calc
-		document.getElementById("lastUpdated").textContent = LAST_UPDATED_TEXT;
+		(document.getElementById("lastUpdated") as HTMLElement).textContent = LAST_UPDATED_TEXT;
 		calculate();
 	});
 </script>

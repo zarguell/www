@@ -108,7 +108,7 @@ import RetroButton from '../../components/RetroButton.astro';
 		font-size: 1.1rem;
 		padding: 0.5rem;
 		border: 2px solid var(--border);
-		background: var(--panel-bg);
+		background: var(--panel);
 		color: var(--text);
 		border-radius: 4px;
 		min-width: 120px;
@@ -132,55 +132,9 @@ import RetroButton from '../../components/RetroButton.astro';
 		visibility: hidden;
 	}
 
-	.retro-button {
-		font-family: 'VT323', monospace;
-		font-size: 1.1rem;
-		padding: 0.5rem 1rem;
-		border: 2px solid var(--border);
-		cursor: pointer;
-		background: var(--panel-bg);
-		color: var(--text);
-		border-radius: 4px;
-		box-shadow: 2px 2px 0 var(--shadow);
-		transition: all 0.1s ease;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.retro-button:hover {
-		transform: translate(1px, 1px);
-		box-shadow: 1px 1px 0 var(--shadow);
-	}
-
-	.retro-button:active {
-		transform: translate(2px, 2px);
-		box-shadow: 0 0 0 var(--shadow);
-	}
-
-	.retro-button--primary {
-		background: var(--accent);
-		color: var(--bg);
-		border-color: var(--accent);
-	}
-
-	.retro-button--primary:hover {
-		background: var(--accent);
-		filter: brightness(1.1);
-	}
-
-	.retro-button--secondary {
-		background: var(--panel-bg);
-		border-color: var(--border);
-	}
-
-	.retro-button--secondary:hover {
-		background: var(--muted);
-		color: var(--bg);
-	}
-
 	.ingredients-table {
 		font-family: 'VT323', monospace;
-		background: var(--panel-bg);
+		background: var(--panel);
 		padding: 1rem;
 		border: 2px solid var(--border);
 		border-radius: 4px;
@@ -263,31 +217,36 @@ import RetroButton from '../../components/RetroButton.astro';
 </style>
 
 <script>
+	import {
+		PEEL_WATER_MULT,
+		peelBased,
+		computeFromBase,
+		baseFromTargetFinalWeight,
+		type JuiceType
+	} from '../../lib/super-juice';
+
 	document.addEventListener('DOMContentLoaded', function() {
-		// Fixed constants per published formulas
-		const PEEL_WATER_MULT = 16.66;
-		const kumquatPer100g = { citric: 25.0, water: 416.5 };
-		const kumquatAscorbicFixedPer100g = 0.20;
+		// Fixed constants + ratio math imported from lib/super-juice (tested there)
 
-		// Peel-based ratios (per gram peel). Grapefruit adds MSG.
-		const peelBased = {
-			lemon:      { citric: 1.00, malic: 0.00, msg: 0.00 },
-			lime:       { citric: 0.66, malic: 0.33, msg: 0.00 },
-			orange:     { citric: 0.90, malic: 0.10, msg: 0.00 },
-			grapefruit: { citric: 0.80, malic: 0.20, msg: 0.033 },
-		};
-
-		const fmt = (n, digits=1) => Number.isFinite(n)
+		const fmt = (n: number, digits = 1): string => Number.isFinite(n)
 			? n.toFixed(digits).replace(/\.0+$/,'').replace(/(\.\d*[1-9])0+$/,'$1')
 			: '';
 
-		const $ = (id) => document.getElementById(id);
+		/**
+ * Required-element lookup. Defaults to HTMLInputElement because every id used
+ * by this tool is an input/select (both expose .value/.disabled).
+ */
+const $ = <T extends HTMLElement = HTMLInputElement>(id: string): T => {
+	const el = document.getElementById(id);
+	if (!el) throw new Error(`super-juice: missing #${id}`);
+	return el as T;
+};
 
-		function currentType() { return $('juiceType').value; }
+		function currentType(): JuiceType { return $('juiceType').value as JuiceType; }
 		function currentInputMode() { return $('inputMode').value; }
 
-		function nameForType(type) { return type[0].toUpperCase() + type.slice(1); }
-		function pluralize(name) { return name.endsWith('s') ? name : name + 's'; }
+		function nameForType(type: JuiceType): string { return type[0].toUpperCase() + type.slice(1); }
+		function pluralize(name: string): string { return name.endsWith('s') ? name : name + 's'; }
 
 		function updateUi() {
 			const type = currentType();
@@ -305,34 +264,7 @@ import RetroButton from '../../components/RetroButton.astro';
 			$('targetWrap').style.display = (mode === 'target') ? '' : 'none';
 		}
 
-		function computeFromBase(type, base_g) {
-			let peel_g = 0, fruit_g = 0;
-			let citric_g = 0, malic_g = 0, msg_g = 0, ascorbic_g = 0, water_ml = 0;
-
-			if (type === 'kumquat') {
-				fruit_g = base_g;
-				const scale = fruit_g / 100.0;
-				citric_g = kumquatPer100g.citric * scale;
-				water_ml = kumquatPer100g.water * scale;
-				ascorbic_g = kumquatAscorbicFixedPer100g * scale;
-			} else {
-				peel_g = base_g;
-				const r = peelBased[type];
-				citric_g = peel_g * r.citric;
-				malic_g  = peel_g * r.malic;
-				msg_g    = peel_g * r.msg;
-				water_ml = peel_g * PEEL_WATER_MULT;
-			}
-
-			return { type, peel_g, fruit_g, citric_g, malic_g, msg_g, ascorbic_g, water_ml };
-		}
-
-		function baseFromTargetFinalWeight(type, target_g) {
-			if (type === 'kumquat') {
-				return target_g / (kumquatPer100g.water / 100.0);
-			}
-			return target_g / PEEL_WATER_MULT;
-		}
+		// computeFromBase / baseFromTargetFinalWeight come from lib/super-juice
 
 		function getStateFromForm() {
 			const type = currentType();
@@ -342,18 +274,19 @@ import RetroButton from '../../components/RetroButton.astro';
 			return { type, mode, base, target };
 		}
 
-		function applyStateToForm(state) {
+		function applyStateToForm(state: { type?: JuiceType; mode?: string; base?: number; target?: number }) {
 			if (state.type) $('juiceType').value = state.type;
 			if (state.mode) $('inputMode').value = state.mode;
-			if (Number.isFinite(state.base)) $('baseGrams').value = state.base;
-			if (Number.isFinite(state.target)) $('targetWeight').value = state.target;
+			if (Number.isFinite(state.base)) $('baseGrams').value = String(state.base);
+			if (Number.isFinite(state.target)) $('targetWeight').value = String(state.target);
 			updateUi();
 		}
 
-		function writeQueryParamsFromState(state) {
+		function writeQueryParamsFromState(state: { type?: JuiceType; mode?: string; base?: number; target?: number }) {
 			const params = new URLSearchParams(window.location.search);
-			params.set('type', state.type);
-			params.set('mode', state.mode);
+			// ?? guards keep a literal "undefined" out of the URL if state is partial
+			params.set('type', state.type ?? '');
+			params.set('mode', state.mode ?? '');
 
 			// Store only the active numeric input
 			if (state.mode === 'base') {
@@ -375,15 +308,15 @@ import RetroButton from '../../components/RetroButton.astro';
 			const base = params.get('base');
 			const target = params.get('target');
 
-			const state = {};
-			if (type) state.type = type;
+			const state: { type?: JuiceType; mode?: string; base?: number; target?: number } = {};
+			if (type) state.type = type as JuiceType;
 			if (mode) state.mode = mode;
 			if (base !== null) state.base = Number(base);
 			if (target !== null) state.target = Number(target);
 			return state;
 		}
 
-		function renderResults(r) {
+		function renderResults(r: import('../../lib/super-juice').SuperJuiceResult) {
 			// Build ingredients table
 			let tableHTML = '<table><thead><tr><th>Ingredient</th><th style="text-align: right;">Quantity</th></tr></thead><tbody>';
 
@@ -416,11 +349,11 @@ import RetroButton from '../../components/RetroButton.astro';
 			// Build step-by-step instructions with bold quantities
 			const steps = $('steps');
 			steps.innerHTML = "";
-			const add = (html) => { const li=document.createElement('li'); li.innerHTML=html; steps.appendChild(li); };
+			const add = (html: string) => { const li=document.createElement('li'); li.innerHTML=html; steps.appendChild(li); };
 
 			const displayName = nameForType(r.type).toLowerCase();
 			const fruitPlural = pluralize(displayName);
-			const bold = (qty, unit) => `<strong>${qty}${unit}</strong>`;
+			const bold = (qty: string | number, unit: string) => `<strong>${qty}${unit}</strong>`;
 
 			if (r.type === 'kumquat') {
 				add(`Weigh ${bold(fmt(r.fruit_g, 1), 'g')} of kumquat fruit.`);
@@ -481,12 +414,12 @@ import RetroButton from '../../components/RetroButton.astro';
 				const base_g = Number($('baseGrams').value);
 				const r = computeFromBase(type, base_g);
 				$('inputMode').value = 'target';
-				$('targetWeight').value = Math.round(r.water_ml);
+				$('targetWeight').value = String(Math.round(r.water_ml));
 			} else {
 				const target = Number($('targetWeight').value);
 				const base_g = baseFromTargetFinalWeight(type, target);
 				$('inputMode').value = 'base';
-				$('baseGrams').value = fmt(base_g, 1);
+				$('baseGrams').value = String(fmt(base_g, 1));
 			}
 
 			updateUi();

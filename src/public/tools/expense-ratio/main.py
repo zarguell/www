@@ -7,14 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import json
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
-from js import Plotly, JSON
+from chart_helpers import chart_img, render_plotly, setup_style
 
-plt.rcParams['figure.figsize'] = [10, 8]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 8))
 
 def calculate_impact(event=None):
     """
@@ -120,19 +116,8 @@ def calculate_impact(event=None):
     plt.tight_layout()
 
     # Export
-    buf = BytesIO()
-    fig.savefig(buf, format='png', dpi=200, bbox_inches='tight')
-    buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode()
-
     # Display
-    img_html = f'''
-    <img id="chartImg"
-         src="data:image/png;base64,{img_data}"
-         alt="Expense Ratio Impact"
-         style="max-width: 100%; height: auto; display: block;">
-    '''
-    display(HTML(img_html), target="#chart")
+    display(HTML(chart_img(fig, 'Expense Ratio Impact')), target="#chart")
 
     # Create interactive Plotly charts
     # Line chart: Portfolio growth over time
@@ -226,49 +211,29 @@ def calculate_impact(event=None):
     plotly_element = document.querySelector("#plotlyChart")
     plotly_element.innerHTML = ""
 
-    spec = fig_combined.to_plotly_json()
-    spec_json = json.dumps(spec)
-    spec_js = JSON.parse(spec_json)
-
-    config = {
-        'displayModeBar': True,
-        'displaylogo': False,
-        'responsive': True,
-        'modeBarButtonsToRemove': ['pan2d', 'lasso2d', 'select2d'],
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': 'expense-ratio-impact',
-            'height': 1200,
-            'width': 1600,
-            'scale': 2
-        }
-    }
-    config_json = json.dumps(config)
-    config_js = JSON.parse(config_json)
-
-    Plotly.react(plotly_element, spec_js.data, spec_js.layout, config_js)
+    render_plotly(fig_combined, plotly_element, 'expense-ratio-impact')
 
     # Summary
     summary_html = f'''
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Fund A Final Value</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${final_balance_a:,.0f}</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">{fund_a_er*100:.2f}% expense ratio</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--border); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Fund B Final Value</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${final_balance_b:,.0f}</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">{fund_b_er*100:.2f}% expense ratio</div>
         </div>
-        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+        <div style="padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
             <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;">Wealth Lost to Fees</div>
             <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">${difference:,.0f}</div>
             <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">{percent_lost:.1f}% of potential wealth</div>
         </div>
     </div>
 
-    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel-bg);">
+    <div style="margin-top: 1.5rem; padding: 1rem; border: 2px solid var(--accent); background: var(--panel);">
         <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--accent);">Key Insight:</div>
         <p style="margin: 0; color: var(--text);">
             Over {time_horizon} years, you pay <strong>${extra_fees:,.0f} more in fees</strong> with Fund B.

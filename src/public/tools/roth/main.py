@@ -1,12 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pyscript import display, document, HTML
-from io import BytesIO
-import base64
+from chart_helpers import fig_to_data_uri, setup_style
 
 # Configure matplotlib for responsive output
-plt.rcParams['figure.figsize'] = [10, 6]
-plt.rcParams['figure.autolayout'] = True
+setup_style((10, 6))
 
 # IRS Contribution Limits for 2025
 IRA_BASE_LIMIT = 7000
@@ -267,16 +265,10 @@ def generate_charts(scenarios, years):
     ax2.grid(True, alpha=0.3)
     ax2.legend(fontsize=10)
 
-    # Convert to base64
-    buf1 = BytesIO()
-    fig1.savefig(buf1, format='png', dpi=200, bbox_inches='tight')
-    buf1.seek(0)
-    img_data1 = base64.b64encode(buf1.read()).decode()
+    # Render figures to base64 PNG data URIs
+    img_data1 = fig_to_data_uri(fig1)
 
-    buf2 = BytesIO()
-    fig2.savefig(buf2, format='png', dpi=200, bbox_inches='tight')
-    buf2.seek(0)
-    img_data2 = base64.b64encode(buf2.read()).decode()
+    img_data2 = fig_to_data_uri(fig2)
 
     plt.close('all')
 
@@ -314,7 +306,7 @@ def generate_summary_table(scenarios, retirement_age):
     table_html = f"""
     <table style="width: 100%; border-collapse: collapse; font-size: 1rem;">
         <thead>
-            <tr style="border-bottom: 3px solid var(--color-border);">
+            <tr style="border-bottom: 3px solid var(--border);">
                 <th style="text-align: left; padding: 0.5rem;">Scenario</th>
                 <th style="text-align: right; padding: 0.5rem;">Contributions</th>
                 <th style="text-align: right; padding: 0.5rem;">Ending Balance</th>

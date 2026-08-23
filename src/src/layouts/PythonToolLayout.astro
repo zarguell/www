@@ -2,15 +2,20 @@
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import '../styles/global.css';
+import HeadMeta from '../components/HeadMeta.astro';
 
 interface Props {
 	title?: string;
 	description?: string;
+	ogImage?: string;
+	plotly?: boolean;
 }
 
 const {
 	title = 'Python Tool',
 	description = 'Interactive Python-powered tool',
+	ogImage,
+	plotly = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -26,6 +31,25 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href={canonicalURL} />
 
+		<!-- Apply saved theme before first paint (mirrors src/scripts/theme.ts) -->
+		<script is:inline>
+			(() => {
+				let theme = null;
+				try {
+					theme = localStorage.getItem('theme');
+				} catch {}
+				if (theme !== 'neon-night' && theme !== 'mall-pastel') {
+					theme =
+						window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+							? 'neon-night'
+							: 'mall-pastel';
+				}
+				document.documentElement.dataset.theme = theme;
+			})();
+		</script>
+
+		<HeadMeta title={title} description={description} canonicalURL={canonicalURL} ogImage={ogImage} />
+
 		<!-- VT323 Font Embed -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,8 +63,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			src="https://pyscript.net/releases/2024.5.2/core.js"
 		></script>
 
-		<!-- Plotly.js for interactive charts -->
-		<script is:inline src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+		<!-- Plotly.js for interactive charts (opt-in: only pages whose tool uses it) -->
+		{plotly && <script is:inline src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>}
 
 		<title>{title}</title>
 	</head>
