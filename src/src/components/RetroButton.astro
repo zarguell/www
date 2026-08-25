@@ -26,13 +26,17 @@ const {
 } = Astro.props;
 
 const Tag = href ? 'a' : 'button';
+
+// Default to noopener+noreferrer for new-tab links unless the caller
+// explicitly overrides rel (prevents reverse tabnabbing).
+const relAttr = target === '_blank' ? rel ?? 'noopener noreferrer' : rel;
 ---
 
 {href ? (
 	<a
 		href={href}
 		target={target}
-		rel={rel}
+		rel={relAttr}
 		class:list={['retro-button', `retro-button--${variant}`, { 'retro-button--disabled': disabled }]}
 		aria-disabled={disabled}
 		id={id}
@@ -96,9 +100,9 @@ const Tag = href ? 'a' : 'button';
 	}
 
 	.retro-button--danger {
-		background: #ff4444;
+		background: var(--danger);
 		color: #ffffff;
-		border-color: #ff0000;
+		border-color: var(--danger);
 	}
 
 	.retro-button--disabled {

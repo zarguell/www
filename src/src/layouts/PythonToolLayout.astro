@@ -61,10 +61,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			is:inline
 			type="module"
 			src="https://pyscript.net/releases/2024.5.2/core.js"
+			integrity="sha384-asJySBoGD75c5ix5s0ZCHAiVSo5M5/x6jAwe2ASM9xSmf0PifqnUUpahyGGE9LfY"
+			crossorigin="anonymous"
 		></script>
 
 		<!-- Plotly.js for interactive charts (opt-in: only pages whose tool uses it) -->
-		{plotly && <script is:inline src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>}
+		{plotly && <script is:inline src="https://cdn.plot.ly/plotly-2.27.0.min.js" integrity="sha384-Hl48Kq2HifOWdXEjMsKo6qxqvRLTYqIGbvlENBmkHAxZKIGCXv43H6W1jA671RzC" crossorigin="anonymous"></script>}
 
 		<title>{title}</title>
 	</head>

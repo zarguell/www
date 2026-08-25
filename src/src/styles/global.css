@@ -31,6 +31,19 @@
 	/* Bevel effect colors */
 	--bevel-light: #4a4a7a;
 	--bevel-dark: #0a0a18;
+
+	/* Aliases consumed by components/pages (security: tokenized colors) */
+	--panel-bg: var(--panel);
+	--color-bg: var(--bg);
+	--color-bg-secondary: var(--bg2);
+	--color-text: var(--text);
+	--color-border: var(--border);
+	--color-accent: var(--accent);
+
+	/* Semantic status background colors */
+	--success-bg: rgba(0, 204, 102, 0.12);
+	--error-bg: rgba(255, 68, 68, 0.12);
+	--warning-bg: rgba(255, 204, 0, 0.12);
 }
 
 /* Mall Pastel Theme (Light) */
@@ -56,6 +69,19 @@
 	/* Bevel effect colors */
 	--bevel-light: #ffffff;
 	--bevel-dark: #e8d8e8;
+
+	/* Aliases consumed by components/pages (security: tokenized colors) */
+	--panel-bg: var(--panel);
+	--color-bg: var(--bg);
+	--color-bg-secondary: var(--bg2);
+	--color-text: var(--text);
+	--color-border: var(--border);
+	--color-accent: var(--accent);
+
+	/* Semantic status background colors */
+	--success-bg: rgba(0, 122, 61, 0.12);
+	--error-bg: rgba(204, 0, 0, 0.12);
+	--warning-bg: rgba(180, 83, 9, 0.12);
 }
 
 /* ============================================================================
