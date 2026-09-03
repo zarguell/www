@@ -1,0 +1,604 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<ToolLayout
+	title="Randy Danger - ARGUELLES.ME"
+	description="A retro raycast FPS that runs entirely in your browser: fight off waves in a green-CRT arena with WASD, mouse look, and procedurally generated gunfire. No installs, no servers."
+>
+	<div class="randy-container">
+		<div class="tool-hero">
+			<h1>Randy Danger</h1>
+			<p class="tool-subtitle">Regular Joe. Extraordinary Violence. A wave-survival raycast FPS, 100% in your browser.</p>
+		</div>
+
+		<div id="stage" class="stage">
+			<canvas id="gameCanvas"></canvas>
+
+			<div id="hud" class="hud" style="display:none">
+				<div class="hud-top">
+					<div class="hud-panel">
+						<div class="hud-label">Score</div>
+						<div class="hud-value" id="score-val">0</div>
+					</div>
+					<div class="hud-panel">
+						<div class="hud-label">Wave</div>
+						<div class="hud-value" id="wave-val">1</div>
+					</div>
+					<div class="hud-panel">
+						<div class="hud-label">Kills</div>
+						<div class="hud-value" id="kills-val">0</div>
+					</div>
+				</div>
+				<div class="hud-bottom">
+					<div class="health-wrap">
+						<div class="health-row">
+							<div class="hud-label">Health</div>
+							<div class="hud-value" id="health-val">100</div>
+						</div>
+						<div class="health-outer"><div id="health-bar-inner" class="health-inner" style="width:100%"></div></div>
+					</div>
+					<div class="hud-panel">
+						<div class="hud-label">Ammo</div>
+						<div class="hud-value" id="ammo-val">30</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="crosshair" class="crosshair" style="display:none"><div class="crosshair-dot"></div></div>
+			<div id="messages" class="messages"></div>
+			<div id="hit-flash" class="hit-flash"></div>
+
+			<div class="screen" id="title-screen">
+				<div class="screen-title">RANDY<br />DANGER</div>
+				<p class="screen-subtitle">
+					<em>&ldquo;I didn't ask for this&hellip; but I'm not complaining.&rdquo;</em>
+				</p>
+				<div class="controls-grid">
+					<span><span class="key">W A S D</span></span><span>Move</span>
+					<span><span class="key">Mouse</span></span><span>Look</span>
+					<span><span class="key">Click / Space</span></span><span>Shoot</span>
+					<span><span class="key">R</span></span><span>Reload</span>
+					<span><span class="key">Shift</span></span><span>Sprint</span>
+					<span><span class="key">E</span></span><span>Pick up ammo</span>
+				</div>
+				<button class="retro-button retro-button--primary" id="start-btn" type="button">ENGAGE THE DANGER</button>
+				<p class="screen-hint">Click the arena to capture your mouse &bull; Esc to pause</p>
+			</div>
+
+			<div class="screen" id="pause-screen" style="display:none">
+				<div class="screen-title screen-title--small">PAUSED</div>
+				<p class="screen-subtitle"><em>&ldquo;Even Randy needs a breather.&rdquo;</em></p>
+				<button class="retro-button retro-button--primary" id="btn-resume" type="button">RESUME</button>
+				<button class="retro-button retro-button--secondary" id="btn-pause-menu" type="button">MAIN MENU</button>
+			</div>
+
+			<div class="screen" id="gameover-screen" style="display:none">
+				<div class="screen-title screen-title--danger">DANGER<br />NEUTRALIZED</div>
+				<p class="screen-subtitle" id="gameover-msg">Randy didn't make it. That's embarrassing.</p>
+				<div class="stats-block">
+					<div class="hud-label">FINAL STATS</div>
+					<div id="final-stats" class="stats-lines"></div>
+				</div>
+				<button class="retro-button retro-button--primary" id="btn-retry" type="button">TRY AGAIN</button>
+				<button class="retro-button retro-button--secondary" id="btn-gameover-menu" type="button">MAIN MENU</button>
+			</div>
+
+			<div class="screen" id="victory-screen" style="display:none">
+				<div class="screen-title screen-title--warn">MISSION<br />COMPLETE</div>
+				<p class="screen-subtitle" id="victory-msg">Randy saves the day. Again.</p>
+				<div class="stats-block">
+					<div id="victory-stats" class="stats-lines"></div>
+				</div>
+				<button class="retro-button retro-button--primary" id="btn-next-wave" type="button">NEXT WAVE</button>
+				<button class="retro-button retro-button--secondary" id="btn-victory-menu" type="button">MAIN MENU</button>
+			</div>
+
+			<div id="mc-overlay" class="mc-overlay"></div>
+			<div class="mc-buttons">
+				<div id="mc-fire" class="mc-fire"><span class="mc-fire-icon">🔥</span><span>FIRE</span></div>
+				<div id="mc-reload" class="mc-reload">RELOAD</div>
+				<div id="mc-pause" class="mc-pause">⏸ PAUSE</div>
+			</div>
+		</div>
+
+		<Window title="Field Manual" badgeText="INFO">
+			<p class="manual">
+				Survive the wave: every hostile downed is +10, every kill +50. Enemies chase and shoot
+				on sight — keep a wall between you and them while you line up shots. Grab yellow ammo
+				pickups (walk over them, or press E nearby), and reload with R before you're empty.
+				Clear the wave to advance; each wave spawns more enemies, with more health, moving
+				faster. Sound effects are generated live in your browser; the arena never leaves this
+				page.
+			</p>
+			<p class="manual manual-muted">
+				On touch devices: left side of the arena is a virtual joystick, right side looks
+				around (tap to fire), with dedicated fire / reload / pause buttons.
+			</p>
+		</Window>
+	</div>
+
+	<script>
+		import { initRandydangerApp } from '../../scripts/randydanger-app';
+
+		document.addEventListener('DOMContentLoaded', () => initRandydangerApp());
+	</script>
+</ToolLayout>
+
+<style>
+	.randy-container {
+		max-width: 1000px;
+		margin: 0 auto;
+	}
+
+	.tool-subtitle {
+		color: var(--muted);
+		font-size: 1.2rem;
+		margin: 0;
+	}
+
+	/* The arena stage — framed like a cabinet screen, dark regardless of theme
+	   because the canvas paints its own world. */
+	.stage {
+		position: relative;
+		aspect-ratio: 16 / 10;
+		max-height: 72vh;
+		margin: 0 auto 1.5rem auto;
+		border: 3px solid var(--border);
+		border-radius: 8px;
+		box-shadow: 6px 6px 0 var(--shadow);
+		overflow: hidden;
+		background: #000;
+		touch-action: none;
+	}
+
+	#gameCanvas {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+		image-rendering: pixelated;
+		cursor: crosshair;
+	}
+
+	/* ── HUD (overlays the canvas, so dark translucent panels read in both themes) ── */
+	.hud {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		font-family: 'VT323', monospace;
+	}
+
+	.hud-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		padding: 12px 16px;
+	}
+
+	.hud-bottom {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		padding: 10px 16px 14px;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+	}
+
+	.hud-panel {
+		background: rgba(0, 0, 0, 0.65);
+		border: 1px solid var(--border);
+		border-radius: 3px;
+		padding: 6px 12px;
+		text-align: center;
+	}
+
+	.hud-label {
+		font-size: 0.9rem;
+		color: var(--muted);
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+	}
+
+	.hud-value {
+		font-size: 1.6rem;
+		color: var(--text);
+		line-height: 1;
+	}
+
+	.hud-value.danger {
+		color: var(--danger);
+		animation: pulse 0.5s infinite alternate;
+	}
+
+	.hud-value.warn {
+		color: var(--warning);
+	}
+
+	@keyframes pulse {
+		from { opacity: 1; }
+		to { opacity: 0.5; }
+	}
+
+	.health-wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		min-width: 120px;
+		background: rgba(0, 0, 0, 0.65);
+		border: 1px solid var(--border);
+		border-radius: 3px;
+		padding: 6px 12px;
+	}
+
+	.health-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.health-outer {
+		width: 100%;
+		height: 8px;
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 2px;
+		overflow: hidden;
+	}
+
+	.health-inner {
+		height: 100%;
+		background: var(--success);
+		border-radius: 2px;
+		transition: width 0.2s, background 0.2s;
+	}
+
+	.crosshair {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		z-index: 20;
+		width: 24px;
+		height: 24px;
+	}
+
+	.crosshair::before,
+	.crosshair::after {
+		content: '';
+		position: absolute;
+		background: rgba(255, 255, 255, 0.8);
+	}
+
+	.crosshair::before {
+		width: 2px;
+		height: 100%;
+		left: 11px;
+		top: 0;
+	}
+
+	.crosshair::after {
+		height: 2px;
+		width: 100%;
+		top: 11px;
+		left: 0;
+	}
+
+	:global(.crosshair-dot) {
+		position: absolute;
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: var(--accent);
+		left: 10px;
+		top: 10px;
+	}
+
+	/* ── Kill feed (children are created at runtime → :global) ── */
+	.messages {
+		position: absolute;
+		top: 50px;
+		right: 16px;
+		z-index: 30;
+		pointer-events: none;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 4px;
+		max-width: 260px;
+	}
+
+	.messages :global(.msg) {
+		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		padding: 4px 10px;
+		border-radius: 2px;
+		background: rgba(0, 0, 0, 0.7);
+		border-left: 3px solid var(--success);
+		color: var(--text);
+		animation: fadeMsg 2.5s forwards;
+	}
+
+	.messages :global(.danger-msg) {
+		border-color: var(--danger);
+	}
+
+	@keyframes fadeMsg {
+		0% { opacity: 1; transform: translateX(0); }
+		70% { opacity: 1; }
+		100% { opacity: 0; transform: translateX(20px); }
+	}
+
+	.hit-flash {
+		position: absolute;
+		inset: 0;
+		z-index: 40;
+		pointer-events: none;
+		background: rgba(255, 50, 50, 0.35);
+		opacity: 0;
+		transition: opacity 0.08s;
+	}
+
+	.hit-flash.flash {
+		opacity: 1;
+	}
+
+	/* ── Screens ── */
+	.screen {
+		position: absolute;
+		inset: 0;
+		z-index: 50;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.92);
+		text-align: center;
+		padding: 20px;
+	}
+
+	.screen-title {
+		font-size: clamp(2.2rem, 7vw, 4.5rem);
+		letter-spacing: 0.06em;
+		color: var(--success);
+		text-shadow: 0 0 30px rgba(0, 255, 80, 0.6);
+		margin-bottom: 8px;
+		line-height: 1;
+	}
+
+	.screen-title--small {
+		font-size: 2.5rem;
+	}
+
+	.screen-title--danger {
+		color: var(--danger);
+		text-shadow: 0 0 30px rgba(255, 50, 50, 0.5);
+	}
+
+	.screen-title--warn {
+		color: var(--warning);
+		text-shadow: 0 0 30px rgba(255, 204, 0, 0.4);
+	}
+
+	.screen-subtitle {
+		font-size: 1.1rem;
+		color: var(--muted);
+		letter-spacing: 0.08em;
+		margin: 0 0 24px 0;
+		max-width: 420px;
+	}
+
+	.controls-grid {
+		display: grid;
+		grid-template-columns: auto auto;
+		gap: 4px 24px;
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0 0 24px 0;
+		text-align: left;
+	}
+
+	.key {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+		padding: 2px 8px;
+		font-family: 'VT323', monospace;
+		color: var(--text);
+		margin-right: 4px;
+	}
+
+	.screen-hint {
+		font-size: 0.9rem;
+		color: var(--muted);
+		margin-top: 12px;
+	}
+
+	.screen .retro-button {
+		margin: 6px;
+	}
+
+	.stats-block {
+		margin: 0 0 24px 0;
+	}
+
+	.stats-lines {
+		font-size: 1.2rem;
+		color: var(--text);
+		line-height: 2;
+		font-family: 'VT323', monospace;
+	}
+
+	/* ── Mobile controls (hidden on fine pointers) ── */
+	.mc-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 25;
+		pointer-events: none;
+		touch-action: none;
+	}
+
+	.stage :global(.dpad-ring) {
+		position: absolute;
+		width: 110px;
+		height: 110px;
+		border-radius: 50%;
+		border: 2px solid rgba(0, 255, 80, 0.4);
+		background: rgba(0, 255, 80, 0.05);
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+	}
+
+	.stage :global(.dpad-knob) {
+		position: absolute;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		background: rgba(0, 255, 80, 0.45);
+		border: 2px solid rgba(0, 255, 80, 0.85);
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		transition: background 0.08s;
+	}
+
+	.mc-buttons {
+		position: absolute;
+		inset: 0;
+		z-index: 26;
+		pointer-events: none;
+	}
+
+	.mc-fire {
+		position: absolute;
+		bottom: 28px;
+		right: 28px;
+		width: 88px;
+		height: 88px;
+		border-radius: 50%;
+		background: rgba(220, 40, 40, 0.28);
+		border: 3px solid rgba(255, 80, 80, 0.6);
+		color: #ff6666;
+		font-family: 'VT323', monospace;
+		font-size: 0.8rem;
+		letter-spacing: 0.06em;
+		display: none;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 2px;
+		pointer-events: auto;
+		touch-action: none;
+		user-select: none;
+		-webkit-user-select: none;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+
+	.mc-fire-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+	}
+
+	.mc-fire.active {
+		background: rgba(220, 40, 40, 0.6);
+		border-color: rgba(255, 100, 100, 0.95);
+	}
+
+	.mc-reload {
+		position: absolute;
+		bottom: 130px;
+		right: 38px;
+		width: 54px;
+		height: 54px;
+		border-radius: 50%;
+		background: rgba(0, 180, 255, 0.15);
+		border: 2px solid rgba(0, 180, 255, 0.4);
+		color: #00ccff;
+		font-family: 'VT323', monospace;
+		font-size: 0.7rem;
+		display: none;
+		align-items: center;
+		justify-content: center;
+		pointer-events: auto;
+		touch-action: none;
+		user-select: none;
+		-webkit-user-select: none;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		cursor: pointer;
+	}
+
+	.mc-reload.active {
+		background: rgba(0, 180, 255, 0.4);
+	}
+
+	.mc-pause {
+		position: absolute;
+		top: 12px;
+		left: 50%;
+		transform: translateX(-50%);
+		padding: 7px 20px;
+		border-radius: 4px;
+		background: rgba(0, 0, 0, 0.65);
+		border: 1px solid rgba(0, 255, 80, 0.25);
+		color: rgba(0, 255, 80, 0.6);
+		font-family: 'VT323', monospace;
+		font-size: 0.8rem;
+		pointer-events: auto;
+		touch-action: none;
+		user-select: none;
+		-webkit-user-select: none;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		cursor: pointer;
+	}
+
+	/* On fine-pointer devices the whole touch layer disappears, like the source. */
+	@media (pointer: fine) {
+		.mc-overlay,
+		.mc-buttons {
+			display: none !important;
+		}
+	}
+
+	@media (pointer: coarse) {
+		.mc-fire,
+		.mc-reload {
+			display: flex;
+		}
+	}
+
+	.manual {
+		margin: 0;
+		font-size: 1.1rem;
+		line-height: 1.6;
+	}
+
+	.manual-muted {
+		color: var(--muted);
+		margin-top: 0.75rem;
+	}
+
+	@media (max-width: 768px) {
+		.stage {
+			aspect-ratio: 4 / 5;
+			max-height: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hud-value.danger,
+		.messages :global(.msg) {
+			animation: none;
+		}
+
+		.health-inner,
+		.hit-flash {
+			transition: none;
+		}
+	}
+</style>
