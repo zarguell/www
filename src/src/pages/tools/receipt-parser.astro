@@ -1,0 +1,346 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import Window from '../../components/Window.astro';
+import RetroButton from '../../components/RetroButton.astro';
+---
+
+<ToolLayout
+	title="Receipt Parser - ARGUELLES.ME"
+	description="Upload a receipt photo and parse it entirely in your browser: local OCR plus heuristics infer merchant, date, totals, and likely line items."
+>
+	<div class="receipt-parser-container">
+		<div class="tool-hero">
+			<h1>Receipt Parser</h1>
+			<p class="tool-subtitle">
+				Upload a receipt photo, run OCR in the browser, and extract likely fields — nothing
+				leaves your device.
+			</p>
+		</div>
+
+		<Window title="Upload Receipt" badgeText="OCR">
+			<div id="uploadZone" class="upload-zone">
+				<input id="fileInput" type="file" accept="image/*" aria-label="Choose a receipt image" />
+				<p class="upload-hint">
+					Drag &amp; drop a receipt photo here, or click to browse.
+					<span class="upload-formats">PNG · JPG · WEBP</span>
+				</p>
+			</div>
+			<div class="btnrow">
+				<RetroButton id="parseBtn" variant="primary" disabled>Parse Receipt</RetroButton>
+				<RetroButton id="sampleBtn" variant="secondary">Load Sample Text</RetroButton>
+				<RetroButton id="clearBtn" variant="secondary">Clear</RetroButton>
+			</div>
+			<div class="status-wrap">
+				<div id="statusBox" class="parse-status" aria-live="polite">
+					Select a receipt image to begin.
+				</div>
+				<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+			</div>
+			<p class="hint">
+				OCR runs locally with Tesseract.js. Sharp, high-contrast photos work best — crop out
+				the background first.
+			</p>
+		</Window>
+
+		<div class="workspace">
+			<div class="stack">
+				<Window title="Image Preview" badgeText="INPUT">
+					<div id="previewBox" class="preview-box">
+						<div class="preview-placeholder">No image loaded yet.</div>
+					</div>
+				</Window>
+
+				<Window title="Raw OCR Text" badgeText="EDITABLE">
+					<textarea
+						id="rawText"
+						class="raw-text"
+						spellcheck="false"
+						aria-label="Raw OCR text"
+						placeholder="OCR output will appear here. You can also paste receipt text directly."
+					></textarea>
+					<p class="hint">
+						Edit the text and click outside the box to re-run the parser on it.
+					</p>
+				</Window>
+			</div>
+
+			<div class="stack">
+				<Window title="Parsed Fields" badgeText="PARSED">
+					<div id="metaGrid" class="meta-grid"></div>
+					<div id="itemsSection" class="hidden">
+						<h2 class="items-title">Likely items</h2>
+						<div id="itemsList" class="items"></div>
+					</div>
+				</Window>
+
+				<Window title="How It Works" badgeText="INFO">
+					<p class="hint">
+						Tesseract reads the image into raw text, then simple heuristics rank a merchant
+						line, pull dates, and infer subtotal/tax/tip/total from keywords and amounts.
+						Best for common retail and restaurant receipts — always check the raw OCR text
+						when a field looks off.
+					</p>
+				</Window>
+			</div>
+		</div>
+	</div>
+
+	<script
+		src="https://unpkg.com/tesseract.js@6.0.1/dist/tesseract.min.js"
+		is:inline
+		integrity="sha384-af5aeeded71fe8586708547807ba48146f8184517d2e516dcff3f5cb8a5b9569f7006b3dcb7941c7948a2cd7f8fab103"
+		crossorigin="anonymous"
+	></script>
+	<script>
+		import { initReceiptParserApp } from '../../scripts/receipt-parser-app';
+
+		document.addEventListener('DOMContentLoaded', () => initReceiptParserApp());
+	</script>
+</ToolLayout>
+
+<style>
+	.receipt-parser-container {
+		max-width: 1000px;
+		margin: 0 auto;
+	}
+
+	.tool-subtitle {
+		color: var(--muted);
+		font-size: 1.2rem;
+		margin: 0;
+	}
+
+	/* Drop zone: the file input covers the zone (keyboard-focusable), so the
+	   focus ring lives on the zone via :focus-within. */
+	.upload-zone {
+		position: relative;
+		border: 3px dashed var(--border);
+		border-radius: 8px;
+		padding: 2rem;
+		text-align: center;
+		background: var(--bg);
+		transition: border-color 0.15s ease, background 0.15s ease;
+	}
+
+	.upload-zone:hover,
+	.upload-zone.dragging {
+		border-color: var(--accent);
+		background: var(--bg2);
+	}
+
+	.upload-zone:focus-within {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	.upload-zone input {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		cursor: pointer;
+	}
+
+	.upload-hint {
+		margin: 0;
+		font-size: 1.2rem;
+		color: var(--text);
+	}
+
+	.upload-formats {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 1rem;
+		color: var(--muted);
+	}
+
+	.btnrow {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 1rem;
+	}
+
+	.status-wrap {
+		margin-top: 1rem;
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.parse-status {
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--muted);
+		font-size: 1.1rem;
+		min-height: 1.5em;
+	}
+
+	.parse-status--error {
+		color: var(--danger);
+		background: var(--error-bg);
+		border-color: var(--danger);
+	}
+
+	.progress {
+		width: 100%;
+		height: 0.6rem;
+		background: var(--bg2);
+		border: 2px solid var(--border);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+
+	.progress > span {
+		display: block;
+		width: 0%;
+		height: 100%;
+		background: var(--accent);
+		transition: width 180ms ease;
+	}
+
+	.hint {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0.75rem 0 0 0;
+	}
+
+	.workspace {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0;
+		align-items: start;
+	}
+
+	.stack {
+		display: grid;
+	}
+
+	.preview-box {
+		min-height: 16rem;
+		display: grid;
+		place-items: center;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		overflow: hidden;
+	}
+
+	.preview-box :global(img) {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+	/* Parsed fields/items are injected at runtime by the app script, so
+	   their styles must be :global — scoped selectors never match them. */
+	.preview-box :global(.preview-placeholder) {
+		padding: 2rem;
+		color: var(--muted);
+		font-size: 1.1rem;
+	}
+
+	.raw-text {
+		width: 100%;
+		min-height: 16rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+		resize: vertical;
+	}
+
+	.raw-text:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.meta-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.meta-grid :global(.meta-item) {
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+	}
+
+	.meta-grid :global(.meta-label) {
+		display: block;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--muted);
+	}
+
+	.meta-grid :global(.meta-item strong) {
+		display: block;
+		font-size: 1.2rem;
+		word-break: break-word;
+	}
+
+	.items-title {
+		font-size: 1.5rem;
+		color: var(--accent);
+		margin: 1.25rem 0 0.5rem 0;
+	}
+
+	.items {
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.items :global(.item-row) {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+	}
+
+	.items :global(.item-raw) {
+		display: block;
+		margin-top: 0.2rem;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+
+	.items :global(.item-amount) {
+		align-self: center;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	@media (max-width: 768px) {
+		.workspace {
+			grid-template-columns: 1fr;
+		}
+
+		.meta-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.btnrow {
+			flex-direction: column;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.upload-zone,
+		.progress > span {
+			transition: none;
+		}
+	}
+</style>
