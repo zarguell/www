@@ -188,6 +188,10 @@ draft: false
 | `docs/tool-dev-guide.md` | **Source of truth for tool development** (JavaScript + PyScript) |
 | `docs/mistakes.md` | Mistakes encountered and lessons learned |
 | `docs/plans/` | Design and implementation plans |
+| `.agents/skills/migrate-tool/` | Skill: migrating a small external tool (repo link) into the site — read the source, design the fit, ship it |
+
+When migrating/porting an external one-off tool into this site, read and follow
+`.agents/skills/migrate-tool/SKILL.md`.
 
 ## Project Constraints
 
