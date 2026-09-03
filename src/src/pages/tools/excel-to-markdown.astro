@@ -1,0 +1,248 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<ToolLayout
+	title="Excel to Markdown Converter - ARGUELLES.ME"
+	description="Convert xlsx, xls, ods, csv, and tsv files into clean markdown tables entirely in your browser. Multi-sheet, RFC 4180-safe CSV parsing, pipe escaping, aligned output."
+>
+	<div class="x2m-container">
+		<div class="tool-hero">
+			<h1>Excel → Markdown</h1>
+			<p class="tool-subtitle">
+				Spreadsheets in, clean markdown tables out. Runs entirely in your browser — nothing
+				is uploaded.
+			</p>
+		</div>
+
+		<Window title="Upload Spreadsheet" badgeText="CONVERT">
+			<div id="x2mDropZone" class="drop-zone">
+				<input
+					id="x2mFileInput"
+					type="file"
+					accept=".xlsx,.xls,.ods,.csv,.tsv,.txt"
+					aria-label="Choose a spreadsheet file"
+				/>
+				<p class="upload-hint">
+					Drag &amp; drop a spreadsheet here, or click to browse.
+					<span class="upload-formats">XLSX · XLS · ODS · CSV · TSV · TXT</span>
+				</p>
+			</div>
+			<div id="x2mStatus" class="parse-status" aria-live="polite">
+				Drop an xlsx/csv/tsv file above, or paste delimited text below. Everything runs locally.
+			</div>
+		</Window>
+
+		<Window title="Options" badgeText="TUNE">
+			<div class="option-row">
+				<label class="option">
+					<input id="x2mHeaderRow" type="checkbox" checked />
+					First row is a header
+				</label>
+				<label class="option">
+					<input id="x2mSkipEmpty" type="checkbox" checked />
+					Skip empty rows &amp; columns
+				</label>
+			</div>
+			<div class="sheet-row">
+				<label class="option" for="x2mSheetPicker">Sheet:</label>
+				<select id="x2mSheetPicker" class="sheet-picker" style="display:none" aria-label="Choose sheet"></select>
+			</div>
+		</Window>
+
+		<Window title="Markdown Output" badgeText="RESULT">
+			<textarea
+				id="x2mOutput"
+				class="raw-text"
+				spellcheck="false"
+				readonly
+				aria-label="Markdown table output"
+				placeholder="Converted markdown will appear here."
+			></textarea>
+			<div class="btnrow">
+				<button class="retro-button retro-button--primary" id="x2mCopy" type="button">Copy Markdown</button>
+				<button class="retro-button retro-button--secondary" id="x2mDownload" type="button">Download .md</button>
+			</div>
+		</Window>
+
+		<Window title="Paste CSV / TSV" badgeText="NO FILE?">
+			<textarea
+				id="x2mPasteText"
+				class="raw-text raw-text--short"
+				spellcheck="false"
+				aria-label="Paste delimited text"
+				placeholder="Paste CSV/TSV text — quotes, embedded commas, and newlines are handled."
+			></textarea>
+			<div class="btnrow">
+				<button class="retro-button retro-button--primary" id="x2mConvertPasted" type="button">Convert Text</button>
+				<button class="retro-button retro-button--secondary" id="x2mSample" type="button">Load Tricky Sample</button>
+			</div>
+			<p class="hint">
+				The sample includes the cases that break naive converters: commas inside quotes,
+				escaped quote characters, and a newline inside a cell.
+			</p>
+		</Window>
+	</div>
+
+	<!-- SheetJS is self-hosted: an integrity-pinned CDN tag proved flaky, and a
+	     same-origin asset removes the third-party runtime dependency entirely. -->
+	<script is:inline src="/assets/xlsx/xlsx-0.18.5.full.min.js"></script>
+	<script>
+		import { initXlsxToMdApp } from '../../scripts/xlsx-to-md-app';
+
+		document.addEventListener('DOMContentLoaded', () => initXlsxToMdApp());
+	</script>
+</ToolLayout>
+
+<style>
+	.x2m-container {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.tool-subtitle {
+		color: var(--muted);
+		font-size: 1.2rem;
+		margin: 0;
+	}
+
+	/* Drop zone: the file input covers the zone (keyboard-focusable), so the
+	   focus ring lives on the zone via :focus-within. */
+	.drop-zone {
+		position: relative;
+		border: 3px dashed var(--border);
+		border-radius: 8px;
+		padding: 2rem;
+		text-align: center;
+		background: var(--bg);
+		transition: border-color 0.15s ease, background 0.15s ease;
+	}
+
+	.drop-zone:hover,
+	.drop-zone.dragging {
+		border-color: var(--accent);
+		background: var(--bg2);
+	}
+
+	.drop-zone:focus-within {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	.drop-zone input {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		cursor: pointer;
+	}
+
+	.upload-hint {
+		margin: 0;
+		font-size: 1.2rem;
+		color: var(--text);
+	}
+
+	.upload-formats {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 1rem;
+		color: var(--muted);
+	}
+
+	.parse-status {
+		margin-top: 1rem;
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--muted);
+		font-size: 1.1rem;
+	}
+
+	:global(.parse-status--error) {
+		color: var(--danger);
+		background: var(--error-bg);
+		border-color: var(--danger);
+	}
+
+	.option-row {
+		display: flex;
+		gap: 1.5rem;
+		flex-wrap: wrap;
+	}
+
+	.option {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 1.15rem;
+		cursor: pointer;
+	}
+
+	.option input {
+			width: 1.1rem;
+		height: 1.1rem;
+		accent-color: var(--accent);
+	}
+
+	.sheet-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 0.75rem;
+	}
+
+	.sheet-picker {
+		padding: 0.4rem 0.6rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'VT323', monospace;
+		font-size: 1.1rem;
+	}
+
+	.raw-text {
+		width: 100%;
+		min-height: 16rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-size: 0.95rem;
+		resize: vertical;
+	}
+
+	.raw-text--short {
+		min-height: 8rem;
+	}
+
+	.raw-text:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.btnrow {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.hint {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0.75rem 0 0 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drop-zone {
+			transition: none;
+		}
+	}
+</style>
