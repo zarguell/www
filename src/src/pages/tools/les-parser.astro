@@ -1,0 +1,273 @@
+---
+import PythonToolLayout from '../../layouts/PythonToolLayout.astro';
+import Window from '../../components/Window.astro';
+---
+
+<PythonToolLayout
+	title="NFC LES Parser - ARGUELLES.ME"
+	description="Parse USDA NFC Earnings & Leave Statements (AD-334 PDFs) into structured JSON and CSV entirely in your browser — the statement never leaves your device."
+>
+	<div class="les-container">
+		<div class="tool-hero">
+			<h1>NFC LES Parser</h1>
+			<p class="tool-subtitle">
+				Turn USDA NFC Earnings &amp; Leave Statements (AD-334) into structured JSON/CSV —
+				parsed entirely in your browser.
+			</p>
+		</div>
+
+		<Window title="Upload Statement" badgeText="PYTHON">
+			<div class="form-group">
+				<label for="pdfInput">AD-334 PDF statements (from NFC EPP)</label>
+				<input id="pdfInput" type="file" accept=".pdf,application/pdf" multiple />
+			</div>
+			<div class="btnrow">
+				<button class="retro-button retro-button--primary" id="lesParseFiles" type="button" py-click="parse_files">Parse PDF(s)</button>
+			</div>
+			<div id="lesStatus" class="parse-status" aria-live="polite">
+				Upload an AD-334 PDF, or paste statement text. Parsing happens entirely in your browser.
+			</div>
+			<p class="hint">
+				Text-based PDFs only (EPP downloads are). Scanned copies need OCR — not supported.
+				First parse loads the pypdf engine (~300 kB). Your statement never leaves this page.
+			</p>
+		</Window>
+
+		<Window title="Paste Statement Text" badgeText="FALLBACK">
+			<p class="hint hint-top">
+				Prefer raw text? Paste the output of <code>pdfplumber</code>'s <code>extract_text()</code>
+				(or any text extraction) and parse it without the PDF engine.
+			</p>
+			<textarea
+				id="lesRawText"
+				class="raw-text"
+				spellcheck="false"
+				aria-label="Statement text"
+				placeholder="Paste AD-334 statement text here…"
+			></textarea>
+			<div class="btnrow">
+				<button class="retro-button retro-button--primary" id="lesParsePasted" type="button" py-click="parse_pasted">Parse Text</button>
+				<button class="retro-button retro-button--secondary" id="lesSample" type="button" py-click="load_sample">Load Sample (synthetic)</button>
+			</div>
+		</Window>
+
+		<div id="lesResults" style="display:none">
+			<Window title="Pay Summary" badgeText="PARSED">
+				<div class="summary-head">
+					<span id="lesBalance" class="balance-badge">UNVERIFIABLE</span>
+					<span id="lesDiag" class="diag"></span>
+				</div>
+				<div class="meta-grid">
+					<div class="meta-item" id="lesPayPeriod"><span class="meta-label">Pay period</span><strong></strong></div>
+					<div class="meta-item" id="lesPayDate"><span class="meta-label">Official pay date</span><strong></strong></div>
+					<div class="meta-item" id="lesSalary"><span class="meta-label">Salary / rate</span><strong></strong></div>
+					<div class="meta-item" id="lesGrossPp"><span class="meta-label">Gross pay (PP)</span><strong></strong></div>
+					<div class="meta-item" id="lesNetPp"><span class="meta-label">Net pay (PP)</span><strong></strong></div>
+					<div class="meta-item" id="lesDedsPp"><span class="meta-label">Total deductions (PP)</span><strong></strong></div>
+					<div class="meta-item" id="lesGrossYtd"><span class="meta-label">Gross pay (YTD)</span><strong></strong></div>
+					<div class="meta-item" id="lesNetYtd"><span class="meta-label">Net pay (YTD)</span><strong></strong></div>
+				</div>
+			</Window>
+		</div>
+
+		<div id="lesResults2" style="display:none">
+			<Window title="Deductions" badgeText="ITEMS">
+				<table class="les-table">
+					<thead>
+						<tr><th>Description</th><th>Item</th><th>PP</th><th>YTD</th></tr>
+					</thead>
+					<tbody id="lesDeductionsBody"></tbody>
+				</table>
+			</Window>
+
+			<Window title="Leave &amp; Earnings" badgeText="ITEMS">
+				<table class="les-table">
+					<thead>
+						<tr><th>Code</th><th>Description</th><th>Hours</th><th>Amount</th></tr>
+					</thead>
+					<tbody id="lesLeaveBody"></tbody>
+				</table>
+			</Window>
+
+			<Window title="YTD Leave Status" badgeText="LEAVE">
+				<table class="les-table">
+					<thead>
+						<tr><th>Type</th><th>Accrued</th><th>Used</th><th>Balance</th></tr>
+					</thead>
+					<tbody id="lesYtdBody"></tbody>
+				</table>
+			</Window>
+		</div>
+
+		<div id="lesJsonWindow" style="display:none">
+			<Window title="Raw JSON" badgeText="EXPORT">
+				<textarea id="lesJson" class="raw-text raw-text--short" readonly aria-label="Parsed JSON output"></textarea>
+				<div id="lesDownloadRow" class="btnrow">
+					<button class="retro-button retro-button--primary" id="lesDownloadJson" type="button" py-click="download_json">Download JSON</button>
+					<button class="retro-button retro-button--secondary" id="lesDownloadCsv" type="button" py-click="download_csv">Download CSV</button>
+				</div>
+			</Window>
+		</div>
+	</div>
+
+	<script type="py" src="/tools/les-parser/main.py" config="/tools/les-parser/config.json"></script>
+</PythonToolLayout>
+
+<style>
+	.les-container {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.tool-subtitle {
+		color: var(--muted);
+		font-size: 1.2rem;
+		margin: 0;
+	}
+
+	.btnrow {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.parse-status {
+		margin-top: 0.75rem;
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--muted);
+		font-size: 1.1rem;
+	}
+
+	:global(.parse-status--error) {
+		color: var(--danger);
+		background: var(--error-bg);
+		border-color: var(--danger);
+	}
+
+	.hint {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0.75rem 0 0 0;
+	}
+
+	.hint-top {
+		margin: 0 0 0.5rem 0;
+	}
+
+	.hint code {
+		background: var(--bg);
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		padding: 0 0.3em;
+	}
+
+	.raw-text {
+		width: 100%;
+		min-height: 12rem;
+		margin-top: 0.5rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: 'VT323', monospace;
+		font-size: 1.05rem;
+		resize: vertical;
+	}
+
+	.raw-text--short {
+		min-height: 10rem;
+	}
+
+	.raw-text:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	/* ── Parsed output (runtime-filled; value nodes are template elements,
+	     row internals are injected → :global where needed) ── */
+	.summary-head {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin-bottom: 0.75rem;
+	}
+
+	.balance-badge {
+		display: inline-block;
+		padding: 0.2em 0.7em;
+		border: 2px solid var(--border);
+		border-radius: 999px;
+		font-size: 1rem;
+		letter-spacing: 0.06em;
+	}
+
+	.diag {
+		color: var(--muted);
+		font-size: 1rem;
+	}
+
+	.meta-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	:global(.meta-item) {
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+	}
+
+	:global(.meta-item .meta-label) {
+		display: block;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--muted);
+	}
+
+	:global(.meta-item strong) {
+		display: block;
+		font-size: 1.2rem;
+		word-break: break-word;
+	}
+
+	.les-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 1.05rem;
+	}
+
+	.les-table th {
+		text-align: left;
+		padding: 0.4rem 0.5rem;
+		border-bottom: 3px solid var(--border);
+		color: var(--muted);
+		text-transform: uppercase;
+		font-size: 0.9rem;
+		letter-spacing: 0.06em;
+	}
+
+	.les-table td {
+		padding: 0.4rem 0.5rem;
+		border-bottom: 2px solid var(--border);
+		word-break: break-word;
+	}
+
+	.les-table tr:last-child td {
+		border-bottom: none;
+	}
+
+	@media (max-width: 640px) {
+		.meta-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

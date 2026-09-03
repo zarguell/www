@@ -400,7 +400,7 @@ The `files` map fetches each URL (relative to the site root) and writes it into 
 1. **`py-click` syntax**: Use `py-click="function_name"` (no parentheses), not `py-click="function_name()"`
 2. **Chart accumulation**: Always `innerHTML = ""` the chart container before displaying a new chart
 3. **Auto-running**: If you want user input first, remove the function call at the bottom of the Python file
-4. **Timing issues**: `py-click` is preferred over `addEventListener` (avoids DOM-not-ready errors)
+4. **Timing issues**: `py-click` is preferred over `addEventListener` (avoids DOM-not-ready errors). It also avoids a nastier failure: passing a Python function to `addEventListener` from module code hands Pyodide a *borrowed proxy*, which is destroyed as soon as the wiring function returns — later clicks fail with "This borrowed proxy was automatically destroyed". `py-click` attributes let PyScript manage the callable's lifetime. If you must use `addEventListener`, wrap the handler with `pyodide.ffi.create_proxy`.
 5. **Responsive charts**: Call `setup_style(figsize)` from `chart_helpers` at module level (applies the shared rcParams); `chart_img()` already emits a responsive `<img>` with `max-width: 100%; height: auto`
 
 ### When to Use PyScript vs JavaScript
