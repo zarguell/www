@@ -186,6 +186,20 @@ export const toolsData: ToolCategory[] = [
 				],
 				lastModified: "2026-01-06",
 			},
+			{
+				title: "NFC LES Parser",
+				slug: "les-parser",
+				description: "Parse USDA NFC Earnings & Leave Statements (AD-334 PDFs) into structured JSON and CSV. Runs entirely in your browser with Python (PyScript) — pay dates, gross/net, deductions, leave balances. Your statement never leaves your device.",
+				badge: "PYTHON",
+				features: [
+					"Extracts pay dates, salary, gross/net pay (PP & YTD)",
+					"14 standard deduction line items (TSP, taxes, FEHBA…)",
+					"Leave earnings and YTD leave balances",
+					"Validates gross == net + deductions",
+					"JSON & CSV export — 100% client-side parsing",
+				],
+				lastModified: "2026-09-03",
+			},
 		],
 	},
 	{
@@ -214,6 +228,20 @@ export const toolsData: ToolCategory[] = [
 		id: "text",
 		description: "Transform, sanitize, and process text with privacy-focused browser tools.",
 		tools: [
+			{
+				title: "Excel to Markdown Converter",
+				slug: "excel-to-markdown",
+				description: "Convert xlsx, xls, ods, csv, and tsv files into clean, aligned markdown tables — entirely in your browser. Multi-sheet support, RFC 4180-safe CSV parsing, pipe escaping, and one-click copy or download.",
+				badge: "TEXT TOOL",
+				features: [
+					"XLSX, XLS, ODS, CSV, and TSV input",
+					"Multi-sheet workbooks with sheet picker",
+					"RFC 4180 CSV parsing (quotes, embedded commas/newlines)",
+					"Pipes escaped, columns aligned for readable source",
+					"Copy to clipboard or download .md",
+				],
+				lastModified: "2026-09-03",
+			},
 			{
 				title: "Sanitext",
 				slug: "sanitext",
@@ -267,6 +295,20 @@ export const toolsData: ToolCategory[] = [
 					"Progress tracking per file",
 				],
 				lastModified: "2025-12-14",
+			},
+			{
+				title: "Receipt Parser",
+				slug: "receipt-parser",
+				description: "Upload a receipt photo and parse it entirely in your browser. Local OCR reads the image, then heuristics infer merchant, date, totals, and likely line items.",
+				badge: "OCR",
+				features: [
+					"In-browser OCR — images never leave your device",
+					"Inferred merchant, date, subtotal, tax, tip, and total",
+					"Likely line items with amounts",
+					"Editable raw OCR text with instant re-parse",
+					"Sample receipt text for a no-upload test drive",
+				],
+				lastModified: "2026-09-03",
 			},
 		],
 	},
@@ -338,6 +380,20 @@ export const toolsData: ToolCategory[] = [
 					"Virtual dice mode (classic & modern sets)"
 				],
 				lastModified: "2026-01-19",
+			},
+			{
+				title: "Randy Danger",
+				slug: "randy-danger",
+				description: "A retro wave-survival FPS that runs entirely in your browser. Fight off escalating waves in a green-CRT arena with WASD and mouse look — raycast rendering, procedural sound effects, no installs.",
+				badge: "GAME",
+				features: [
+					"Raycast 3D arena, playable in the browser",
+					"Escalating waves with chasing enemy AI",
+					"WASD + mouse look (pointer lock) or touch controls",
+					"Procedural Web Audio gunfire and hit sounds",
+					"Score, kills, and wave progression tracking",
+				],
+				lastModified: "2026-09-03",
 			},
 		],
 	},
