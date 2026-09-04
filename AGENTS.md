@@ -153,7 +153,7 @@ draft: false
 - Respect `prefers-reduced-motion` in CSS
 - Test both themes (neon-night, mall-pastel)
 - Keep blog collection named "blog" (not "posts")
-- Use VT323 font globally
+- Use the typography split: VT323 for display (headings, buttons, badges, chrome), IBM Plex Mono for body text
 - Make all interactive elements keyboard accessible
 - Persist theme choice in localStorage
 - Use `PythonToolLayout` ONLY for Python/PyScript tools
@@ -163,8 +163,11 @@ draft: false
 ## Design System Reference
 
 ### Typography
-- Font: VT323 (Google Fonts embed)
-- Size: Large, retro terminal style
+- Display font: VT323 (Google Fonts embed) — headings, buttons, badges, window chrome, labels
+- Body font: IBM Plex Mono (Google Fonts embed) — paragraphs, prose, forms, long-form reading
+- Tokens: `--font-display` / `--font-body` in `global.css`; never hardcode font names in components
+- Size: body text 17px (1.0625rem); VT323 sizes run a step larger than body sizes
+- Loud effects are rationed: one hard `text-shadow` on `h1` only; headings use `--text`; accent color is for interactive elements (links, buttons, badges), not headings
 
 ### Key Components
 - `Window` - Retro panel wrapper with title bar

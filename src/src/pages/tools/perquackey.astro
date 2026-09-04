@@ -208,8 +208,8 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 
 	.form-group input {
 		padding: 0.75rem;
-		font-size: 1.2rem;
-		font-family: 'VT323', monospace;
+		font-size: 1rem;
+		font-family: var(--font-body);
 		border: 2px solid var(--border);
 		background: var(--bg);
 		color: var(--text);
@@ -322,7 +322,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		border: 2px solid var(--border);
 		color: white;
 		padding: 0.5rem 1rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 		cursor: pointer;
 		transition: all 0.2s ease;
@@ -415,7 +415,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		background: var(--bg);
 		border: 1px solid var(--border);
 		color: var(--text);
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		line-height: 1;
 		padding: 0.25rem 0.5rem;
@@ -460,7 +460,6 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 
 	.rules-content h4 {
 		margin: 0;
-		color: var(--accent);
 		font-size: 1.1rem;
 	}
 
@@ -522,7 +521,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		border: 2px solid var(--border);
 		color: var(--text);
 		padding: 0.5rem 1rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 		cursor: pointer;
 		transition: all 0.2s ease;
@@ -544,7 +543,25 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		margin-top: 1rem;
 	}
 
-	/* Virtual Dice Styles */
+	/* Virtual dice styles live in the <style is:global> block below — the dice
+	   are rendered by JavaScript at runtime, so scoped selectors can't reach them. */
+
+	@media (max-width: 768px) {
+		.standings-window {
+			position: static;
+			max-width: 100%;
+			min-width: 100%;
+		}
+
+		.timer-display {
+			font-size: 3rem;
+		}
+	}
+</style>
+
+<style is:global>
+	/* Dice are created by perquackey-app at runtime, so these rules must be
+	   global. They live here (not global.css) because only this page rolls dice. */
 	.dice-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
@@ -553,23 +570,140 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		min-height: 100px;
 	}
 
+	.die {
+		width: 70px;
+		height: 70px;
+		border: 6px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
+		font-family: var(--font-display);
+		font-size: 2.5rem;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		user-select: none;
+		position: relative;
+		box-shadow:
+			6px 6px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
+		transition: all 0.1s ease;
+		image-rendering: pixelated;
+		border-radius: 8px;
+	}
+
+	.die::before {
+		content: '';
+		position: absolute;
+		top: 6px;
+		left: 6px;
+		right: 6px;
+		bottom: 6px;
+		border: 3px solid rgba(0, 0, 0, 0.3);
+		border-radius: 4px;
+		pointer-events: none;
+	}
+
+	.die::after {
+		content: '';
+		position: absolute;
+		bottom: 3px;
+		right: 3px;
+		width: 8px;
+		height: 8px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 50%;
+		pointer-events: none;
+	}
+
+	.die.black {
+		background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+		color: #ffffff;
+		border-color: #000000;
+	}
+
+	.die.black:hover {
+		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+		transform: translate(-3px, -3px);
+		box-shadow:
+			9px 9px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
+	}
+
+	.die.black.selected {
+		background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+		border-color: var(--accent);
+		border-width: 8px;
+		box-shadow:
+			0 0 15px var(--accent),
+			6px 6px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
+		transform: scale(1.08);
+	}
+
+	.die:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 3px;
+	}
+
+	.die.red {
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--danger) 85%, black) 0%,
+			color-mix(in srgb, var(--danger) 60%, black) 100%
+		);
+		color: #ffffff;
+		border-color: color-mix(in srgb, var(--danger) 55%, black);
+	}
+
+	.die.red:hover {
+		background: linear-gradient(
+			135deg,
+			var(--danger) 0%,
+			color-mix(in srgb, var(--danger) 75%, black) 100%
+		);
+		transform: translate(-3px, -3px);
+		box-shadow:
+			9px 9px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
+	}
+
+	.die.red.selected {
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--danger) 95%, white) 0%,
+			var(--danger) 100%
+		);
+		border-color: var(--accent);
+		border-width: 8px;
+		box-shadow:
+			0 0 15px var(--accent),
+			6px 6px 0 rgba(0, 0, 0, 0.4),
+			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
+		transform: scale(1.08);
+	}
+
+	.die.rolling {
+		animation: roll 0.5s ease-in-out;
+	}
 
 	@keyframes roll {
-		0% {
-			transform: rotate(0deg) scale(1);
-		}
-		25% {
-			transform: rotate(90deg) scale(1.1);
-		}
-		50% {
-			transform: rotate(180deg) scale(1);
-		}
-		75% {
-			transform: rotate(270deg) scale(1.1);
-		}
-		100% {
-			transform: rotate(360deg) scale(1);
-		}
+		0% { transform: rotate(0deg) scale(1); }
+		25% { transform: rotate(90deg) scale(1.1); }
+		50% { transform: rotate(180deg) scale(1); }
+		75% { transform: rotate(270deg) scale(1.1); }
+		100% { transform: rotate(360deg) scale(1); }
+	}
+
+	@keyframes touch-pulse {
+		0% { transform: scale(1); filter: brightness(1); }
+		50% { transform: scale(1.05); filter: brightness(1.2); }
+		100% { transform: scale(1); filter: brightness(1); }
+	}
+
+	.die.touch-active {
+		animation: touch-pulse 0.15s ease-out;
 	}
 
 	.dice-controls {
@@ -597,7 +731,7 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 
 	.selected-word-value {
 		font-size: 1.3rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-weight: bold;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
@@ -624,27 +758,50 @@ const ogImage = new URL('/assets/perquackey-og.jpg', Astro.site);
 		min-width: 120px;
 	}
 
+	@keyframes reorder-pulse {
+		0%, 100% {
+			box-shadow: 0 0 15px var(--accent);
+		}
+		50% {
+			box-shadow: 0 0 25px var(--focus), 0 0 35px var(--accent);
+		}
+	}
+
+	.dice-container .die.reorder-target {
+		animation: reorder-pulse 0.5s ease-in-out infinite;
+		border-color: var(--focus) !important;
+	}
+
+	.reorder-help-text {
+		background: var(--accent);
+		color: var(--sticker-text);
+		padding: 0.5rem;
+		text-align: center;
+		font-weight: bold;
+		margin-bottom: 0.5rem;
+		border-radius: 4px;
+		animation: slideDown 0.2s ease-out;
+		border: 2px solid var(--border);
+		box-shadow: 3px 3px 0 var(--shadow);
+	}
+
+	@keyframes slideDown {
+		from { opacity: 0; transform: translateY(-10px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+
 	@media (max-width: 768px) {
-		.standings-window {
-			position: static;
-			max-width: 100%;
-			min-width: 100%;
-		}
-
-		.timer-display {
-			font-size: 3rem;
-		}
-
 		.dice-grid {
-			grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
 			gap: 0.75rem;
 		}
 
 		.die {
-			width: 55px;
-			height: 55px;
+			width: 64px;
+			height: 64px;
 			font-size: 1.8rem;
 			border-width: 5px;
+			margin: 2px;
 		}
 
 		.die::before {

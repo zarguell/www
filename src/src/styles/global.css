@@ -52,19 +52,21 @@
 	--bg2: #f8e8e8;
 	--panel: #ffffff;
 	--text: #4a4a6a;
-	--muted: #8a8aaa;
+	--muted: #62628a;
 	--accent: #ff99cc;
 	--accent2: #99ccff;
 	--border: #d8b8d8;
 	--shadow: #b898b8;
-	--link: #cc6699;
-	--visited: #996699;
-	--focus: #ffcc00;
+	/* Deepened for WCAG AA: link 4.97:1, visited 6.2:1, focus 4.7:1 on --bg */
+	--link: #984a73;
+	--visited: #7d4a80;
+	--focus: #b45309;
 	--success: #007a3d;
 	--warning: #b45309;
 	--danger: #cc0000;
 	--sticker-bg: #ff99cc;
-	--sticker-text: #ffffff;
+	/* Dark ink on pastel pink: 6.9:1 (was white at 2.0:1) */
+	--sticker-text: #402440;
 
 	/* Bevel effect colors */
 	--bevel-light: #ffffff;
@@ -85,6 +87,18 @@
 }
 
 /* ============================================================================
+   TYPOGRAPHY TOKENS
+   VT323 (terminal pixel font) is the display voice: headings, buttons,
+   badges, window chrome, labels. IBM Plex Mono is the reading voice:
+   body copy, prose, forms. Both load from Google Fonts in the layouts.
+   ============================================================================ */
+
+:root {
+	--font-display: "VT323", "Courier New", monospace;
+	--font-body: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* ============================================================================
    GLOBAL STYLES
    ============================================================================ */
 
@@ -98,9 +112,9 @@ html {
 }
 
 body {
-	font-family: "VT323", monospace;
-	font-size: 20px;
-	line-height: 1.6;
+	font-family: var(--font-body);
+	font-size: 1.0625rem;
+	line-height: 1.65;
 	margin: 0;
 	padding: 0;
 	background: var(--bg);
@@ -111,7 +125,7 @@ body {
 
 /* VT323 utility class */
 .vt323-regular {
-	font-family: "VT323", monospace;
+	font-family: var(--font-display);
 	font-weight: 400;
 	font-style: normal;
 }
@@ -121,30 +135,29 @@ body {
    ============================================================================ */
 
 h1, h2, h3, h4, h5, h6 {
+	font-family: var(--font-display);
 	margin: 0 0 0.5rem 0;
 	color: var(--text);
 	line-height: 1.2;
 	font-weight: 400;
 }
 
+/* One chromatic echo on the page title only; other headings stay clean */
 h1 {
-	font-size: 3rem;
-	text-shadow: 2px 2px 0 var(--accent), -1px -1px 0 var(--accent2);
+	font-size: 3.25rem;
+	text-shadow: 3px 3px 0 var(--accent);
 }
 
 h2 {
-	font-size: 2.5rem;
-	text-shadow: 2px 2px 0 var(--accent);
+	font-size: 2.25rem;
 }
 
 h3 {
-	font-size: 2rem;
-	color: var(--accent);
+	font-size: 1.75rem;
 }
 
 h4 {
-	font-size: 1.5rem;
-	color: var(--accent2);
+	font-size: 1.375rem;
 }
 
 p {
@@ -152,22 +165,20 @@ p {
 }
 
 strong, b {
-	font-weight: 400;
-	color: var(--accent);
-	text-transform: uppercase;
+	font-weight: 600;
 }
 
 a {
 	color: var(--link);
-	text-decoration: none;
-	border-bottom: 2px dotted var(--link);
-	transition: all 0.2s ease;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	transition: color 0.15s ease;
 }
 
 a:hover {
-	color: var(--focus);
-	background: var(--accent2);
-	border-bottom-style: solid;
+	color: var(--accent);
+	text-decoration-thickness: 2px;
 }
 
 a:focus {
@@ -186,8 +197,8 @@ a:visited {
 .retro-button {
 	display: inline-block;
 	padding: 0.6em 1.2em;
-	font-family: "VT323", monospace;
-	font-size: 1.2rem;
+	font-family: var(--font-display);
+	font-size: 1.3rem;
 	font-weight: 400;
 	text-decoration: none;
 	border: 3px solid;
@@ -259,18 +270,18 @@ a:visited {
 }
 
 .form-group label {
-	font-size: 1.1rem;
-	font-weight: bold;
+	font-size: 1rem;
+	font-weight: 600;
 	color: var(--text);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-	font-family: "VT323", monospace;
-	font-size: 1.2rem;
+	font-family: var(--font-body);
+	font-size: 1rem;
 	padding: 0.75rem;
-	border: 3px solid var(--border);
+	border: 2px solid var(--border);
 	background: var(--bg2);
 	color: var(--text);
 	outline: none;
@@ -307,7 +318,7 @@ a:visited {
 
 .calculator-subtitle,
 .tagline {
-	font-size: 1.3rem;
+	font-size: 1.05rem;
 	color: var(--muted);
 	margin: 0;
 }
@@ -350,17 +361,17 @@ a:visited {
 }
 
 .prose code {
-	padding: 0.2em 0.4em;
+	padding: 0.15em 0.35em;
 	background: var(--bg2);
-	border: 2px solid var(--border);
-	font-family: "VT323", monospace;
+	border: 1px solid var(--border);
+	font-family: var(--font-body);
 	font-size: 0.9em;
 }
 
 .prose pre {
 	padding: 1.5em;
 	background: var(--bg2);
-	border: 3px solid var(--border);
+	border: 2px solid var(--border);
 	box-shadow: 4px 4px 0 var(--shadow);
 	overflow-x: auto;
 	margin-bottom: 1.5em;
@@ -435,7 +446,7 @@ a:visited {
 
 @media (max-width: 720px) {
 	body {
-		font-size: 18px;
+		font-size: 1rem;
 	}
 
 	h1 {
@@ -443,7 +454,7 @@ a:visited {
 	}
 
 	h2 {
-		font-size: 2rem;
+		font-size: 1.875rem;
 	}
 
 	h3 {
@@ -452,42 +463,8 @@ a:visited {
 }
 
 /* ============================================================================
-   TAG CHIPS (Cool Finds Filtering)
+   CLICK-TO-ZOOM (shared by PyScript tool pages)
    ============================================================================ */
-
-.tag-chip {
-	padding: 0.375rem 0.75rem;
-	font-family: "VT323", monospace;
-	font-size: 1rem;
-	background: var(--bg2);
-	border: 1px solid var(--border);
-	border-radius: 4px;
-	color: var(--text);
-	cursor: pointer;
-	transition: all 0.2s ease;
-	box-shadow: 1px 1px 0 var(--shadow);
-	position: relative;
-}
-
-.tag-chip:hover {
-	border-color: var(--accent);
-	background: var(--border);
-	transform: translate(0.5px, 0.5px);
-	box-shadow: 0.5px 0.5px 0 var(--shadow);
-}
-
-.tag-chip:focus {
-	outline: 2px solid var(--focus);
-	outline-offset: 2px;
-}
-
-	.tag-chip.active {
-		background: var(--accent);
-		border-color: var(--accent);
-		color: var(--sticker-text);
-		box-shadow: 0 0 0 var(--shadow);
-		transform: translate(1px, 1px);
-	}
 
 	/* Click-to-zoom chart overlay (shared by PyScript tool pages) */
 	.click-zoom input[type="checkbox"] {
@@ -511,288 +488,3 @@ a:visited {
 		max-height: 95vh !important;
 		object-fit: contain;
 	}
-
-	/* Virtual Dice Styles */
-	.dice-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		min-height: 100px;
-	}
-
-	.die {
-		width: 70px;
-		height: 70px;
-		border: 6px solid var(--border);
-		background: var(--bg);
-		color: var(--text);
-		font-family: 'VT323', monospace;
-		font-size: 2.5rem;
-		font-weight: bold;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		user-select: none;
-		position: relative;
-		box-shadow:
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-		transition: all 0.1s ease;
-		image-rendering: pixelated;
-		border-radius: 8px;
-	}
-
-	.die::before {
-		content: '';
-		position: absolute;
-		top: 6px;
-		left: 6px;
-		right: 6px;
-		bottom: 6px;
-		border: 3px solid rgba(0, 0, 0, 0.3);
-		border-radius: 4px;
-		pointer-events: none;
-	}
-
-	.die::after {
-		content: '';
-		position: absolute;
-		bottom: 3px;
-		right: 3px;
-		width: 8px;
-		height: 8px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 50%;
-		pointer-events: none;
-	}
-
-	.die.black {
-		background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-		color: #ffffff;
-		border-color: #000000;
-	}
-
-	.die.black:hover {
-		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-		transform: translate(-3px, -3px);
-		box-shadow:
-			9px 9px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-	}
-
-	.die.black.selected {
-		background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-		border-color: var(--accent);
-		border-width: 8px;
-		box-shadow:
-			0 0 15px var(--accent),
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
-		transform: scale(1.08);
-	}
-
-	.die:focus-visible {
-		outline: 3px solid var(--focus);
-		outline-offset: 3px;
-	}
-
-	.die.red {
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--danger) 85%, black) 0%,
-			color-mix(in srgb, var(--danger) 60%, black) 100%
-		);
-		color: #ffffff;
-		border-color: color-mix(in srgb, var(--danger) 55%, black);
-	}
-
-	.die.red:hover {
-		background: linear-gradient(
-			135deg,
-			var(--danger) 0%,
-			color-mix(in srgb, var(--danger) 75%, black) 100%
-		);
-		transform: translate(-3px, -3px);
-		box-shadow:
-			9px 9px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.15);
-	}
-
-	.die.red.selected {
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--danger) 95%, white) 0%,
-			var(--danger) 100%
-		);
-		border-color: var(--accent);
-		border-width: 8px;
-		box-shadow:
-			0 0 15px var(--accent),
-			6px 6px 0 rgba(0, 0, 0, 0.4),
-			inset 3px 3px 0 rgba(255, 255, 255, 0.2);
-		transform: scale(1.08);
-	}
-
-	.die.rolling {
-		animation: roll 0.5s ease-in-out;
-	}
-
-	@keyframes roll {
-		0% {
-			transform: rotate(0deg) scale(1);
-		}
-		25% {
-			transform: rotate(90deg) scale(1.1);
-		}
-		50% {
-			transform: rotate(180deg) scale(1);
-		}
-		75% {
-			transform: rotate(270deg) scale(1.1);
-		}
-		100% {
-			transform: rotate(360deg) scale(1);
-		}
-	}
-
-	@keyframes touch-pulse {
-		0% { transform: scale(1); filter: brightness(1); }
-		50% { transform: scale(1.05); filter: brightness(1.2); }
-		100% { transform: scale(1); filter: brightness(1); }
-	}
-
-	.die.touch-active {
-		animation: touch-pulse 0.15s ease-out;
-	}
-
-	.dice-controls {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.selected-word-display {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem;
-		background: var(--bg2);
-		border: 2px solid var(--border);
-		min-height: 3rem;
-	}
-
-	.selected-word-label {
-		font-size: 1.1rem;
-		font-weight: bold;
-		color: var(--accent);
-		white-space: nowrap;
-	}
-
-	.selected-word-value {
-		font-size: 1.3rem;
-		font-family: 'VT323', monospace;
-		font-weight: bold;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		flex: 1;
-		color: var(--text);
-	}
-
-	.selected-word-value:empty::before {
-		content: 'Click dice to select letters';
-		color: var(--border);
-		font-size: 1rem;
-		letter-spacing: normal;
-		text-transform: none;
-	}
-
-	.dice-actions {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-
-	.dice-actions .retro-button {
-		flex: 1;
-		min-width: 120px;
-	}
-
-	@media (max-width: 768px) {
-		.dice-grid {
-			grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-			gap: 0.75rem;
-		}
-
-		.die {
-			width: 64px;
-			height: 64px;
-			font-size: 1.8rem;
-			border-width: 5px;
-			margin: 2px;
-		}
-
-		.die::before {
-			top: 5px;
-			left: 5px;
-			right: 5px;
-			bottom: 5px;
-			border-width: 2px;
-		}
-
-		.die.selected {
-			border-width: 6px;
-		}
-
-		.dice-actions {
-			flex-direction: column;
-		}
-
-		.dice-actions .retro-button {
-			width: 100%;
-		}
-
-		.selected-word-display {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.25rem;
-		}
-
-		.selected-word-value {
-			font-size: 1.1rem;
-		}
-	}
-
-@keyframes reorder-pulse {
-	0%, 100% { 
-		box-shadow: 0 0 15px var(--accent);
-	}
-	50% { 
-		box-shadow: 0 0 25px var(--focus), 0 0 35px var(--accent);
-	}
-}
-
-.dice-container .die.reorder-target {
-	animation: reorder-pulse 0.5s ease-in-out infinite;
-	border-color: var(--focus) !important;
-}
-
-	.reorder-help-text {
-		background: var(--accent);
-		color: var(--sticker-text);
-		padding: 0.5rem;
-		text-align: center;
-		font-weight: bold;
-		margin-bottom: 0.5rem;
-		border-radius: 4px;
-		animation: slideDown 0.2s ease-out;
-		border: 2px solid var(--border);
-		box-shadow: 3px 3px 0 var(--shadow);
-	}
-
-@keyframes slideDown {
-	from { opacity: 0; transform: translateY(-10px); }
-	to { opacity: 1; transform: translateY(0); }
-}
-

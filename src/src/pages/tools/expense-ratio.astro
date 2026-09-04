@@ -81,19 +81,19 @@ import Window from '../../components/Window.astro';
 
 <style>
 	.tool-header { text-align: center; margin-bottom: 2rem; }
-	.tool-header h1 { font-size: 2.5rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+	.tool-header h1 { font-size: 2.5rem; margin: 0 0 0.5rem 0; }
 	.tool-subtitle { font-size: 1.2rem; color: var(--muted); margin: 0; }
 	.tool-content { display: flex; flex-direction: column; gap: 2rem; }
 	.form-group { margin-bottom: 1.5rem; }
 	.form-group label { display: block; font-weight: bold; margin-bottom: 0.5rem; color: var(--text); }
 	.form-group label small { font-weight: normal; color: var(--muted); font-size: 0.9rem; }
-	.form-group input { width: 100%; padding: 0.75rem; font-family: 'VT323', monospace; font-size: 1.1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; }
+	.form-group input { width: 100%; padding: 0.75rem; font-family: var(--font-body); font-size: 1rem; border: 2px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; }
 	.form-group input:focus { outline: none; border-color: var(--accent); }
 	.form-group small { display: block; margin-top: 0.5rem; color: var(--muted); font-size: 0.95rem; }
 	.button-group { display: flex; gap: 1rem; margin-top: 1rem; }
-	.retro-button { flex: 1; padding: 1rem 2rem; font-family: 'VT323', monospace; font-size: 1.2rem; border: 3px solid var(--border); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-weight: bold; }
+	.retro-button { flex: 1; padding: 1rem 2rem; font-family: var(--font-display); font-size: 1.2rem; border: 3px solid var(--border); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-weight: bold; }
 	.chart-container { width: 100%; overflow-x: hidden; border: 3px solid var(--border); background: var(--panel); padding: 1rem; box-shadow: 4px 4px 0 var(--shadow); margin-bottom: 1.5rem; }
-	.chart-container h3 { margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--accent); }
+	.chart-container h3 { margin: 0 0 1rem 0; font-size: 1.2rem; }
 	:global(#chart img) { max-width: 100% !important; height: auto !important; display: block !important; }
 	:global(#plotlyChart) { min-height: 500px; height: 90vh; }
 

@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Window from '../../components/Window.astro';
-import RetroButton from '../../components/RetroButton.astro';
 import Tag from '../../components/Tag.astro';
 import { getCollection } from 'astro:content';
 
@@ -34,7 +33,13 @@ const formatDate = (date: Date) => {
 
 	<div class="posts-grid">
 		{posts.map((post) => (
-			<Window title={post.data.title} badgeText={formatDate(post.data.pubDate)}>
+			<article class="post-card">
+				<h2 class="post-card__title">
+					<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+				</h2>
+				<time class="post-card__date" datetime={post.data.pubDate.toISOString()}>
+					{formatDate(post.data.pubDate)}
+				</time>
 				<p class="post-description">{post.data.description}</p>
 				{post.data.tags && post.data.tags.length > 0 && (
 					<div class="post-tags">
@@ -43,8 +48,8 @@ const formatDate = (date: Date) => {
 						))}
 					</div>
 				)}
-				<RetroButton href={`/blog/${post.id}/`}>Read More</RetroButton>
-			</Window>
+				<a class="post-card__more" href={`/blog/${post.id}/`}>Read More →</a>
+			</article>
 		))}
 	</div>
 
@@ -67,7 +72,7 @@ const formatDate = (date: Date) => {
 	}
 
 	.blog-subtitle {
-		font-size: 1.3rem;
+		font-size: 1.05rem;
 		color: var(--muted);
 		margin: 0;
 	}
@@ -86,8 +91,8 @@ const formatDate = (date: Date) => {
 		text-decoration: none;
 		border: 3px solid var(--accent);
 		border-radius: 4px;
-		font-family: VT323, monospace;
-		font-size: 1.2rem;
+		font-family: var(--font-display);
+		font-size: 1.3rem;
 		box-shadow: 3px 3px 0 var(--shadow);
 		transition: all 0.1s ease;
 	}
@@ -110,20 +115,59 @@ const formatDate = (date: Date) => {
 
 	.posts-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-		gap: 2rem;
+		grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.post-card {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		background: var(--panel);
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		box-shadow: 4px 4px 0 var(--shadow);
+		padding: 1.5rem;
+	}
+
+	.post-card__title {
+		font-size: 1.75rem;
+		line-height: 1.25;
+		margin: 0 0 0.25rem 0;
+	}
+
+	.post-card__title a {
+		color: var(--text);
+		text-decoration: none;
+	}
+
+	.post-card__title a:hover {
+		color: var(--accent);
+		text-decoration: underline;
+	}
+
+	.post-card__date {
+		font-size: 0.9rem;
+		color: var(--muted);
+		margin-bottom: 1rem;
+	}
+
+	.post-card__more {
+		margin-top: auto;
+		font-family: var(--font-display);
+		font-size: 1.2rem;
 	}
 
 	.post-description {
-		margin-bottom: 1.5rem;
-		line-height: 1.5;
+		margin-bottom: 1.25rem;
+		line-height: 1.6;
 	}
 
 	.post-tags {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1.25rem;
 	}
 
 	@media (max-width: 768px) {

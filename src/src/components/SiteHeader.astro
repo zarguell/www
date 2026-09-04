@@ -10,7 +10,6 @@ import { initTheme, toggleTheme } from '../scripts/theme';
 	<div class="site-header__inner">
 		<a href="/" class="site-header__logo">
 			<span class="site-header__title">ARGUELLES</span>
-			<span class="site-header__badge">{'{{ .me }}'}</span>
 		</a>
 
 		<nav class="site-header__nav" aria-label="Main navigation">
@@ -42,6 +41,36 @@ import { initTheme, toggleTheme } from '../scripts/theme';
 
 	// Expose toggle function to window for button onClick
 	(window as any).toggleTheme = toggleTheme;
+
+	// Reflect the active theme in the toggle: icon shows the current theme,
+	// label describes what clicking will do.
+	const THEME_ICONS: Record<string, string> = {
+		'neon-night': '☾',
+		'mall-pastel': '☀',
+	};
+	const THEME_LABELS: Record<string, string> = {
+		'neon-night': 'Switch to light theme',
+		'mall-pastel': 'Switch to dark theme',
+	};
+
+	function updateThemeToggle() {
+		const current = document.documentElement.dataset.theme ?? 'neon-night';
+		const icon = document.querySelector<HTMLElement>('.theme-toggle__icon');
+		const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+		if (icon) icon.textContent = THEME_ICONS[current] ?? '◑';
+		if (button) {
+			button.setAttribute('aria-label', THEME_LABELS[current] ?? 'Toggle theme');
+			button.setAttribute('title', THEME_LABELS[current] ?? 'Toggle theme');
+		}
+	}
+
+	updateThemeToggle();
+
+	// Keep the toggle in sync with any theme change (inline onclick, scripts, etc.)
+	new MutationObserver(updateThemeToggle).observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ['data-theme'],
+	});
 </script>
 
 <style>
@@ -74,19 +103,11 @@ import { initTheme, toggleTheme } from '../scripts/theme';
 	}
 
 	.site-header__title {
+		font-family: var(--font-display);
 		font-size: 2rem;
 		font-weight: 400;
 		color: var(--text);
 		text-shadow: 2px 2px 0 var(--accent);
-	}
-
-	.site-header__badge {
-		background: var(--accent);
-		color: var(--sticker-text);
-		padding: 0.2em 0.5em;
-		font-size: 0.9rem;
-		border: 2px solid var(--border);
-		text-transform: uppercase;
 	}
 
 	.site-header__nav {
@@ -96,8 +117,9 @@ import { initTheme, toggleTheme } from '../scripts/theme';
 	}
 
 	.site-header__link {
+		font-family: var(--font-display);
 		padding: 0.4em 0.8em;
-		font-size: 1.1rem;
+		font-size: 1.25rem;
 		color: var(--text);
 		text-decoration: none;
 		border: 2px solid transparent;
@@ -109,7 +131,7 @@ import { initTheme, toggleTheme } from '../scripts/theme';
 	.site-header__link:focus {
 		background: var(--bg);
 		border-color: var(--accent);
-		color: var(--focus);
+		color: var(--accent);
 	}
 
 	.theme-toggle {
@@ -157,12 +179,7 @@ import { initTheme, toggleTheme } from '../scripts/theme';
 		}
 
 		.site-header__title {
-			font-size: 1.5rem;
-		}
-
-		.site-header__badge {
-			font-size: 0.75rem;
-			padding: 0.15em 0.4em;
+			font-size: 1.625rem;
 		}
 
 		.site-header__nav {

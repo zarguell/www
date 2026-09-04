@@ -51,32 +51,33 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 
 				<div class="tools-grid">
 					{category.tools.map((tool) => (
-						<Window
-							title={tool.title}
-							badgeText={tool.badge}
+						<article
+							class="tool-card"
 							data-tool-title={tool.title.toLowerCase()}
 							data-tool-desc={tool.description.toLowerCase()}
 							data-date={tool.lastModified}
 						>
-							<div class="tool-card">
-								<p class="tool-description">{tool.description}</p>
-								<ul class="tool-features">
-									{tool.features.map((feature) => <li>{feature}</li>)}
-								</ul>
-								<div class="tool-footer">
-									{tool.url ? (
-										<RetroButton href={tool.url} variant="primary" target="_blank" rel="noopener noreferrer">
-											Visit Site
-										</RetroButton>
-									) : (
-										<RetroButton href={`/tools/${tool.slug}`} variant="primary">
-											Open Tool
-										</RetroButton>
-									)}
-									<span class="tool-date">Updated: {new Date(tool.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-								</div>
+							<header class="tool-card-header">
+								<h3 class="tool-card-title">{tool.title}</h3>
+								{tool.badge && <span class="tool-card-badge">{tool.badge}</span>}
+							</header>
+							<p class="tool-description">{tool.description}</p>
+							<ul class="tool-features">
+								{tool.features.map((feature) => <li>{feature}</li>)}
+							</ul>
+							<div class="tool-footer">
+								{tool.url ? (
+									<RetroButton href={tool.url} variant="primary" target="_blank" rel="noopener noreferrer">
+										Visit Site
+									</RetroButton>
+								) : (
+									<RetroButton href={`/tools/${tool.slug}`} variant="primary">
+										Open Tool
+									</RetroButton>
+								)}
+								<span class="tool-date">Updated: {new Date(tool.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
 							</div>
-						</Window>
+						</article>
 					))}
 				</div>
 			</section>
@@ -88,35 +89,36 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		<h2 class="view-title">All Tools (Newest First)</h2>
 		<div class="tools-grid" id="dateViewGrid">
 			{getToolsSortedByDate('newest').map((tool) => (
-				<Window
-					title={tool.title}
-					badgeText={tool.badge}
+				<article
+					class="tool-card"
 					data-tool-title={tool.title.toLowerCase()}
 					data-tool-desc={tool.description.toLowerCase()}
 					data-date={tool.lastModified}
 				>
-					<div class="tool-card">
-						<p class="tool-description">{tool.description}</p>
-						<ul class="tool-features">
-							{tool.features.map((feature) => <li>{feature}</li>)}
-						</ul>
-						<div class="tool-footer">
-							{tool.url ? (
-								<RetroButton href={tool.url} variant="primary" target="_blank" rel="noopener noreferrer">
-									Visit Site
-								</RetroButton>
-							) : (
-								<RetroButton href={`/tools/${tool.slug}`} variant="primary">
-									Open Tool
-								</RetroButton>
-							)}
-							<span class="tool-date">
-								<span class="tool-category-badge">{tool.category}</span>
-								Updated: {new Date(tool.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-							</span>
-						</div>
+					<header class="tool-card-header">
+						<h3 class="tool-card-title">{tool.title}</h3>
+						{tool.badge && <span class="tool-card-badge">{tool.badge}</span>}
+					</header>
+					<p class="tool-description">{tool.description}</p>
+					<ul class="tool-features">
+						{tool.features.map((feature) => <li>{feature}</li>)}
+					</ul>
+					<div class="tool-footer">
+						{tool.url ? (
+							<RetroButton href={tool.url} variant="primary" target="_blank" rel="noopener noreferrer">
+								Visit Site
+							</RetroButton>
+						) : (
+							<RetroButton href={`/tools/${tool.slug}`} variant="primary">
+								Open Tool
+							</RetroButton>
+						)}
+						<span class="tool-date">
+							<span class="tool-category-badge">{tool.category}</span>
+							Updated: {new Date(tool.lastModified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+						</span>
 					</div>
-				</Window>
+				</article>
 			))}
 		</div>
 	</div>
@@ -174,8 +176,8 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		background: var(--bg2);
 		border: 3px solid var(--border);
 		color: var(--text);
-		font-family: VT323, monospace;
-		font-size: 1.1rem;
+		font-family: var(--font-display);
+		font-size: 1.2rem;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		box-shadow: 2px 2px 0 var(--shadow);
@@ -202,10 +204,10 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		width: 100%;
 		padding: 0.6em 1em;
 		background: var(--bg);
-		border: 3px solid var(--border);
+		border: 2px solid var(--border);
 		color: var(--text);
-		font-family: VT323, monospace;
-		font-size: 1.1rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 		box-shadow: 2px 2px 0 var(--shadow);
 		transition: all 0.2s ease;
 	}
@@ -234,7 +236,7 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 	.view-title {
 		font-size: 2rem;
 		margin: 0 0 1.5rem 0;
-		color: var(--accent);
+		color: var(--text);
 		border-bottom: 3px solid var(--border);
 		padding-bottom: 0.5rem;
 	}
@@ -255,15 +257,15 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		border: 2px solid var(--border);
 		color: var(--text);
 		text-decoration: none;
-		font-family: 'VT323', monospace;
-		font-size: 1.1rem;
+		font-family: var(--font-display);
+		font-size: 1.2rem;
 		transition: all 0.2s ease;
 		box-shadow: 2px 2px 0 var(--shadow);
 	}
 
 	.category-link:hover {
 		background: var(--accent);
-		color: var(--bg);
+		color: var(--sticker-text);
 		transform: translate(1px, 1px);
 		box-shadow: 1px 1px 0 var(--shadow);
 	}
@@ -276,13 +278,13 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 	.category-title {
 		font-size: 2.5rem;
 		margin: 0 0 0.5rem 0;
-		color: var(--accent);
+		color: var(--text);
 		border-bottom: 3px solid var(--border);
 		padding-bottom: 0.5rem;
 	}
 
 	.category-description {
-		font-size: 1.2rem;
+		font-size: 1.05rem;
 		color: var(--muted);
 		margin: 0 0 1.5rem 0;
 	}
@@ -298,11 +300,41 @@ import { toolsData, getAllTools, getToolsSortedByDate } from '../../data/tools';
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+		background: var(--panel);
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		box-shadow: 4px 4px 0 var(--shadow);
+		padding: 1.5rem;
+	}
+
+	.tool-card-header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+
+	.tool-card-title {
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		line-height: 1.2;
+		margin: 0;
+	}
+
+	.tool-card-badge {
+		font-family: var(--font-display);
+		background: var(--sticker-bg);
+		color: var(--sticker-text);
+		padding: 0.2em 0.6em;
+		font-size: 0.95rem;
+		border: 2px solid var(--border);
+		text-transform: uppercase;
+		white-space: nowrap;
 	}
 
 	.tool-description {
 		margin: 0;
-		font-size: 1.1rem;
+		font-size: 1rem;
 		line-height: 1.5;
 		color: var(--text);
 	}

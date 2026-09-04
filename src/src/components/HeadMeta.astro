@@ -11,7 +11,16 @@ interface Props {
 	ogImageAlt?: string;
 }
 
-const { title, description, canonicalURL, ogImage, ogImageAlt = 'Preview image' } = Astro.props;
+const {
+	title,
+	description,
+	canonicalURL,
+	// Site-wide share card; pages can override with their own image
+	ogImage = '/og-default.png',
+	ogImageAlt = 'ARGUELLES.ME — tiny tools, homelab notes, and the occasional 404',
+} = Astro.props;
+
+const ogImageURL = new URL(ogImage, canonicalURL);
 ---
 
 <!-- Open Graph meta tags -->
@@ -19,12 +28,12 @@ const { title, description, canonicalURL, ogImage, ogImageAlt = 'Preview image' 
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />
 <meta property="og:url" content={canonicalURL} />
-{ogImage && (
-	<>
-		<meta property="og:image" content={ogImage} />
-		<meta property="og:image:alt" content={ogImageAlt} />
-	</>
-)}
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={ogImageURL} />
 
 <!-- RSS Feed -->
 <link rel="alternate" type="application/rss+xml" title={title} href="/rss.xml" />

@@ -83,12 +83,12 @@ import Window from '../../components/Window.astro';
 		</form>
 
 		<div id="chart-container" class="chart-container">
-			<h3 style="text-align: center; color: var(--accent); margin-bottom: 1rem;">Static Image (Click to Zoom)</h3>
+			<h3 style="text-align: center;margin-bottom: 1rem;>Static Image (Click to Zoom)</h3>
 			<div id="chart" class="click-zoom"></div>
 		</div>
 
 		<div id="plotly-container" class="chart-container">
-			<h3 style="text-align: center; color: var(--accent); margin-bottom: 1rem;">Interactive Chart (Hover, Zoom, Export)</h3>
+			<h3 style="text-align: center;margin-bottom: 1rem;>Interactive Chart (Hover, Zoom, Export)</h3>
 			<div id="plotlyChart"></div>
 		</div>
 
@@ -111,7 +111,6 @@ import Window from '../../components/Window.astro';
 	.tool-header h1 {
 		font-size: 2.5rem;
 		margin: 0 0 0.5rem 0;
-		color: var(--accent);
 	}
 
 	.tool-subtitle {
@@ -146,8 +145,8 @@ import Window from '../../components/Window.astro';
 	.form-group input {
 		width: 100%;
 		padding: 0.75rem;
-		font-family: 'VT323', monospace;
-		font-size: 1.1rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 		border: 2px solid var(--border);
 		background: var(--bg);
 		color: var(--text);
@@ -175,7 +174,7 @@ import Window from '../../components/Window.astro';
 	.retro-button {
 		flex: 1;
 		padding: 1rem 2rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		border: 3px solid var(--border);
 		cursor: pointer;

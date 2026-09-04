@@ -344,7 +344,6 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 	.tool-hero h1 {
 		font-size: 3rem;
 		margin: 0 0 0.5rem 0;
-		color: var(--accent);
 	}
 
 	.tool-subtitle {
@@ -370,7 +369,7 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 		border-radius: 8px;
 		border: 2px solid var(--border);
 		margin-bottom: 1rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.1rem;
 		text-align: center;
 		display: none;
@@ -397,8 +396,8 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 
 	.cocktail-name-input {
 		flex: 1;
-		font-family: 'VT323', monospace;
-		font-size: 1.3rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 		padding: 0.75rem;
 		border: 2px solid var(--border);
 		background: var(--panel);
@@ -473,8 +472,8 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 	input:not(.icon-button),
 	select,
 	textarea {
-		font-family: 'VT323', monospace;
-		font-size: 1.2rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 		padding: 0.75rem;
 		border: 3px solid var(--border);
 		background: var(--bg2);
@@ -619,7 +618,7 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 	/* Ensure table inputs and selects get retro styling */
 	.recipe-table input,
 	.recipe-table select {
-		font-family: 'VT323', monospace;
+		font-family: var(--font-body);
 		font-size: 1rem;
 		padding: 0.5rem;
 		border: 3px solid var(--border);
@@ -648,7 +647,7 @@ const ogImage = new URL('/assets/cocktail-og.jpg', Astro.site);
 		margin: 0 2px;
 		box-shadow: 2px 2px 0 var(--shadow);
 		transition: all 0.1s ease;
-		font-family: "VT323", monospace;
+		font-family: var(--font-display);
 	}
 
 	.icon-button:hover:not(:disabled) {

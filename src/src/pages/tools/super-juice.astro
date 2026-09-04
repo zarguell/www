@@ -72,7 +72,6 @@ import RetroButton from '../../components/RetroButton.astro';
 	.tool-hero h1 {
 		font-size: 3rem;
 		margin: 0 0 0.5rem 0;
-		color: var(--accent);
 	}
 
 	.tool-subtitle {
@@ -104,8 +103,8 @@ import RetroButton from '../../components/RetroButton.astro';
 
 	input,
 	select {
-		font-family: 'VT323', monospace;
-		font-size: 1.1rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 		padding: 0.5rem;
 		border: 2px solid var(--border);
 		background: var(--panel);
@@ -133,7 +132,7 @@ import RetroButton from '../../components/RetroButton.astro';
 	}
 
 	.ingredients-table {
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		background: var(--panel);
 		padding: 1rem;
 		border: 2px solid var(--border);

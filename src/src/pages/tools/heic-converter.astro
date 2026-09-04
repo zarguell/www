@@ -285,7 +285,7 @@ import Window from '../../components/Window.astro';
 		background: var(--panel);
 		color: var(--text);
 		border: 2px solid var(--border);
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.1rem;
 		cursor: pointer;
 		transition: all 0.1s ease;
@@ -301,7 +301,7 @@ import Window from '../../components/Window.astro';
 	}
 
 	.file-name {
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 		color: var(--muted);
 		font-style: italic;
@@ -312,8 +312,8 @@ import Window from '../../components/Window.astro';
 		border: 2px solid var(--border);
 		background: var(--bg);
 		color: var(--text);
-		font-family: 'VT323', monospace;
-		font-size: 1.1rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 	}
 
 	.error-message {
@@ -322,7 +322,7 @@ import Window from '../../components/Window.astro';
 		background: var(--panel);
 		border: 2px solid var(--border);
 		color: var(--text);
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 		min-height: 1.5rem;
 	}
@@ -334,7 +334,7 @@ import Window from '../../components/Window.astro';
 		padding: 0.75rem;
 		background: var(--panel);
 		border: 1px solid var(--border);
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 	}
 

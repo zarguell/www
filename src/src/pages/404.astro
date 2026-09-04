@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Window from '../components/Window.astro';
+import RetroButton from '../components/RetroButton.astro';
+---
+
+<BaseLayout title="404 - Page Not Found" description="The page you are looking for does not exist.">
+	<div class="error-hero">
+		<h1 class="error-code">404</h1>
+		<p class="error-tagline">PAGE NOT FOUND</p>
+	</div>
+
+	<Window title="System Message" badgeText="ERROR">
+		<div class="system-msg">
+			<p>
+				The page you requested has moved, been deleted, or never existed
+				in the first place.
+			</p>
+			<p class="chat-gag">
+				<span class="who">zachisawesome</span> has signed off. <span class="time">(3:42 PM)</span>
+			</p>
+		</div>
+	</Window>
+
+	<div class="error-actions">
+		<RetroButton href="/" variant="primary">&larr; Back Home</RetroButton>
+		<RetroButton href="/tools/" variant="secondary">Play With Tools</RetroButton>
+		<RetroButton href="/blog/" variant="secondary">Read the Blog</RetroButton>
+	</div>
+</BaseLayout>
+
+<style>
+	.error-hero {
+		text-align: center;
+		padding: 3rem 0 2rem;
+	}
+
+	.error-code {
+		font-size: 7rem;
+		line-height: 1;
+		margin: 0;
+	}
+
+	.error-tagline {
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		letter-spacing: 0.2em;
+		color: var(--muted);
+		margin: 0.5rem 0 0;
+	}
+
+	.system-msg {
+		max-width: 55ch;
+		margin: 0 auto;
+		text-align: center;
+	}
+
+	.system-msg p {
+		margin-bottom: 0.75em;
+	}
+
+	.chat-gag {
+		font-style: italic;
+		color: var(--muted);
+	}
+
+	.chat-gag .who {
+		color: var(--link);
+		font-weight: 600;
+		font-style: normal;
+	}
+
+	.chat-gag .time {
+		font-size: 0.85em;
+	}
+
+	.error-actions {
+		display: flex;
+		justify-content: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin: 2rem 0 3rem;
+	}
+
+	@media (max-width: 720px) {
+		.error-code {
+			font-size: 4.5rem;
+		}
+
+		.error-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+	}
+</style>

@@ -397,11 +397,11 @@ closeBtn?.addEventListener('click', () => {
 	}
 });
 
-// Restore window state from localStorage
+// Restore window state from localStorage. Closed by default — it only
+// reopens if the visitor explicitly opened (and didn't close) it before.
 const chatOpenState = localStorage.getItem('aimChatOpen');
-if (chatOpenState === 'false') {
-	aimChatWindow?.style.setProperty('display', 'none');
-} else {
+if (chatOpenState === 'true') {
+	aimChatWindow?.style.setProperty('display', 'flex');
 	attachDragListeners();
 }
 

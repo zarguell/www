@@ -164,7 +164,6 @@ import Window from '../../components/Window.astro';
 	.sanitext-hero h1 {
 		font-size: 3rem;
 		margin: 0 0 0.5rem 0;
-		color: var(--accent);
 	}
 
 	.tagline {
@@ -196,7 +195,7 @@ import Window from '../../components/Window.astro';
 	}
 
 	.char-count {
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.1rem;
 		color: var(--muted);
 	}
@@ -205,7 +204,7 @@ import Window from '../../components/Window.astro';
 		width: 100%;
 		min-height: 400px;
 		padding: 1rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		line-height: 1.6;
 		background: var(--bg);
@@ -311,7 +310,7 @@ import Window from '../../components/Window.astro';
 		padding: 0.75rem 1rem;
 		background: var(--bg2);
 		border-bottom: 2px solid var(--border);
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.1rem;
 		font-weight: bold;
 		color: var(--text);
@@ -329,7 +328,7 @@ import Window from '../../components/Window.astro';
 		padding: 0.75rem 1rem;
 		border-bottom: 1px solid var(--border);
 		align-items: center;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 	}
 
@@ -440,7 +439,7 @@ import Window from '../../components/Window.astro';
 
 	.form-label {
 		display: block;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		font-weight: bold;
 		color: var(--text);
@@ -450,7 +449,7 @@ import Window from '../../components/Window.astro';
 	.form-control {
 		width: 100%;
 		padding: 0.6em 0.8em;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.1rem;
 		background: var(--bg);
 		border: 2px solid var(--border);
@@ -467,7 +466,7 @@ import Window from '../../components/Window.astro';
 
 	.form-help {
 		display: block;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1rem;
 		color: var(--muted);
 		margin-top: 0.5rem;
@@ -482,7 +481,7 @@ import Window from '../../components/Window.astro';
 		align-items: center;
 		gap: 0.75rem;
 		cursor: pointer;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		color: var(--text);
 	}
@@ -510,7 +509,7 @@ import Window from '../../components/Window.astro';
 		border: 3px solid var(--border);
 		border-radius: 4px;
 		box-shadow: 6px 6px 0 var(--shadow);
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		color: var(--text);
 		display: flex;
@@ -552,7 +551,7 @@ import Window from '../../components/Window.astro';
 		text-align: center;
 		padding: 2rem;
 		margin-top: 2rem;
-		font-family: 'VT323', monospace;
+		font-family: var(--font-display);
 		font-size: 1.2rem;
 		color: var(--muted);
 		border-top: 2px solid var(--border);
