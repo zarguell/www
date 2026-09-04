@@ -50,3 +50,16 @@ This document tracks mistakes encountered during development and their solutions
 - Tests should validate structure and quality, not enforce arbitrary schema
 - Avoid hardcoding expected values that may change over time
 - Keep tests flexible to accommodate organic data growth
+
+## [2026-09-04] Production Build Failure - Unterminated Inline Style
+
+**Issue**: A scripted sweep removed `color: var(--accent)` from inline heading styles across tool pages, but dropped the closing quote of the `style` attribute on four `<h3>` tags. The unterminated attribute swallowed past the tag boundary, so Astro reported "Expected corresponding JSX closing tag for 'h3'" and the Cloudflare build failed — even though the local build had reported success.
+
+**Solution**: Restored the closing quotes (`style="text-align: center; margin-bottom: 1rem;">`), grep-verified no other `;>` instances existed, rebuilt from clean output (`rm -rf dist node_modules/.vite`), and confirmed both affected pages emitted `dist/<route>/index.html` before pushing.
+
+**Agent**: ZCode
+
+**Key Lessons**:
+- Diff-review the output of bulk regex/script edits before building — the broken markup was invisible in the build log
+- A green exit code is not proof the site built: wipe `dist` and `node_modules/.vite`, rebuild, and confirm `dist/<route>/index.html` exists for every touched page
+- Permanent guideline lives in AGENTS.md → "Build Verification (before pushing)"

@@ -89,6 +89,24 @@ npm run test           # Watch mode
 npm run test:run       # Single run
 ```
 
+## Build Verification (before pushing)
+
+A green build exit code is not proof the site built — a broken template
+has shipped to prod this way. Before pushing changes:
+
+1. Rebuild from clean output after template, style, or script changes:
+   ```bash
+   cd src && rm -rf dist node_modules/.vite && npm run build
+   ```
+2. Confirm the pages you touched actually emitted HTML — check the file,
+   not just the log line:
+   ```bash
+   ls dist/<route>/index.html
+   ```
+3. After any scripted or regex bulk edit across files, read the diff of
+   a few affected files before building. Verify quotes, tags, and
+   closing brackets survived the transformation.
+
 ## Coding Conventions
 
 ### Dependencies
@@ -152,6 +170,7 @@ draft: false
 - Keep dependencies minimal
 - Respect `prefers-reduced-motion` in CSS
 - Test both themes (neon-night, mall-pastel)
+- Verify built output before pushing (see "Build Verification") — a clean exit code alone is not proof
 - Keep blog collection named "blog" (not "posts")
 - Use the typography split: VT323 for display (headings, buttons, badges, chrome), IBM Plex Mono for body text
 - Make all interactive elements keyboard accessible
