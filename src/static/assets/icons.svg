@@ -65,6 +65,10 @@
   <symbol id="tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M4 4h7l9 9-7 7-9-9V4Z"/><circle cx="8.5" cy="8.5" r="1.2"/>
   </symbol>
+  <symbol id="file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"/>
+    <path d="M14 3v5h5M8 13h8M8 17h6"/>
+  </symbol>
   <symbol id="play" viewBox="0 0 24 24" fill="currentColor">
     <path d="M8 5v14l11-7L8 5Z"/>
   </symbol>

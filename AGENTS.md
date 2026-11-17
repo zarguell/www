@@ -48,6 +48,14 @@ npm run dev       # builds and serves on http://127.0.0.1:4321
 - **Every local tool needs all three pieces:** a template, a JS entrypoint (or the shared
   PyScript entrypoint), and a registry entry in `content/tools.json`.
 
+## Agent files
+
+`engine/pages.py::build_llms` generates `/llms.txt` plus Markdown versions at
+`/index.md`, `/about/index.md`, `/links/index.md`, `/blog/index.md`, and
+`/blog/<slug>/index.md`. Keep those links crawlable and absolute. Do not add
+interactive tools to the agent index. HTML pages emit the matching
+`rel="alternate" type="text/markdown"` and `rel="describedby"` links.
+
 ## Custom Markdown components
 
 The build supports fenced `mermaid` and `timeline` blocks. Read

@@ -185,3 +185,58 @@ def test_timeline_rejects_malformed_lines() -> None:
 
     with pytest.raises(ValueError, match="timeline line 1"):
         make_markdown().render("```timeline\nnot a valid event\n```")
+
+
+def test_llms_txt_follows_the_standard(site: Path) -> None:
+    text = (site / "llms.txt").read_text(encoding="utf-8")
+    assert text.startswith("# Zach Arguelles\n")
+    assert "\n> " in text
+    for section in ("## Pages", "## Blog posts", "## Optional"):
+        assert section in text
+    assert "/tools/" not in text
+    assert "](https://www.arguelles.me/index.md)" in text
+    assert "](https://www.arguelles.me/about/index.md)" in text
+    assert "](https://www.arguelles.me/links/index.md)" in text
+    assert "](https://www.arguelles.me/blog/index.md)" in text
+    assert "](https://www.arguelles.me/blog/artex-ai-pentesting/index.md)" in text
+
+
+def test_raw_markdown_pages_exist(site: Path) -> None:
+    for raw in (
+        "index.md",
+        "about/index.md",
+        "links/index.md",
+        "blog/index.md",
+        "blog/artex-ai-pentesting/index.md",
+        "blog/influxdb-speedtest/index.md",
+        "blog/cloudflare-ztna/index.md",
+    ):
+        assert (site / raw).is_file(), raw
+
+
+def test_raw_post_has_front_matter_and_absolute_links(site: Path) -> None:
+    text = (site / "blog/artex-ai-pentesting/index.md").read_text(encoding="utf-8")
+    assert text.startswith("---\n")
+    assert "url: https://www.arguelles.me/blog/artex-ai-pentesting/" in text
+    assert "markdown: https://www.arguelles.me/blog/artex-ai-pentesting/index.md" in text
+    assert "# ARTEX: an AI pentest framework" in text
+    assert "](/assets/" not in text
+
+
+def test_blog_post_exposes_agent_markdown_link(site: Path) -> None:
+    html = (site / "blog/artex-ai-pentesting/index.html").read_text(encoding="utf-8")
+    assert "For agents" in html
+    assert 'href="/blog/artex-ai-pentesting/index.md"' in html
+    assert 'rel="alternate" type="text/markdown"' in html
+    assert 'rel="describedby" href="/llms.txt"' in html
+
+
+def test_llms_links_resolve_to_emitted_files(site: Path) -> None:
+    import re
+    from urllib.parse import urlparse
+
+    text = (site / "llms.txt").read_text(encoding="utf-8")
+    for url in re.findall(r"\]\((https://www\.arguelles\.me/[^)]*)\)", text):
+        path = urlparse(url).path.lstrip("/")
+        candidate = site / path
+        assert candidate.exists() or (site / path / "index.html").exists(), url

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
 from typing import Any
 
@@ -50,6 +51,14 @@ class SiteBuilder:
             post.word_count = word_count(post.body)
             post.reading_time = reading_minutes(post.body)
 
+    @staticmethod
+    def raw_markdown_path(path: str) -> str | None:
+        if path == "/":
+            return "/index.md"
+        if path in {"/about/", "/links/", "/blog/"} or path.startswith("/blog/"):
+            return f"{path}index.md"
+        return None
+
     def context(
         self,
         path: str,
@@ -70,6 +79,7 @@ class SiteBuilder:
                 "title": title,
                 "description": description,
                 "canonical": canonical,
+                "markdown": self.raw_markdown_path(path),
                 "og_image": image,
                 "og_type": og_type,
             },
@@ -90,6 +100,46 @@ class SiteBuilder:
 
     def render(self, template: str, context: dict[str, Any]) -> str:
         return self.env.get_template(template).render(context)
+
+    def write_raw(self, route: str, content: str) -> None:
+        target = self.paths.dist / route.lstrip("/")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+
+    def absolute_markdown_links(self, markdown: str) -> str:
+        return re.sub(
+            r"\]\((/(?!/)[^)\s]+)\)",
+            lambda match: f"]({self.site['url'].rstrip('/')}{match.group(1)})",
+            markdown,
+        )
+
+    @staticmethod
+    def demote_h1(markdown: str) -> str:
+        lines: list[str] = []
+        in_fence = False
+        for line in markdown.splitlines():
+            if line.lstrip().startswith("```"):
+                in_fence = not in_fence
+            elif not in_fence and line.startswith("# "):
+                line = "## " + line[2:]
+            lines.append(line)
+        return "\n".join(lines)
+
+    def raw_page(self, path: str, title: str, description: str, body: str) -> str:
+        origin = self.site["url"].rstrip("/")
+        canonical = f"{origin}{path}"
+        markdown_path = "/index.md" if path == "/" else f"{path}index.md"
+        markdown_url = f"{origin}{markdown_path}"
+        return (
+            "---\n"
+            f"title: {json.dumps(title, ensure_ascii=False)}\n"
+            f"description: {json.dumps(description, ensure_ascii=False)}\n"
+            f"url: {canonical}\n"
+            f"markdown: {markdown_url}\n"
+            "---\n\n"
+            f"# {title}\n\n"
+            f"{self.absolute_markdown_links(body).strip()}\n"
+        )
 
     def build_home(self) -> None:
         page = load_page(self.paths, "home")
@@ -229,6 +279,124 @@ class SiteBuilder:
         target.write_text(html, encoding="utf-8")
         self.routes.append("/404.html")
 
+    def build_llms(self) -> None:
+        base = self.site["url"].rstrip("/")
+        home = load_page(self.paths, "home")
+        about = load_page(self.paths, "about")
+
+        home_body = (
+            home.body
+            + "\n\n## Explore\n\n"
+            + f"- [Blog]({base}/blog/index.md)\n"
+            + f"- [About]({base}/about/index.md)\n"
+            + f"- [Links]({base}/links/index.md)\n\n"
+            + "Interactive tools and other browser-only pages are intentionally "
+            + "excluded from the agent-readable pages.\n"
+        )
+        colophon = "\n\n## Colophon\n\n" + "\n".join(
+            f"- **{row['label']}:** {row['value']}" for row in self.colophon
+        )
+        self.write_raw(
+            "/index.md",
+            self.raw_page("/", home.meta["title"], self.site["description"], home_body),
+        )
+        self.write_raw(
+            "/about/index.md",
+            self.raw_page("/about/", about.meta["title"], self.site["description"], about.body + colophon),
+        )
+
+        links_lines = [
+            "---",
+            f"title: {json.dumps('Links', ensure_ascii=False)}",
+            f"description: {json.dumps('Curated corners of the internet: socials, projects, and cool finds.', ensure_ascii=False)}",
+            f"url: {base}/links/",
+            f"markdown: {base}/links/index.md",
+            "---",
+            "",
+            "# Links",
+            "",
+        ]
+        for category in self.links["categories"]:
+            links_lines.append(f"## {category['name']}")
+            links_lines.append("")
+            for item in category["links"]:
+                links_lines.append(f"- [{item['title']}]({item['url']}) — {item['description']}")
+            links_lines.append("")
+        links_lines.append("## Cool finds")
+        links_lines.append("")
+        for item in self.links["coolFinds"]:
+            tags = ", ".join(item["tags"])
+            links_lines.append(
+                f"- [{item['title']}]({item['url']}) — {item['description']} ({tags}; {item['date']})"
+            )
+        self.write_raw("/links/index.md", "\n".join(links_lines).rstrip() + "\n")
+
+        blog_lines = [
+            "---",
+            f"title: {json.dumps('Blog', ensure_ascii=False)}",
+            f"description: {json.dumps('Notes on homelab, automation, and the systems I keep breaking.', ensure_ascii=False)}",
+            f"url: {base}/blog/",
+            f"markdown: {base}/blog/index.md",
+            "---",
+            "",
+            "# Blog",
+            "",
+        ]
+        for post in self.posts:
+            blog_lines.append(
+                f"- [{post.title}]({base}/blog/{post.slug}/index.md): {post.pub_date.isoformat()} — {post.description}"
+            )
+        self.write_raw("/blog/index.md", "\n".join(blog_lines).rstrip() + "\n")
+
+        for post in self.posts:
+            body = self.demote_h1(post.body)
+            front = (
+                "---\n"
+                f"title: {json.dumps(post.title, ensure_ascii=False)}\n"
+                f"description: {json.dumps(post.description, ensure_ascii=False)}\n"
+                f"url: {base}/blog/{post.slug}/\n"
+                f"markdown: {base}/blog/{post.slug}/index.md\n"
+                f"pubDate: {post.pub_date.isoformat()}\n"
+                f"tags: {json.dumps(post.tags, ensure_ascii=False)}\n"
+                + (f"image: {json.dumps(base + post.image, ensure_ascii=False)}\n" if post.image else "")
+                + "---\n\n"
+                f"# {post.title}\n\n"
+            )
+            self.write_raw(f"/blog/{post.slug}/index.md", front + self.absolute_markdown_links(body).strip() + "\n")
+
+        index = [
+            f"# {self.site['name']}",
+            "",
+            f"> {self.site['description']}",
+            "",
+            "This is a static personal site. The links below point at plain Markdown "
+            "versions of the pages. Interactive tools and other browser-only pages "
+            "are intentionally excluded because their value is interactive rather "
+            "than textual. Each Markdown file carries the canonical HTML URL in its "
+            "front matter.",
+            "",
+            "## Pages",
+            "",
+            f"- [Home]({base}/index.md): {self.site['description']}",
+            f"- [About]({base}/about/index.md): Bio and how this site is built.",
+            f"- [Links]({base}/links/index.md): Social links, projects, and cool finds.",
+            f"- [Blog]({base}/blog/index.md): Notes on homelab, automation, and security.",
+            "",
+            "## Blog posts",
+            "",
+        ]
+        for post in self.posts:
+            index.append(f"- [{post.title}]({base}/blog/{post.slug}/index.md): {post.pub_date.isoformat()} — {post.description}")
+        index += [
+            "",
+            "## Optional",
+            "",
+            f"- [RSS]({base}/rss.xml): Full-text feed in RSS 2.0",
+            f"- [HTML site]({base}/): Human-readable version of the same content",
+            "",
+        ]
+        self.write_raw("/llms.txt", "\n".join(index).rstrip() + "\n")
+
     def build_rss(self) -> None:
         ctx = {
             "site": self.site,
@@ -256,5 +424,6 @@ class SiteBuilder:
         self.build_tool_pages()
         self.build_styleguide()
         self.build_404()
+        self.build_llms()
         self.build_rss()
         self.build_sitemap()

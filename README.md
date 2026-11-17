@@ -84,6 +84,18 @@ still loads the Pyodide runtime and its built-in packages from the upstream CDN 
 runtime. The CSP in `static/_headers` restricts where it can load from; PyScript needs
 `script-src 'unsafe-eval'` and `'wasm-unsafe-eval'`.
 
+## Agent access
+
+`/llms.txt` follows the [llms.txt standard](https://llmstxt.org/). It links to
+Markdown versions of the home, about, links, blog index, and every blog post.
+Each Markdown file carries its canonical HTML URL and its own Markdown URL in
+front matter. HTML pages advertise their Markdown alternate with
+`rel="alternate" type="text/markdown"` and the site index with
+`rel="describedby"`.
+
+Blog posts also show a **For agents** link to their Markdown version. Interactive
+tools and other browser-only pages are intentionally excluded.
+
 ## Deployment
 
 This is a Cloudflare **Workers** static-assets project, not Cloudflare Pages.

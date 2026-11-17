@@ -22,6 +22,8 @@
   <meta name="twitter:description" content="{{ page.description }}">
   <meta name="twitter:image" content="{{ page.og_image }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.name }}" href="/rss.xml">
+  {% if page.markdown %}<link rel="alternate" type="text/markdown" href="{{ page.markdown }}">{% endif %}
+  <link rel="describedby" href="/llms.txt">
   <link rel="stylesheet" href="{{ asset('css/main.css') }}">
   <script src="{{ asset('js/theme-init.js') }}"></script>
   {% block head %}{% endblock %}

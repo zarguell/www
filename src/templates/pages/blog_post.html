@@ -11,8 +11,11 @@
       <span>{{ post.reading_time }} min read</span>
       {% if post.updated_date %}<span>Updated {{ post.updated_date|date }}</span>{% endif %}
     </div>
-    <div class="tag-row tag-row--post">
-      {% for item in post.tags %}{{ tag(item, '/blog/?tag=' ~ item|urlencode) }}{% endfor %}
+    <div class="post-header__foot">
+      <div class="tag-row tag-row--post">
+        {% for item in post.tags %}{{ tag(item, '/blog/?tag=' ~ item|urlencode) }}{% endfor %}
+      </div>
+      <a class="agent-link" href="{{ page.markdown }}">{{ icon('file-text') }} For agents</a>
     </div>
   </header>
 

@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
 Sitemap: https://www.arguelles.me/sitemap.xml
+
+# LLM index: https://www.arguelles.me/llms.txt

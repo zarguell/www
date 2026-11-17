@@ -387,8 +387,42 @@
   font-size: 11px;
 }
 
-.tag-row--post {
+.post-header__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
   margin-top: 14px;
+}
+
+.tag-row--post {
+  margin-top: 0;
+}
+
+.agent-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.agent-link:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.agent-link .icon {
+  width: 13px;
+  height: 13px;
 }
 
 .post-meta span + span::before {
