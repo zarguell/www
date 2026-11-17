@@ -149,3 +149,42 @@
 .prose--tight p:last-child {
   margin-bottom: 0;
 }
+
+/* Minimal Pygments palette: grayscale with semantic accents. */
+.code-block .c,
+.code-block .c1,
+.code-block .ch,
+.code-block .cm {
+  color: var(--faint);
+  font-style: italic;
+}
+.code-block .k,
+.code-block .kd,
+.code-block .kn,
+.code-block .kc {
+  color: var(--text);
+}
+.code-block .s,
+.code-block .s1,
+.code-block .s2,
+.code-block .sb {
+  color: var(--accent);
+}
+.code-block .nb,
+.code-block .nf,
+.code-block .nc {
+  color: var(--warning);
+}
+.code-block .mi,
+.code-block .mf,
+.code-block .m {
+  color: var(--text);
+}
+.code-block .o,
+.code-block .p {
+  color: var(--muted);
+}
+.code-block .nv,
+.code-block .n {
+  color: var(--text);
+}

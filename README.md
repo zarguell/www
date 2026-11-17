@@ -76,9 +76,11 @@ src/
   copied into `dist/assets/vendor/` at build time, so Renovate can bump them and there
   is no runtime CDN script dependency for those libraries.
 
-PyScript itself is vendored from `@pyscript/core`. PyScript loads the Pyodide runtime and
-Python packages from their upstream CDN at runtime; that is the one remaining external
-runtime dependency. The CSP in `static/_headers` restricts where it can load from.
+PyScript itself is vendored from `@pyscript/core`, and the pure-Python plotly wheel is
+downloaded from the pinned `requirements-vendor.txt` and served same-origin. PyScript
+still loads the Pyodide runtime and its built-in packages from the upstream CDN at
+runtime. The CSP in `static/_headers` restricts where it can load from; PyScript needs
+`script-src 'unsafe-eval'` and `'wasm-unsafe-eval'`.
 
 ## Deployment
 
@@ -112,4 +114,5 @@ or a broken internal link.
 
 `renovate.json` enables the recommended managers for npm, pip, and GitHub Actions.
 `src/package.json` pins exact versions for esbuild, Vitest, TypeScript, and every vendored
-browser library. `src/requirements.txt` pins the Python engine dependencies.
+browser library. `src/requirements.txt` pins the Python engine dependencies. `src/requirements-vendor.txt`
+pins the plotly wheel that is downloaded into `dist/assets/python/` at build time.
