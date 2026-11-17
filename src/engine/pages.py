@@ -127,6 +127,8 @@ class SiteBuilder:
                 post.description,
                 post=post,
                 related=related,
+                has_mermaid="```mermaid" in post.body,
+                has_timeline="```timeline" in post.body,
                 og_image=post.image,
                 og_type="article",
             )

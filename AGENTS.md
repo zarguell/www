@@ -48,6 +48,13 @@ npm run dev       # builds and serves on http://127.0.0.1:4321
 - **Every local tool needs all three pieces:** a template, a JS entrypoint (or the shared
   PyScript entrypoint), and a registry entry in `content/tools.json`.
 
+## Custom Markdown components
+
+The build supports fenced `mermaid` and `timeline` blocks. Read
+`docs/markdown-components.md` before adding or changing one. The parser lives in
+`engine/render.py`; component CSS lives in `assets/css/prose.css`; behavior lives
+in `assets/js/`.
+
 ## Adding a blog post
 
 1. Add `src/content/blog/<slug>.md` with YAML front matter:

@@ -188,3 +188,233 @@
 .code-block .n {
   color: var(--text);
 }
+
+.mermaid-block {
+  margin: 1.5em 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow-x: auto;
+}
+
+.mermaid-block__bar {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mermaid-block .mermaid {
+  margin: 0;
+  padding: 16px;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+}
+
+.mermaid-block svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-block--error::after {
+  content: "Diagram could not be rendered.";
+  display: block;
+  padding: 0 16px 16px;
+  color: var(--error);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.timeline {
+  margin: 2em 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.timeline__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.timeline__title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.timeline__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag__count {
+  margin-left: 4px;
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.timeline__list {
+  position: relative;
+  margin: 0;
+  padding: 4px 18px 12px 42px;
+  list-style: none;
+}
+
+.timeline__list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 12px;
+  left: 23px;
+  width: 1px;
+  background: var(--border);
+}
+
+.timeline__item {
+  position: relative;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.timeline__item:last-child {
+  border-bottom: 0;
+}
+
+.timeline__marker {
+  position: absolute;
+  top: 22px;
+  left: -24px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.timeline__item:hover .timeline__marker {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.timeline__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.timeline__kind {
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.timeline__kind--release {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.timeline__kind--fix {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.timeline__kind--incident {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.timeline__kind--actor {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.timeline .timeline__event {
+  margin: 4px 0 2px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.timeline__desc {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.timeline__desc code {
+  font-size: 0.9em;
+}
+
+.timeline__empty {
+  padding: 0 18px 16px 42px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+@media (max-width: 680px) {
+  .timeline__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .timeline__list {
+    padding-left: 34px;
+  }
+
+  .timeline__list::before {
+    left: 17px;
+  }
+
+  .timeline__marker {
+    left: -22px;
+  }
+}
+
+/* Post bodies keep prose readable while letting wide artifacts use the column. */
+.post-layout .prose {
+  max-width: none;
+}
+
+.post-layout .prose > p,
+.post-layout .prose > ul,
+.post-layout .prose > ol,
+.post-layout .prose > h2,
+.post-layout .prose > h3,
+.post-layout .prose > h4,
+.post-layout .prose > blockquote,
+.post-layout .prose > .footnotes {
+  max-width: 68ch;
+}
+
+@media (max-width: 680px) {
+  .mermaid-block .mermaid {
+    justify-content: flex-start;
+  }
+
+  .mermaid-block svg {
+    flex: none;
+    max-width: none !important;
+  }
+}

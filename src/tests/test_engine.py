@@ -43,7 +43,7 @@ def test_date_and_read_time() -> None:
 
 def test_blog_posts_have_required_metadata() -> None:
     posts = load_posts(Paths.from_root(ROOT))
-    assert len(posts) == 2
+    assert len(posts) >= 3
     for post in posts:
         assert post.title
         assert post.description
@@ -111,7 +111,7 @@ def test_rss_is_well_formed(site: Path) -> None:
     root = tree.getroot()
     assert root.tag == "rss"
     items = root.findall("./channel/item")
-    assert len(items) == 2
+    assert len(items) >= 3
 
 
 def test_sitemap_is_well_formed(site: Path) -> None:
@@ -152,3 +152,36 @@ def test_every_css_custom_property_is_defined() -> None:
         used.update(re.findall(r"var\(\s*(--[\w-]+)", path.read_text(encoding="utf-8")))
     missing = sorted(used - defined)
     assert not missing, f"undefined CSS custom properties: {missing}"
+
+
+def test_mermaid_fence_emits_mermaid_pre() -> None:
+    from engine.render import make_markdown
+
+    html = make_markdown().render("```mermaid\nsequenceDiagram\n  A->>B: hi\n```")
+    assert '<pre class="mermaid">' in html
+    assert "sequenceDiagram" in html
+
+
+def test_timeline_fence_renders_events_and_filters() -> None:
+    from engine.render import make_markdown
+
+    html = make_markdown().render(
+        "```timeline\n"
+        "title: Example timeline\n"
+        "10 Jan | First event | `abc`, initial import | release\n"
+        "12 Jan | Bad thing | | incident\n"
+        "```"
+    )
+    assert '<section class="timeline"' in html
+    assert "Example timeline" in html
+    assert html.count("data-timeline-item") == 2
+    assert 'data-timeline-filter="release"' in html
+    assert 'data-timeline-filter="incident"' in html
+    assert "<code>abc</code>" in html
+
+
+def test_timeline_rejects_malformed_lines() -> None:
+    from engine.render import make_markdown
+
+    with pytest.raises(ValueError, match="timeline line 1"):
+        make_markdown().render("```timeline\nnot a valid event\n```")

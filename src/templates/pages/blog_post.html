@@ -65,3 +65,12 @@
   {% endif %}
 </article>
 {% endblock %}
+{% block scripts %}
+{% if has_mermaid %}
+<script src="{{ asset('vendor/mermaid.min.js') }}"></script>
+<script type="module" src="{{ asset('js/mermaid-init.js') }}"></script>
+{% endif %}
+{% if has_timeline %}
+<script type="module" src="{{ asset('js/timeline.js') }}"></script>
+{% endif %}
+{% endblock %}
