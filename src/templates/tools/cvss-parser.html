@@ -1,0 +1,31 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-hero">
+  <h1>CVSS Vector Parser</h1>
+  <p class="tool-subtitle">Paste a CVSS v2, v3.x, or v4.0 vector and see what every metric means.</p>
+</div>
+
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">Vector input</h2>
+    <span class="badge">CVSS 2 · 3 · 4</span>
+  </div>
+  <div class="panel__body">
+    <div class="form-group">
+      <label for="cvssInput">CVSS vector string</label>
+      <textarea id="cvssInput" rows="3" spellcheck="false" autocomplete="off" placeholder="CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N">CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N</textarea>
+      <small>Parsing runs locally in your browser. Missing base metrics and unknown fields are reported below.</small>
+    </div>
+    <div class="btn-row" aria-label="Example vectors">
+      <button class="btn btn--small" type="button" data-cvss-example="v4">v4.0 example</button>
+      <button class="btn btn--small" type="button" data-cvss-example="v31">v3.1 example</button>
+      <button class="btn btn--small" type="button" data-cvss-example="v2">v2.0 example</button>
+    </div>
+    <p id="cvssStatus" class="status-line" aria-live="polite"></p>
+  </div>
+</section>
+
+<div id="cvssResults" class="cvss-results" aria-live="polite"></div>
+{% endblock %}
+
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/cvss-parser.js') }}"></script>{% endblock %}

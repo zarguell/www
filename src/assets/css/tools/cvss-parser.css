@@ -1,0 +1,155 @@
+.cvss-results {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+}
+
+.cvss-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.cvss-summary__item {
+  display: grid;
+  gap: 3px;
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+}
+
+.cvss-summary__item:last-child {
+  border-right: 0;
+}
+
+.cvss-summary__item span {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cvss-summary__item strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cvss-canonical {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.cvss-canonical__label {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cvss-canonical code {
+  flex: 1;
+  min-width: 200px;
+  color: var(--text);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.cvss-group {
+  margin-top: 0;
+}
+
+.cvss-metrics {
+  display: grid;
+  gap: 0;
+}
+
+.cvss-metric {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cvss-metric:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.cvss-metric:first-child {
+  padding-top: 0;
+}
+
+.cvss-metric__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cvss-metric__code {
+  padding: 2px 6px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.cvss-metric__name {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cvss-metric__value {
+  margin-left: auto;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.cvss-metric__value--invalid {
+  color: var(--error);
+}
+
+.cvss-metric__desc,
+.cvss-metric__value-desc {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 72ch;
+}
+
+.cvss-metric__value-desc {
+  color: var(--faint);
+}
+
+.cvss-results .notice {
+  margin-top: 0;
+}
+
+@media (max-width: 680px) {
+  .cvss-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .cvss-summary__item {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cvss-summary__item:last-child {
+    border-bottom: 0;
+  }
+
+  .cvss-metric__value {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}

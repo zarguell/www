@@ -167,14 +167,14 @@
       {
         "title": "NFC LES Parser",
         "slug": "les-parser",
-        "description": "Parse USDA NFC Earnings & Leave Statements (AD-334 PDFs) into structured JSON and CSV. Runs entirely in your browser with Python (PyScript) — pay dates, gross/net, deductions, leave balances. Your statement never leaves your device.",
+        "description": "Parse USDA NFC Earnings & Leave Statements (AD-334 PDFs) into structured JSON and CSV. Runs entirely in your browser with Python (PyScript) \u2014 pay dates, gross/net, deductions, leave balances. Your statement never leaves your device.",
         "badge": "PYTHON",
         "features": [
           "Extracts pay dates, salary, gross/net pay (PP & YTD)",
-          "14 standard deduction line items (TSP, taxes, FEHBA…)",
+          "14 standard deduction line items (TSP, taxes, FEHBA\u2026)",
           "Leave earnings and YTD leave balances",
           "Validates gross == net + deductions",
-          "JSON & CSV export — 100% client-side parsing"
+          "JSON & CSV export \u2014 100% client-side parsing"
         ],
         "lastModified": "2026-09-03"
       }
@@ -209,7 +209,7 @@
       {
         "title": "Excel to Markdown Converter",
         "slug": "excel-to-markdown",
-        "description": "Convert xlsx, xls, ods, csv, and tsv files into clean, aligned markdown tables — entirely in your browser. Multi-sheet support, RFC 4180-safe CSV parsing, pipe escaping, and one-click copy or download.",
+        "description": "Convert xlsx, xls, ods, csv, and tsv files into clean, aligned markdown tables \u2014 entirely in your browser. Multi-sheet support, RFC 4180-safe CSV parsing, pipe escaping, and one-click copy or download.",
         "badge": "TEXT TOOL",
         "features": [
           "XLSX, XLS, ODS, CSV, and TSV input",
@@ -280,7 +280,7 @@
         "description": "Upload a receipt photo and parse it entirely in your browser. Local OCR reads the image, then heuristics infer merchant, date, totals, and likely line items.",
         "badge": "OCR",
         "features": [
-          "In-browser OCR — images never leave your device",
+          "In-browser OCR \u2014 images never leave your device",
           "Inferred merchant, date, subtotal, tax, tip, and total",
           "Likely line items with amounts",
           "Editable raw OCR text with instant re-parse",
@@ -362,7 +362,7 @@
       {
         "title": "Randy Danger",
         "slug": "randy-danger",
-        "description": "A retro wave-survival FPS that runs entirely in your browser. Fight off escalating waves in a green-CRT arena with WASD and mouse look — raycast rendering, procedural sound effects, no installs.",
+        "description": "A retro wave-survival FPS that runs entirely in your browser. Fight off escalating waves in a green-CRT arena with WASD and mouse look \u2014 raycast rendering, procedural sound effects, no installs.",
         "badge": "GAME",
         "features": [
           "Raycast 3D arena, playable in the browser",
@@ -372,6 +372,26 @@
           "Score, kills, and wave progression tracking"
         ],
         "lastModified": "2026-09-03"
+      }
+    ]
+  },
+  {
+    "name": "Security",
+    "id": "security",
+    "description": "Parse and explain security advisory data.",
+    "tools": [
+      {
+        "title": "CVSS Vector Parser",
+        "slug": "cvss-parser",
+        "description": "Parse CVSS v2, v3.x, and v4.0 vector strings. See every metric, value, and what it means, with warnings for unknown or missing components.",
+        "badge": "CVSS",
+        "features": [
+          "CVSS v2, v3.x, and v4.0 detection",
+          "Every metric and value explained",
+          "Unknown, duplicate, and missing metric warnings",
+          "Live parsing, no upload"
+        ],
+        "lastModified": "2026-11-17"
       }
     ]
   },
