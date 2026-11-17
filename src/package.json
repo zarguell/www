@@ -14,6 +14,7 @@
     "lint": "bash scripts/lint.sh"
   },
   "dependencies": {
+    "@e965/xlsx": "^0.20.3",
     "@pyscript/core": "0.7.31",
     "exifreader": "4.54.0",
     "heic-to": "1.6.7",
@@ -22,8 +23,7 @@
     "lz-string": "1.5.0",
     "plotly.js-dist-min": "4.3.0",
     "tesseract.js": "7.0.0",
-    "wordlist-js": "2.0.0",
-    "xlsx": "0.18.5"
+    "wordlist-js": "2.0.0"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

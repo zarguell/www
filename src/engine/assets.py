@@ -29,7 +29,7 @@ VENDOR_FILES = {
     "html-to-image/dist/html-to-image.js": "vendor/html-to-image.js",
     "tesseract.js/dist/tesseract.min.js": "vendor/tesseract/tesseract.min.js",
     "tesseract.js/dist/worker.min.js": "vendor/tesseract/worker.min.js",
-    "xlsx/dist/xlsx.full.min.js": "vendor/xlsx.full.min.js",
+    "@e965/xlsx/dist/xlsx.full.min.js": "vendor/xlsx.full.min.js",
 }
 
 TESSERACT_CORE = (
