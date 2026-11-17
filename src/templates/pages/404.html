@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import link_arrow %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+<section class="panel error-page">
+  <img class="error-page__topo" src="/assets/images/topo.svg" alt="" width="1200" height="800">
+  <div class="error-page__content">
+    <p class="prompt" aria-hidden="true">&gt;_</p>
+    <h1 class="error-page__code">{{ page_404.meta.code }}</h1>
+    <p class="error-page__message">{{ page_404.meta.message }}</p>
+    {{ link_arrow('Go home', '/') }}
+  </div>
+</section>
+{% endblock %}

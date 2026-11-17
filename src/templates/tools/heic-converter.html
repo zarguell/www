@@ -1,0 +1,69 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tools-hero">
+		<h1>HEIC to JPG/PNG Converter</h1>
+		<p class="tools-subtitle">Convert HEIC images to standard formats in your browser</p>
+	</div>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Upload & Convert</h2><span class="badge">IMAGE TOOL</span></div><div class="panel__body">
+		<div class="controls">
+			<div class="form-group">
+				<label for="fileInput">Select HEIC Files:</label>
+				<div class="file-input-wrapper">
+					<input type="file" id="fileInput" accept=".heic,.heif,image/heic,image/heif" multiple>
+					<label for="fileInput" class="file-input-label">Choose Files</label>
+					<span id="fileCount" class="file-name">No files selected</span>
+				</div>
+				<div id="errorMsg" class="error-message"></div>
+			</div>
+
+			<div class="form-group">
+				<label for="formatSelect">Output Format:</label>
+				<select id="formatSelect">
+					<option value="image/jpeg">JPG</option>
+					<option value="image/png">PNG</option>
+				</select>
+			</div>
+
+			<div class="form-group" id="qualityGroup">
+				<label for="qualitySelect">JPG Quality:</label>
+				<select id="qualitySelect">
+					<option value="0.92">High (0.92)</option>
+					<option value="0.85" selected>Medium (0.85)</option>
+					<option value="0.75">Low (0.75)</option>
+				</select>
+			</div>
+
+			<div class="form-group">
+				<label for="downloadMode">Download Mode:</label>
+				<select id="downloadMode">
+					<option value="individual">Individual Files (download as converted)</option>
+					<option value="zip">ZIP Archive (download all at once when done)</option>
+				</select>
+			</div>
+
+			<button id="convertBtn" class="btn btn--primary">Convert & Download All</button>
+
+			<div id="progress"></div>
+		</div>
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">About This Tool</h2><span class="badge">INFO</span></div><div class="panel__body">
+		<div class="info-content">
+			<p><strong>Privacy First:</strong> All conversions happen in your browser. Your images are never uploaded to any server.</p>
+			<p><strong>HEIC Format:</strong> HEIC (High Efficiency Image Container) is Apple's default image format. It offers better compression than JPG but isn't widely supported.</p>
+			<p><strong>Download Modes:</strong></p>
+			<ul>
+				<li><strong>Individual Files:</strong> Each image downloads immediately after conversion</li>
+				<li><strong>ZIP Archive:</strong> All converted images are bundled into a single ZIP file that downloads once everything is complete</li>
+			</ul>
+			<p><strong>JPG Quality:</strong> Only applies when converting to JPG format. Higher quality = larger file size. PNG is lossless and doesn't use quality settings.</p>
+		</div>
+	</div></section>
+
+	<!-- Load heic-to and JSZip libraries from CDN -->
+{% endblock %}
+
+{% block tool_head_extra %}<script src="{{ asset('vendor/heic-to.js') }}" defer></script>
+<script src="{{ asset('vendor/jszip.min.js') }}" defer></script>{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/heic-converter.js') }}"></script>{% endblock %}

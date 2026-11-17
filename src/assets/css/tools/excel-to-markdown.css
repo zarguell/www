@@ -1,0 +1,149 @@
+.x2m-container {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.tool-subtitle {
+		color: var(--muted);
+		font-size: 1.2rem;
+		margin: 0;
+	}
+
+	/* Drop zone: the file input covers the zone (keyboard-focusable), so the
+	   focus ring lives on the zone via :focus-within. */
+	.drop-zone {
+		position: relative;
+		border: 3px dashed var(--border);
+		border-radius: 8px;
+		padding: 2rem;
+		text-align: center;
+		background: var(--bg);
+		transition: border-color 0.15s ease, background 0.15s ease;
+	}
+
+	.drop-zone:hover,
+	.drop-zone.dragging {
+		border-color: var(--accent);
+		background: var(--bg2);
+	}
+
+	.drop-zone:focus-within {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+
+	.drop-zone input {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		cursor: pointer;
+	}
+
+	.upload-hint {
+		margin: 0;
+		font-size: 1.2rem;
+		color: var(--text);
+	}
+
+	.upload-formats {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 1rem;
+		color: var(--muted);
+	}
+
+	.parse-status {
+		margin-top: 1rem;
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--muted);
+		font-size: 1.1rem;
+	}
+
+	:global(.parse-status--error) {
+		color: var(--danger);
+		background: var(--error-bg);
+		border-color: var(--danger);
+	}
+
+	.option-row {
+		display: flex;
+		gap: 1.5rem;
+		flex-wrap: wrap;
+	}
+
+	.option {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 1.15rem;
+		cursor: pointer;
+	}
+
+	.option input {
+			width: 1.1rem;
+		height: 1.1rem;
+		accent-color: var(--accent);
+	}
+
+	.sheet-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 0.75rem;
+	}
+
+	.sheet-picker {
+		padding: 0.4rem 0.6rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: var(--font-body);
+		font-size: 1rem;
+	}
+
+	.raw-text {
+		width: 100%;
+		min-height: 16rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-size: 0.95rem;
+		resize: vertical;
+	}
+
+	.raw-text--short {
+		min-height: 8rem;
+	}
+
+	.raw-text:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.btnrow {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.hint {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0.75rem 0 0 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drop-zone {
+			transition: none;
+		}
+	}

@@ -1,0 +1,170 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="calculator-hero">
+		<h1>Roth vs Taxable Investment Calculator</h1>
+		<p class="calculator-subtitle">Compare Backdoor Roth, Taxable Brokerage, and Cash (PyScript Powered)</p>
+	</div>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Investment Scenarios</h2><span class="badge">SELECTION</span></div><div class="panel__body">
+		<div class="calculator-form">
+			<div class="form-group checkbox-group">
+				<label class="check-line">
+					<input type="checkbox" id="includeBackdoor" checked />
+					<span>Compare Backdoor Roth (tax-free growth)</span>
+				</label>
+				<small>Traditional IRA contribution → immediate Roth conversion</small>
+			</div>
+
+			<div class="form-group checkbox-group">
+				<label class="check-line">
+					<input type="checkbox" id="includeTaxable" checked />
+					<span>Compare Taxable Brokerage (tax drag + capital gains)</span>
+				</label>
+				<small>Standard brokerage account with ongoing taxation</small>
+			</div>
+
+			<div class="form-group checkbox-group">
+				<label class="check-line">
+					<input type="checkbox" id="includeCash" checked />
+					<span>Compare Cash / No Investing (opportunity cost)</span>
+				</label>
+				<small>0% growth - shows the cost of not investing</small>
+			</div>
+		</div>
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Time Horizon & Returns</h2><span class="badge">BASIC</span></div><div class="panel__body">
+		<div class="calculator-form">
+			<div class="form-row">
+				<div class="form-group">
+					<label for="currentAge">Current Age</label>
+					<input type="number" id="currentAge" value="30" min="0" max="100" />
+				</div>
+
+				<div class="form-group">
+					<label for="retirementAge">Retirement Age</label>
+					<input type="number" id="retirementAge" value="58" min="0" max="100" />
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="returnRate">Expected Return (% per year)</label>
+					<input type="number" id="returnRate" step="0.1" value="7" min="0" max="20" />
+				</div>
+
+				<div class="form-group">
+					<label for="expenseRatio">Expense Ratio (% per year)</label>
+					<input type="number" id="expenseRatio" step="0.01" value="0.05" min="0" max="5" />
+					<small>Fund fees (e.g., 0.05% for index funds)</small>
+				</div>
+			</div>
+		</div>
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Annual Contributions</h2><span class="badge">CONTRIBUTIONS</span></div><div class="panel__body">
+		<div class="calculator-form">
+			<div class="form-group">
+				<label for="backdoorAnnual">Backdoor Roth Contribution ($/year)</label>
+				<input type="number" id="backdoorAnnual" value="7000" min="0" max="69000" />
+				<small>IRS limit: $7,000 ($8,000 if age 50+)</small>
+			</div>
+
+			<div class="form-group checkbox-group">
+				<label class="check-line">
+					<input type="checkbox" id="includeMega" checked />
+					<span>Add Mega Backdoor Roth (after-tax 401k → Roth)</span>
+				</label>
+			</div>
+
+			<div class="form-group">
+				<label for="megaAnnual">Mega Backdoor Contribution ($/year)</label>
+				<input type="number" id="megaAnnual" value="46500" min="0" max="69000" />
+				<small>After-tax 401k + in-plan conversion (if plan allows)</small>
+			</div>
+		</div>
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Tax Parameters</h2><span class="badge">TAX MODEL</span></div><div class="panel__body">
+		<div class="calculator-form">
+			<div class="form-row">
+				<div class="form-group">
+					<label for="federalRate">Federal Marginal Tax Rate (%)</label>
+					<input type="number" id="federalRate" step="1" value="24" min="0" max="50" />
+					<small>Your current tax bracket</small>
+				</div>
+
+				<div class="form-group">
+					<label for="stateRate">State Tax Rate (%)</label>
+					<input type="number" id="stateRate" step="0.1" value="5" min="0" max="13" />
+					<small>0% if no state income tax</small>
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="capGainsRate">Long-Term Capital Gains Rate (%)</label>
+					<input type="number" id="capGainsRate" step="1" value="15" min="0" max="20" />
+					<small>0%, 15%, or 20% based on income</small>
+				</div>
+
+				<div class="form-group">
+					<label for="dividendYield">Qualified Dividend Yield (%)</label>
+					<input type="number" id="dividendYield" step="0.1" value="2" min="0" max="10" />
+					<small>Annual tax drag from dividends</small>
+				</div>
+			</div>
+		</div>
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Backdoor Roth Details</h2><span class="badge">ADVANCED</span></div><div class="panel__body">
+		<div class="calculator-form">
+			<div class="form-group">
+				<label for="existingPreTaxIRA">Existing Pre-Tax IRA Balance ($)</label>
+				<input type="number" id="existingPreTaxIRA" value="0" min="0" step="1000" />
+				<small>⚠️ Triggers pro-rata rule - part of conversion becomes taxable</small>
+			</div>
+
+			<div class="form-group">
+				<label for="conversionDelay">Conversion Delay (days)</label>
+				<input type="number" id="conversionDelay" value="0" min="0" max="90" />
+				<small>Days between contribution and conversion (gains become taxable)</small>
+			</div>
+		</div>
+	</div></section>
+
+	<div class="button-group">
+		<button
+			id="runBtn"
+			class="btn btn--primary"
+			py-click="run_projection">
+			Run Comparison
+		</button>
+	</div>
+
+	<div id="chart-container" class="mt-2">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Account Balances Over Time</h2><span class="badge">CHART 1</span></div><div class="panel__body">
+			<div id="chart"></div>
+			<!-- Click-to-zoom will be initialized here after chart is generated -->
+		</div></section>
+	</div>
+
+	<div id="chart2-container" class="mt-2">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Cumulative Taxes Paid Over Time</h2><span class="badge">CHART 2</span></div><div class="panel__body">
+			<div id="chart2"></div>
+			<!-- Click-to-zoom will be initialized here after chart is generated -->
+		</div></section>
+	</div>
+
+	<div id="summary-container" class="mt-2">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Comparison & Insights</h2><span class="badge">RESULTS</span></div><div class="panel__body">
+			<div id="summary"></div>
+		</div></section>
+	</div>
+
+	<!-- PyScript integration -->
+<script type="py" src="/tools/roth/main.py" config="/tools/roth/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript() }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, social_links, link_arrow %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+<section class="panel hero">
+  <div class="hero__media">
+    <img src="{{ hero_image }}" alt="A snow-covered mountain ridge at dusk" width="1800" height="1000">
+  </div>
+  <div class="hero__copy">
+    <p class="prompt" aria-hidden="true">&gt;_</p>
+    <h1 class="hero__title">{{ home.meta.title }}</h1>
+    <p class="hero__tagline">{{ home.meta.tagline }}</p>
+    <div class="prose prose--tight">{{ body_html|safe }}</div>
+    <div class="hero__actions">
+      {{ link_arrow(home.meta.cta_primary.label, home.meta.cta_primary.href) }}
+      {{ link_arrow(home.meta.cta_secondary.label, home.meta.cta_secondary.href) }}
+    </div>
+  </div>
+  <div class="hero__foot">
+    <span class="hero__location">{{ icon('pin') }} Based in the {{ site.location }}.</span>
+    {{ social_links(site.social) }}
+  </div>
+</section>
+
+<div class="home-grid">
+  <a class="feature-card" href="/blog/">
+    <div class="feature-card__top">
+      <span class="feature-card__title">Blog</span>
+      {{ icon('arrow-up-right') }}
+    </div>
+    <p class="feature-card__desc">Read my thoughts on whatever I feel like writing about.</p>
+    <span class="feature-card__more">Read posts {{ icon('arrow-right') }}</span>
+  </a>
+  <a class="feature-card" href="/tools/">
+    <div class="feature-card__top">
+      <span class="feature-card__title">Tools</span>
+      {{ icon('arrow-up-right') }}
+    </div>
+    <p class="feature-card__desc">Tiny calculators and utilities that feel like toys. Really just a mix of random stuff I&rsquo;ve built over time.</p>
+    <span class="feature-card__more">Explore tools {{ icon('arrow-right') }}</span>
+  </a>
+  <a class="feature-card" href="/links/">
+    <div class="feature-card__top">
+      <span class="feature-card__title">Links</span>
+      {{ icon('arrow-up-right') }}
+    </div>
+    <p class="feature-card__desc">Quick links to my socials, or other links I want to share.</p>
+    <span class="feature-card__more">Browse links {{ icon('arrow-right') }}</span>
+  </a>
+  <a class="feature-card" href="/about/">
+    <div class="feature-card__top">
+      <span class="feature-card__title">About</span>
+      {{ icon('arrow-up-right') }}
+    </div>
+    <p class="feature-card__desc">Learn more about me.</p>
+    <span class="feature-card__more">About me {{ icon('arrow-right') }}</span>
+  </a>
+</div>
+
+<section class="panel section">
+  <div class="panel__head">
+    <h2 class="panel__title">What&rsquo;s new</h2>
+    <span class="badge">Update</span>
+  </div>
+  <div class="panel__body">
+    <div class="whats-new">
+      {% if latest_post %}
+      <div class="whats-new__row">
+        <span class="whats-new__label">Latest blog post</span>
+        <a class="whats-new__link" href="/blog/{{ latest_post.slug }}/">{{ latest_post.title }}</a>
+      </div>
+      {% endif %}
+      {% if newest_tool %}
+      <div class="whats-new__row">
+        <span class="whats-new__label">Newest tool</span>
+        <a class="whats-new__link" href="/tools/{{ newest_tool.slug }}/">{{ newest_tool.title }}</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

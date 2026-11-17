@@ -1,0 +1,262 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-header">
+		<h1>Monte Carlo Retirement Projection Lab</h1>
+		<p class="tool-subtitle">Simulate thousands of retirement scenarios to see sequence-of-returns risk in action</p>
+	</div>
+
+	<div class="tool-content">
+		<form data-no-submit id="simulationForm">
+
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Personal Information</h2><span class="badge">STEP 1</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="currentAge">
+						Current Age
+						<small>(years)</small>
+					</label>
+					<input
+						type="number"
+						id="currentAge"
+						min="25"
+						max="65"
+						value="30"
+						required
+					/>
+					<small>Enter your current age (25-65)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="retirementAge">
+						Target Retirement Age
+						<small>(years)</small>
+					</label>
+					<input
+						type="number"
+						id="retirementAge"
+						min="40"
+						max="70"
+						value="58"
+						required
+					/>
+					<small>When you plan to retire (40-70)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="currentPortfolio">
+						Current Portfolio Value
+						<small>(dollars)</small>
+					</label>
+					<input
+						type="number"
+						id="currentPortfolio"
+						min="0"
+						max="5000000"
+						step="10000"
+						value="500000"
+						required
+					/>
+					<small>Your current invested assets ($0 - $5M)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="annualContribution">
+						Annual Contribution
+						<small>(dollars)</small>
+					</label>
+					<input
+						type="number"
+						id="annualContribution"
+						min="0"
+						max="100000"
+						step="1000"
+						value="60000"
+						required
+					/>
+					<small>Annual amount you'll invest until retirement</small>
+				</div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Asset Allocation & Returns</h2><span class="badge">STEP 2</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="stockAllocation">
+						Stock Allocation
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="stockAllocation"
+						min="0"
+						max="1"
+						step="0.05"
+						value="0.8"
+						required
+					/>
+					<small>Percentage in stocks (0.0 - 1.0, e.g., 0.8 = 80%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="bondAllocation">
+						Bond Allocation
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="bondAllocation"
+						min="0"
+						max="1"
+						step="0.05"
+						value="0.2"
+						required
+					/>
+					<small>Percentage in bonds (must equal 1 - stock allocation)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="stockReturn">
+						Expected Stock Return
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="stockReturn"
+						min="0.02"
+						max="0.12"
+						step="0.005"
+						value="0.07"
+						required
+					/>
+					<small>Expected annual stock return (2% - 12%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="bondReturn">
+						Expected Bond Return
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="bondReturn"
+						min="0.01"
+						max="0.08"
+						step="0.005"
+						value="0.03"
+						required
+					/>
+					<small>Expected annual bond return (1% - 8%)</small>
+				</div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Risk & Volatility</h2><span class="badge">STEP 3</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="stockVolatility">
+						Stock Volatility (σ)
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="stockVolatility"
+						min="0.10"
+						max="0.30"
+						step="0.01"
+						value="0.16"
+						required
+					/>
+					<small>Annual stock volatility (10% - 30%, historical ~16%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="bondVolatility">
+						Bond Volatility (σ)
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="bondVolatility"
+						min="0.03"
+						max="0.15"
+						step="0.01"
+						value="0.05"
+						required
+					/>
+					<small>Annual bond volatility (3% - 15%, historical ~5%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="correlation">
+						Stock-Bond Correlation (ρ)
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="correlation"
+						min="-0.5"
+						max="1.0"
+						step="0.1"
+						value="0.1"
+						required
+					/>
+					<small>Correlation between stock and bond returns (-0.5 to 1.0)</small>
+				</div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Retirement Withdrawals</h2><span class="badge">STEP 4</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="withdrawalRate">
+						Withdrawal Rate
+						<small>(decimal)</small>
+					</label>
+					<input
+						type="number"
+						id="withdrawalRate"
+						min="0.02"
+						max="0.06"
+						step="0.005"
+						value="0.035"
+						required
+					/>
+					<small>Annual withdrawal rate in retirement (2% - 6%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="numSimulations">
+						Number of Simulations
+						<small>(count)</small>
+					</label>
+					<input
+						type="number"
+						id="numSimulations"
+						min="100"
+						max="10000"
+						step="100"
+						value="1000"
+						required
+					/>
+					<small>How many scenarios to run (100 - 10,000, more = slower)</small>
+				</div>
+			</div></section>
+
+			<div class="button-group">
+				<button type="button" class="btn btn--primary" py-click="run_simulation">
+					Run Simulation
+				</button>
+			</div>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<h3 class="text-center mb-1">Static Image (Click to Zoom)</h3>
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="plotly-container" class="chart-container">
+			<h3 class="text-center mb-1">Interactive Charts (Hover, Zoom, Export)</h3>
+			<div id="plotlyChart"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+<script type="py" src="/tools/monte-carlo/main.py" config="/tools/monte-carlo/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript(plotly=true) }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}

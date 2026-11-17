@@ -1,0 +1,20 @@
+{
+  "name": "Zach Arguelles",
+  "title": "ARGUELLES.ME",
+  "tagline": "Build. Write. Iterate.",
+  "description": "Cybersecurity engineer and habitual tinkerer. Notes on homelab, automation, and whatever I'm learning this week.",
+  "url": "https://www.arguelles.me",
+  "author": "Zach Arguelles",
+  "location": "Pacific Northwest",
+  "nav": [
+    { "label": "Blog", "href": "/blog/" },
+    { "label": "Tools", "href": "/tools/" },
+    { "label": "Links", "href": "/links/" },
+    { "label": "About", "href": "/about/" }
+  ],
+  "social": [
+    { "label": "GitHub", "href": "https://github.com/zarguell", "icon": "github" },
+    { "label": "LinkedIn", "href": "https://www.linkedin.com/in/zarguell/", "icon": "linkedin" },
+    { "label": "RSS", "href": "/rss.xml", "icon": "rss" }
+  ]
+}

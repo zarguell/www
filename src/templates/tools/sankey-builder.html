@@ -1,0 +1,49 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-header">
+		<h1>Cash Flow Sankey Builder</h1>
+		<p class="tool-subtitle">Create beautiful Sankey diagrams from simple text input</p>
+	</div>
+
+	<div class="tool-content">
+		<form data-no-submit id="simulationForm">
+
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Flow Data Input</h2><span class="badge">INPUTS</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="diagramTitle">Diagram Title</label>
+					<input type="text" id="diagramTitle" value="Cash Flow Diagram" />
+					<small>Title for your diagram</small>
+				</div>
+
+				<div class="form-group">
+					<label for="sankeyText">Flow Data</label>
+					<textarea id="sankeyText" rows="15" required placeholder="Gross Income [150000] Federal Taxes
+Gross Income [7500] State Taxes
+Gross Income [11475] FICA Taxes
+Gross Income [23000] 401k Contributions
+Gross Income [7000] Roth IRA
+Take Home Pay [39600] Housing
+Take Home Pay [26425] Other Expenses"></textarea>
+					<small>Format: Source [value] Target (one flow per line)</small>
+				</div>
+
+				<div class="button-group">
+					<button type="button" class="btn btn--primary" py-click="build_sankey">
+						Build Diagram
+					</button>
+				</div>
+			</div></section>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<div id="chart"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+<script type="py" src="/tools/sankey-builder/main.py" config="/tools/sankey-builder/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript(plotly=true) }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}

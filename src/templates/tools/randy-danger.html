@@ -1,0 +1,117 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="randy-container">
+		<div class="tool-hero">
+			<h1>Randy Danger</h1>
+			<p class="tool-subtitle">Regular Joe. Extraordinary Violence. A wave-survival raycast FPS, 100% in your browser.</p>
+		</div>
+
+		<div id="stage" class="stage">
+			<canvas id="gameCanvas"></canvas>
+
+			<div id="hud" class="hud is-hidden">
+				<div class="hud-top">
+					<div class="hud-panel">
+						<div class="hud-label">Score</div>
+						<div class="hud-value" id="score-val">0</div>
+					</div>
+					<div class="hud-panel">
+						<div class="hud-label">Wave</div>
+						<div class="hud-value" id="wave-val">1</div>
+					</div>
+					<div class="hud-panel">
+						<div class="hud-label">Kills</div>
+						<div class="hud-value" id="kills-val">0</div>
+					</div>
+				</div>
+				<div class="hud-bottom">
+					<div class="health-wrap">
+						<div class="health-row">
+							<div class="hud-label">Health</div>
+							<div class="hud-value" id="health-val">100</div>
+						</div>
+						<div class="health-outer"><div id="health-bar-inner" class="health-inner" class="w-full"></div></div>
+					</div>
+					<div class="hud-panel">
+						<div class="hud-label">Ammo</div>
+						<div class="hud-value" id="ammo-val">30</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="crosshair" class="crosshair is-hidden"><div class="crosshair-dot"></div></div>
+			<div id="messages" class="messages"></div>
+			<div id="hit-flash" class="hit-flash"></div>
+
+			<div class="screen" id="title-screen">
+				<div class="screen-title">RANDY<br />DANGER</div>
+				<p class="screen-subtitle">
+					<em>&ldquo;I didn't ask for this&hellip; but I'm not complaining.&rdquo;</em>
+				</p>
+				<div class="controls-grid">
+					<span><span class="key">W A S D</span></span><span>Move</span>
+					<span><span class="key">Mouse</span></span><span>Look</span>
+					<span><span class="key">Click / Space</span></span><span>Shoot</span>
+					<span><span class="key">R</span></span><span>Reload</span>
+					<span><span class="key">Shift</span></span><span>Sprint</span>
+					<span><span class="key">E</span></span><span>Pick up ammo</span>
+				</div>
+				<button class="btn btn--primary" id="start-btn" type="button">ENGAGE THE DANGER</button>
+				<p class="screen-hint">Click the arena to capture your mouse &bull; Esc to pause</p>
+			</div>
+
+			<div class="screen is-hidden" id="pause-screen">
+				<div class="screen-title screen-title--small">PAUSED</div>
+				<p class="screen-subtitle"><em>&ldquo;Even Randy needs a breather.&rdquo;</em></p>
+				<button class="btn btn--primary" id="btn-resume" type="button">RESUME</button>
+				<button class="btn" id="btn-pause-menu" type="button">MAIN MENU</button>
+			</div>
+
+			<div class="screen is-hidden" id="gameover-screen">
+				<div class="screen-title screen-title--danger">DANGER<br />NEUTRALIZED</div>
+				<p class="screen-subtitle" id="gameover-msg">Randy didn't make it. That's embarrassing.</p>
+				<div class="stats-block">
+					<div class="hud-label">FINAL STATS</div>
+					<div id="final-stats" class="stats-lines"></div>
+				</div>
+				<button class="btn btn--primary" id="btn-retry" type="button">TRY AGAIN</button>
+				<button class="btn" id="btn-gameover-menu" type="button">MAIN MENU</button>
+			</div>
+
+			<div class="screen is-hidden" id="victory-screen">
+				<div class="screen-title screen-title--warn">MISSION<br />COMPLETE</div>
+				<p class="screen-subtitle" id="victory-msg">Randy saves the day. Again.</p>
+				<div class="stats-block">
+					<div id="victory-stats" class="stats-lines"></div>
+				</div>
+				<button class="btn btn--primary" id="btn-next-wave" type="button">NEXT WAVE</button>
+				<button class="btn" id="btn-victory-menu" type="button">MAIN MENU</button>
+			</div>
+
+			<div id="mc-overlay" class="mc-overlay"></div>
+			<div class="mc-buttons">
+				<div id="mc-fire" class="mc-fire"><span class="mc-fire-icon">🔥</span><span>FIRE</span></div>
+				<div id="mc-reload" class="mc-reload">RELOAD</div>
+				<div id="mc-pause" class="mc-pause">⏸ PAUSE</div>
+			</div>
+		</div>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Field Manual</h2><span class="badge">INFO</span></div><div class="panel__body">
+			<p class="manual">
+				Survive the wave: every hostile downed is +10, every kill +50. Enemies chase and shoot
+				on sight — keep a wall between you and them while you line up shots. Grab yellow ammo
+				pickups (walk over them, or press E nearby), and reload with R before you're empty.
+				Clear the wave to advance; each wave spawns more enemies, with more health, moving
+				faster. Sound effects are generated live in your browser; the arena never leaves this
+				page.
+			</p>
+			<p class="manual manual-muted">
+				On touch devices: left side of the arena is a virtual joystick, right side looks
+				around (tap to fire), with dedicated fire / reload / pause buttons.
+			</p>
+		</div></section>
+	</div>
+{% endblock %}
+
+{% block tool_head_extra %}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/randy-danger.js') }}"></script>{% endblock %}

@@ -1,0 +1,8 @@
+[
+  { "label": "Generator", "value": "Python + Jinja2 (static)" },
+  { "label": "Font", "value": "Space Grotesk, IBM Plex Sans, IBM Plex Mono (self-hosted)" },
+  { "label": "Styling", "value": "Custom CSS with design tokens (no frameworks)" },
+  { "label": "Hosting", "value": "Cloudflare Workers static assets" },
+  { "label": "Features", "value": "Markdown + JSON content pipeline, zero client-side frameworks" },
+  { "label": "Philosophy", "value": "Minimal dependencies, maximal clarity" }
+]

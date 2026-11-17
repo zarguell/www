@@ -4,19 +4,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{js,ts,tsx}'],
-    exclude: ['node_modules', 'dist', '.astro'],
+    include: ['tests/js/**/*.{test,spec}.ts'],
+    exclude: ['node_modules', 'dist'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'dist/',
-        '.astro/',
-        '**/*.astro',
-        '**/*.config.{js,ts}',
-        '**/types/',
-      ],
-    },
-  },
+      reporter: ['text', 'html'],
+      include: ['assets/js/lib/**/*.ts'],
+      exclude: ['**/*.test.ts']
+    }
+  }
 });

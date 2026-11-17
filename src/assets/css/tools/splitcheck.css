@@ -1,0 +1,242 @@
+.splitcheck-container {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.topbar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+	}
+
+	.topbar h1 {
+		font-size: 2rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: var(--panel);
+		border: 2px solid var(--border);
+		border-radius: 999px;
+		padding: 0.5rem 1rem;
+		font-family: var(--font-display);
+		font-size: 1.1rem;
+	}
+
+	.badge strong {
+		font-size: 1rem;
+	}
+
+	.btnrow {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.smallbtn {
+		padding: 0.5rem 0.75rem;
+		font-size: 0.9rem;
+	}
+
+	.notice {
+		padding: 1rem;
+		border-radius: 12px;
+		border: 2px solid var(--border);
+		margin-bottom: 1rem;
+		font-family: var(--font-display);
+		font-size: 1.1rem;
+	}
+
+	.notice.view {
+		background: var(--panel);
+		border-color: var(--accent);
+		color: var(--text);
+	}
+
+	.notice.manage {
+		background: var(--panel);
+		border-color: var(--success);
+		color: var(--text);
+	}
+
+	.notice.hidden {
+		display: none;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	.muted {
+		color: var(--muted);
+		font-size: 1rem;
+	}
+
+	.row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.twocols {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	@media (max-width: 768px) {
+		.row {
+			grid-template-columns: 1fr;
+		}
+
+		.twocols {
+			grid-template-columns: 1fr;
+		}
+
+		.topbar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.btnrow {
+			flex-direction: column;
+		}
+
+		.smallbtn {
+			width: 100%;
+		}
+	}
+
+	.primaryShare {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		margin-bottom: 0.5rem;
+	}
+
+	.hint {
+		font-size: 1rem;
+		color: var(--muted);
+		margin-top: 0.25rem;
+		font-family: var(--font-display);
+	}
+
+	.hint.ok {
+		color: var(--success);
+	}
+
+	.hint.warn {
+		color: var(--warning);
+	}
+
+	.mono {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-size: 0.9rem;
+		background: var(--bg);
+		padding: 0.5rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		width: 100%;
+	}
+
+	.shortcuts-card {
+		background: var(--bg);
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		margin: 0.5rem 0;
+	}
+
+	.shortcuts-card .muted {
+		padding: 0.25rem 0;
+		font-family: var(--font-display);
+		font-size: 1rem;
+	}
+
+	h2 {
+		font-size: 1.5rem;
+		margin: 1rem 0 0.5rem 0;
+	}
+
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+
+	.chip {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: var(--bg);
+		border: 2px solid var(--border);
+		padding: 0.5rem 0.75rem;
+		border-radius: 999px;
+		font-family: var(--font-display);
+		font-size: 1.1rem;
+	}
+
+	.chip button {
+		width: auto;
+		padding: 0.25rem 0.5rem;
+		border-radius: 999px;
+		font-size: 1rem;
+	}
+
+	.card {
+		background: var(--bg);
+		border: 2px solid var(--border);
+		border-radius: 12px;
+		padding: 1rem;
+		margin: 0.5rem 0;
+	}
+
+		.card.is-owed {
+			background: var(--bg);
+			border-color: var(--success);
+		}
+
+		.card.owes {
+			background: var(--bg);
+			border-color: var(--danger);
+		}
+
+	.card.settle {
+		background: var(--bg);
+		border-color: var(--accent);
+	}
+
+	.form-control {
+		width: 100%;
+		padding: 0.75rem;
+		margin: 0.5rem 0;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		font-size: 1rem;
+		background: var(--bg);
+		color: var(--text);
+		font-family: var(--font-display);
+	}
+
+	.form-control:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.form-label {
+		display: block;
+		margin-top: 1rem;
+		margin-bottom: 0.25rem;
+		font-family: var(--font-display);
+		font-size: 1.2rem;
+		color: var(--text);
+	}

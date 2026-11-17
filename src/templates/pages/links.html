@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, tag, page_head %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+{{ page_head('Links', 'Curated corners of the internet') }}
+
+<div class="link-groups">
+  {% for category in links.categories %}
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">{{ category.name }}</h2>
+      <span class="badge">{{ category.links|length }}</span>
+    </div>
+    <div class="panel__body">
+      <div class="link-list">
+        {% for item in category.links %}
+        <a class="link-item" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">
+          <span>
+            <span class="link-item__title">{{ item.title }}</span>
+            <p class="link-item__desc">{{ item.description }}</p>
+          </span>
+          {{ icon('arrow-up-right') }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+
+<section class="section">
+  <div class="section__head">
+    <h2 class="section__title">Cool finds</h2>
+    <span class="mono faint">{{ links.coolFinds|length }} saved</span>
+  </div>
+  <div class="search-bar">
+    <label class="sr-only" for="find-search">Search cool finds</label>
+    <input class="input" id="find-search" type="search" placeholder="Search cool finds..." data-find-search>
+    <div class="filter-row" role="group" aria-label="Filter finds by tag">
+      <button class="tag" type="button" data-find-filter="all" aria-pressed="true">All</button>
+      {% for item in tags %}
+      <button class="tag" type="button" data-find-filter="{{ item }}" aria-pressed="false">{{ item }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="find-list">
+    {% for item in links.coolFinds %}
+    <article class="find-item" data-find data-tags="{{ item.tags|join('|') }}" data-title="{{ item.title }}" data-description="{{ item.description }}">
+      <div>
+        <h3 class="find-item__title"><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }} {{ icon('arrow-up-right') }}</a></h3>
+        <p class="find-item__desc">{{ item.description }}</p>
+        <div class="tag-row">
+          {% for tag_name in item.tags %}{{ tag(tag_name) }}{% endfor %}
+        </div>
+      </div>
+      <div class="find-item__meta">{{ item.date|date }}</div>
+    </article>
+    {% endfor %}
+  </div>
+  <p class="empty-state" data-find-empty hidden>No cool finds match your filters.</p>
+</section>
+
+<section class="panel section">
+  <div class="panel__head">
+    <h2 class="panel__title">Submit a link</h2>
+    <span class="badge badge--accent">Open</span>
+  </div>
+  <div class="panel__body">
+    <p class="muted links-intro">Know a cool corner of the web? Open an issue on GitHub with your suggestion.</p>
+    <a class="btn" href="https://github.com/zarguell/www/issues" target="_blank" rel="noopener noreferrer">Open an issue {{ icon('external') }}</a>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ asset('js/links.js') }}"></script>{% endblock %}

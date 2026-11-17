@@ -1,0 +1,9 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [".venv", "dist", "node_modules"]
+
+[tool.ruff.lint.per-file-ignores]
+# PyScript entry scripts run at module scope and intentionally use top-level await
+# to install the vendored plotly wheel before the remaining imports.
+"static/tools/*/main.py" = ["E402", "F704"]

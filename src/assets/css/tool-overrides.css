@@ -1,0 +1,233 @@
+/* Loaded after each tool's ported stylesheet to keep the new theme in charge. */
+.tool-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tool-topbar .back-link {
+  margin-bottom: 0;
+}
+
+.tool-topbar__meta {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+
+.calculator-hero,
+.tool-hero,
+.tools-hero,
+.tool-header,
+.sanitext-hero {
+  padding: 4px 0 22px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.calculator-hero h1,
+.tool-hero h1,
+.tools-hero h1,
+.tool-header h1,
+.sanitext-hero h1 {
+  font-size: clamp(30px, 4.4vw, 44px);
+  margin: 0 0 8px;
+}
+
+.calculator-subtitle,
+.tool-subtitle,
+.tools-subtitle,
+.tool-hero p,
+.tool-header p,
+.sanitext-hero .tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.last-updated {
+  margin: 10px 0 0;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.tool-content,
+.calculator-form {
+  display: grid;
+  gap: 16px;
+}
+
+.panel + .panel,
+.tool-content > section + section {
+  margin-top: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.form-group small {
+  color: var(--faint);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+  border-color: var(--text);
+}
+
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+  width: auto;
+  min-height: 0;
+  accent-color: var(--text);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+.results-section,
+.tool-output {
+  margin-top: 18px;
+}
+
+.result-grid,
+.results-content {
+  display: grid;
+  gap: 12px;
+}
+
+.form-group input[type="range"] {
+  padding: 0;
+  accent-color: var(--text);
+  background: transparent;
+  border: 0;
+}
+
+@media (max-width: 680px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.text-center { text-align: center; }
+.mb-1 { margin-bottom: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.w-full { width: 100%; }
+
+.check-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.is-hidden {
+  display: none;
+}
+
+/* The ported tool CSS predates this theme; strip its retro depth effects. */
+.tool-page * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.tool-page .panel,
+.tool-page [class*="card"] {
+  border-radius: var(--radius);
+}
+
+/* Tighten the ported form spacing without changing the field contract. */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  margin: 0;
+  font-weight: 500;
+}
+
+.form-group label small {
+  display: inline;
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+.form-group small {
+  margin-top: 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-row > .form-group {
+  min-width: 0;
+}
+
+@media (max-width: 680px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Prevent wide form controls from expanding grid tracks past the viewport. */
+.batch-grid > *,
+.cocktail-name-row > *,
+.header-actions > * {
+  min-width: 0;
+}

@@ -1,0 +1,61 @@
+{% macro icon(name, class_name='icon') -%}
+<svg class="{{ class_name }}" aria-hidden="true" focusable="false"><use href="/assets/icons.svg#{{ name }}"></use></svg>
+{%- endmacro %}
+
+{% macro badge(text, variant='') -%}
+<span class="badge{% if variant %} badge--{{ variant }}{% endif %}">{{ text }}</span>
+{%- endmacro %}
+
+{% macro tag(label, href=None) -%}
+{% if href %}<a class="tag" href="{{ href }}">{{ label }}</a>{% else %}<span class="tag">{{ label }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro link_arrow(label, href, external=False) -%}
+<a class="link-arrow" href="{{ href }}"{% if external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ label }} {{ icon('arrow-up-right' if external else 'arrow-right') }}</a>
+{%- endmacro %}
+
+{% macro social_links(items) -%}
+<div class="social-links">
+  {% for item in items %}
+  <a class="social-link" href="{{ item.href }}" aria-label="{{ item.label }}" title="{{ item.label }}"{% if item.href.startswith('http') %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ icon(item.icon) }}</a>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro page_head(title, subtitle='', meta='') -%}
+<header class="page-head">
+  <div>
+    <h1>{{ title }}</h1>
+    {% if subtitle %}<p class="page-head__sub">{{ subtitle }}</p>{% endif %}
+  </div>
+  {% if meta %}<div class="page-head__meta">{{ meta|safe }}</div>{% endif %}
+</header>
+{%- endmacro %}
+
+{% macro panel(title=None, badge_text=None, flush=False) -%}
+<section class="panel">
+  {% if title %}
+  <div class="panel__head">
+    <h2 class="panel__title">{{ title }}</h2>
+    {% if badge_text %}{{ badge(badge_text) }}{% endif %}
+  </div>
+  {% endif %}
+  <div class="panel__body{% if flush %} panel__body--flush{% endif %}">
+    {{ caller() }}
+  </div>
+</section>
+{%- endmacro %}
+
+{% macro button(label, href=None, variant='', attrs='') -%}
+{% if href %}
+<a class="btn{% if variant %} btn--{{ variant }}{% endif %}" href="{{ href }}" {{ attrs|safe }}>{{ label }}</a>
+{% else %}
+<button class="btn{% if variant %} btn--{{ variant }}{% endif %}" type="button" {{ attrs|safe }}>{{ label }}</button>
+{% endif %}
+{%- endmacro %}
+
+{% macro pyscript(plotly=False) -%}
+<link rel="stylesheet" href="{{ asset('vendor/pyscript/core.css') }}">
+<script type="module" src="{{ asset('vendor/pyscript/core.js') }}"></script>
+{% if plotly %}<script src="{{ asset('vendor/plotly.min.js') }}" defer></script>{% endif %}
+{%- endmacro %}

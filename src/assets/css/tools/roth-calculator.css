@@ -1,0 +1,128 @@
+#chart,
+	#chart2,
+	#summary {
+		min-height: 100px;
+	}
+
+	/* Chart container - prevents overflow */
+	#chart-container,
+	#chart2-container,
+	#summary-container {
+		width: 100%;
+		overflow-x: hidden;
+	}
+
+	:global(#chart),
+	:global(#chart2) {
+		width: 100%;
+		overflow: hidden;
+	}
+
+	/* PyScript renders matplotlib as an <img> tag - target it for responsiveness */
+	:global(#chart img),
+	:global(#chart2 img) {
+		max-width: 100% !important;
+		height: auto !important;
+		display: block !important;
+	}
+
+	:global(#chart figure),
+	:global(#chart2 figure) {
+		width: 100% !important;
+		max-width: 100% !important;
+		margin: 0 !important;
+	}
+
+	:global(#summary) {
+		font-family: var(--font-display);
+		font-size: 1.2rem;
+		line-height: 1.6;
+	}
+
+	:global(#summary table) {
+		margin-bottom: 2rem;
+	}
+
+	:global(#summary th),
+	:global(#summary td) {
+		padding: 0.75rem;
+	}
+
+	.calculator-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-family: var(--font-display);
+		font-size: 1.2rem;
+		font-weight: bold;
+	}
+
+	.form-group small {
+		font-family: var(--font-display);
+		font-size: 1rem;
+		line-height: 1.4;
+	}
+
+	.checkbox-group {
+		padding: 0.75rem 0;
+	}
+
+	:global(input[type="number"]) {
+		width: 100%;
+		padding: 0.5rem;
+		margin-top: 0.25rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
+		border: 2px solid var(--border);
+		background: var(--bg);
+		color: var(--text);
+	}
+
+	:global(input[type="checkbox"]) {
+		width: 1.2rem;
+		height: 1.2rem;
+		cursor: pointer;
+	}
+
+	.button-group {
+		margin: 2rem 0;
+		text-align: center;
+	}
+
+	/* Mobile-specific adjustments */
+	@media (max-width: 768px) {
+		:global(#chart figure),
+		:global(#chart2 figure) {
+			font-size: 0.75rem !important;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	/* Click-to-zoom styles for both charts */
+
+	:global(#chartImg),
+	:global(#chartImg2) {
+		max-width: 100%;
+		height: auto;
+		display: block;
+		transition: transform 0.25s ease;
+		cursor: zoom-in;
+	}

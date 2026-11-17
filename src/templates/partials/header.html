@@ -1,0 +1,27 @@
+{% from "partials/macros.html" import icon %}
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="/" aria-label="{{ site.name }} — home">
+      <span class="brand__mark">ZA</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      {% for item in site.nav %}
+      <a class="site-nav__link" href="{{ item.href }}"{% if page.path == item.href or (item.href != '/' and page.path.startswith(item.href)) %} aria-current="page"{% endif %}>{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Switch theme" title="Switch theme">{{ icon('theme') }}</button>
+      <button class="icon-button mobile-menu-button" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-nav" aria-label="Open menu">{{ icon('menu') }}</button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobile-nav" hidden>
+    <div class="container">
+      <ul class="mobile-nav__list">
+        {% for item in site.nav %}
+        <li><a class="mobile-nav__link" href="{{ item.href }}">{{ item.label }} {{ icon('arrow-right') }}</a></li>
+        {% endfor %}
+        <li><a class="mobile-nav__link" href="/styleguide/">Styleguide {{ icon('arrow-right') }}</a></li>
+      </ul>
+    </div>
+  </div>
+</header>

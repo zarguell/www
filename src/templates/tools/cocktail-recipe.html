@@ -1,0 +1,319 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-hero">
+		<div class="hero-header">
+			<div>
+				<h1>Cocktail Recipe Maker</h1>
+				<p class="tool-subtitle">Build and share custom cocktail recipes with optional batch calculations</p>
+			</div>
+			<div class="header-actions" id="headerActions">
+				<button id="share-recipe-btn" class="btn btn--primary">Share Recipe</button>
+				<button id="copy-to-edit-btn" class="btn btn--small is-hidden">Copy to Edit</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="mode-notice" id="modeNotice"></div>
+
+	<div class="cocktail-name-row">
+		<input id="cocktailName" class="cocktail-name-input" placeholder="Cocktail name" value="My Batch Cocktail" aria-label="Cocktail name" />
+		<span class="status-pill" id="headlinePill">Ready</span>
+	</div>
+
+	<!-- Manage UI (hidden in view mode) -->
+	<div id="manageUI">
+		<div class="batch-grid">
+			<!-- Left: Ingredient library -->
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Ingredient Library</h2><span class="badge">BUILD</span></div><div class="panel__body">
+				<div class="form-row">
+					<select id="presetSelect" class="preset-select" aria-label="Preset ingredient"></select>
+					<button id="addPresetBtn" class="btn btn--primary">Add</button>
+				</div>
+
+				<details class="custom-ingredient-details">
+					<summary>➕ Add custom ingredient</summary>
+					<div class="form-row">
+						<input id="custEmoji" placeholder="🧪" class="emoji-input" aria-label="Custom ingredient emoji" />
+						<input id="custName" placeholder="Name" class="name-input" aria-label="Custom ingredient name" />
+					</div>
+					<div class="form-row">
+						<input id="custAbv" type="number" min="0" max="100" step="0.1" placeholder="Default ABV %" class="abv-input" aria-label="Custom ingredient ABV percent" />
+						<button id="addCustomBtn" class="btn">Add custom</button>
+					</div>
+					<div class="muted">Set ABV to 0 for juices/syrups/mixers.</div>
+				</details>
+
+				<div class="kpi-container">
+					<div class="kpi-box">
+						<div class="kpi-label">Single serving (undiluted)</div>
+						<div class="kpi-value"><span id="baseTotalMl">0</span> ml</div>
+					</div>
+					<div class="kpi-box">
+						<div class="kpi-label">Single serving ethanol</div>
+						<div class="kpi-value"><span id="baseEthanolMl">0</span> ml</div>
+					</div>
+				</div>
+			</div></section>
+
+			<!-- Right: Recipe builder -->
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Recipe Builder (Single Serving)</h2><span class="badge">RECIPE</span></div><div class="panel__body">
+				<div class="recipe-header">
+					<div class="recipe-controls">
+						<button id="clearBtn" class="btn btn--small">Clear</button>
+						<button id="exampleBtn" class="btn btn--small">Load Example</button>
+					</div>
+				</div>
+
+				<div class="form-group" id="recipe-name-group">
+					<label for="recipe-name">Recipe Name</label>
+					<input
+						type="text"
+						id="recipe-name"
+						name="recipe-name"
+						placeholder="e.g., Spicy Margarita"
+						required
+					/>
+				</div>
+
+				<div class="recipe-table-wrapper">
+					<table class="recipe-table">
+						<thead>
+							<tr>
+								<th>Ingredient</th>
+								<th class="right">Amount</th>
+								<th>Unit</th>
+								<th class="right">ABV%</th>
+								<th class="center">Move</th>
+								<th class="center">Remove</th>
+							</tr>
+						</thead>
+						<tbody id="recipeTbody"></tbody>
+					</table>
+				</div>
+
+				<div class="muted">
+					ABV is editable per ingredient (useful for overproof spirits or specific brands).
+				</div>
+
+				<div class="form-group">
+					<label for="preparationMethod">Preparation method</label>
+					<select id="preparationMethod">
+						<option value="none">None (build in glass)</option>
+						<option value="stirred">Stirred with ice</option>
+						<option value="shaken">Shaken with ice</option>
+					</select>
+					<div class="muted">How to prepare the cocktail - affects dilution information on the recipe card</div>
+				</div>
+			</div></section>
+		</div>
+	</div>
+
+	<!-- Batch mode toggle -->
+	<div class="batch-toggle-section" id="batch-toggle">
+		<label class="toggle-label">
+			<input
+				type="checkbox"
+				id="batch-mode-toggle"
+				name="batch-mode"
+			/>
+			<span>Enable Batch Calculator</span>
+		</label>
+	</div>
+
+	<!-- Full width: Settings + output card -->
+	<div id="batch-calculator">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Batch Settings & Export</h2><span class="badge">CALCULATE</span></div><div class="panel__body">
+		<div class="batch-settings-grid">
+			<div class="settings-column" id="settingsColumn">
+				<div class="batch-mode-section">
+					<div class="radio-group">
+						<label class="radio-label">
+							<input type="radio" name="scaleMode" value="total" checked />
+							Target total volume
+						</label>
+						<label class="radio-label">
+							<input type="radio" name="scaleMode" value="servings" />
+							Number of servings
+						</label>
+					</div>
+				</div>
+
+				<div class="form-group" id="totalRow">
+					<label for="targetTotal">Target final volume</label>
+					<div class="input-row">
+						<input id="targetTotal" type="number" value="750" min="1" step="1" />
+						<select id="targetUnit">
+							<option value="ml">ml</option>
+							<option value="oz">oz</option>
+							<option value="cup">cups</option>
+							<option value="l">L</option>
+						</select>
+					</div>
+					<div class="muted">Final volume including dilution water</div>
+				</div>
+
+				<div class="form-group is-hidden" id="servingsRow">
+					<label for="servings">Number of servings</label>
+					<input id="servings" type="number" value="10" min="1" step="1" />
+				</div>
+
+				<div class="form-group">
+					<label for="dilutionMode">Dilution method</label>
+					<div class="input-row">
+						<select id="dilutionMode">
+							<option value="none">No dilution water</option>
+							<option value="stirred">Stirred (20% default)</option>
+							<option value="shaken">Shaken (30% default)</option>
+							<option value="custom">Custom %</option>
+						</select>
+						<input id="customDilution" type="number" min="0" max="200" step="0.1" value="20" class="is-hidden" />
+					</div>
+					<div class="muted">
+						If guests will pour the batch over fresh ice, consider aiming a bit lower because the glass ice will continue diluting.
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="displayUnit">Display unit for recipe card</label>
+					<select id="displayUnit">
+						<option value="ml">ml</option>
+						<option value="oz">oz</option>
+						<option value="cup">cups</option>
+						<option value="l">L</option>
+					</select>
+				</div>
+
+				<div class="button-row">
+					<button id="calcBtn" class="btn btn--primary">Recalculate</button>
+				</div>
+
+				<div class="form-group">
+					<label for="cardNoteInput">Recipe card note (optional)</label>
+					<textarea id="cardNoteInput" rows="2" placeholder="Add a custom note for your recipe card..."></textarea>
+					<div class="muted">This note appears on the exported PNG image.</div>
+				</div>
+
+				<div class="button-row">
+					<button id="saveBtn" class="btn">Save to Browser</button>
+					<button id="loadBtn" class="btn">Load</button>
+				</div>
+			</div>
+
+			<div class="export-column">
+				<div class="export-section">
+					<div class="export-header">
+						<span class="status-pill">Batch Recipe Card</span>
+						<button id="exportBtn" class="btn btn--primary">Export PNG</button>
+					</div>
+
+					<!-- Recipe Card -->
+					<div id="card" class="recipe-card">
+						<div class="card-header">
+							<div class="card-title-section">
+								<h3 id="cardTitle">My Batch Cocktail</h3>
+								<div class="card-meta" id="cardMeta">Batching sheet</div>
+							</div>
+							<div class="card-tags">
+								<div class="tag" id="tagMethod">Method: —</div>
+								<div class="tag" id="tagFreezer">Freezer: —</div>
+							</div>
+						</div>
+
+						<div class="card-stats">
+							<div><strong>Final volume:</strong> <span id="cardFinalVol">—</span></div>
+							<div><strong>ABV:</strong> <span id="cardAbv">—</span></div>
+							<div><strong>Dilution water:</strong> <span id="cardWater">—</span></div>
+						</div>
+
+						<table class="card-table">
+							<thead>
+								<tr>
+									<th>Ingredient</th>
+									<th class="right">Scaled amount</th>
+								</tr>
+							</thead>
+							<tbody id="cardBody"></tbody>
+						</table>
+
+						<div class="card-note" id="cardNotes">
+							Notes: If guests will pour over fresh ice, consider lowering added water since the glass ice will keep diluting.
+						</div>
+
+						<div class="card-footer">
+							Made on <a href="https://www.arguelles.me/tools/cocktail-recipe/" target="_blank" rel="noopener">www.arguelles.me/tools/cocktail-recipe/</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div></section>
+	</div>
+
+	<!-- Normal Mode Recipe Card (hidden when batch mode is enabled) -->
+	<div id="normal-mode-card-section" class="is-hidden">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Single Serving Recipe Card</h2><span class="badge">RECIPE</span></div><div class="panel__body">
+			<div class="batch-settings-grid">
+				<div class="settings-column is-hidden">
+					<!-- Placeholder for alignment -->
+				</div>
+
+				<div class="export-column">
+					<div class="export-section">
+						<div class="export-header">
+							<span class="status-pill">Single Serving Recipe Card</span>
+							<button id="exportNormalBtn" class="btn btn--primary">Export PNG</button>
+						</div>
+
+						<!-- Normal Mode Recipe Card -->
+						<div id="normalCard" class="recipe-card">
+							<div class="card-header">
+								<div class="card-title-section">
+									<h3 id="normalCardTitle">My Cocktail</h3>
+									<div class="card-meta" id="normalCardMeta">Single serving</div>
+								</div>
+								<div class="card-tags">
+									<div class="tag" id="normalTagMethod">Method: —</div>
+								</div>
+							</div>
+
+							<div class="card-stats">
+								<div><strong>Total volume:</strong> <span id="normalCardVol">—</span></div>
+								<div><strong>ABV:</strong> <span id="normalCardAbv">—</span></div>
+								<div><strong>Preparation:</strong> <span id="normalCardPrep">—</span></div>
+							</div>
+
+							<table class="card-table">
+								<thead>
+									<tr>
+										<th>Ingredient</th>
+										<th class="right">Amount</th>
+									</tr>
+								</thead>
+								<tbody id="normalCardBody"></tbody>
+							</table>
+
+							<div class="card-note is-hidden" id="normalCardNotes">
+								Notes: —
+							</div>
+
+							<div class="card-footer">
+								Made on <a href="https://www.arguelles.me/tools/cocktail-recipe/" target="_blank" rel="noopener">www.arguelles.me/tools/cocktail-recipe/</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div></section>
+	</div>
+
+	<div class="toast" id="toast"></div>
+
+
+<!-- html-to-image for PNG export -->
+
+<!-- LZ-String for compression -->
+{% endblock %}
+
+{% block tool_head_extra %}<script src="{{ asset('vendor/html-to-image.js') }}" defer></script>
+<script src="{{ asset('vendor/lz-string.min.js') }}" defer></script>{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/cocktail-recipe.js') }}"></script>{% endblock %}

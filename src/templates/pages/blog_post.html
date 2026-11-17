@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, tag, link_arrow %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+<article class="post-page">
+  <a class="back-link" href="/blog/">← Back to blog</a>
+  <header class="post-header">
+    <h1 class="post-title">{{ post.title }}</h1>
+    <div class="post-meta">
+      <span>{{ post.pub_date|date }}</span>
+      <span>{{ post.reading_time }} min read</span>
+      {% if post.updated_date %}<span>Updated {{ post.updated_date|date }}</span>{% endif %}
+    </div>
+    <div class="tag-row tag-row--post">
+      {% for item in post.tags %}{{ tag(item, '/blog/?tag=' ~ item|urlencode) }}{% endfor %}
+    </div>
+  </header>
+
+  {% if post.image %}
+  <figure class="post-hero">
+    <img src="{{ post.image }}" alt="" width="1200" height="675">
+  </figure>
+  {% endif %}
+
+  <div class="post-layout">
+    <div class="prose">
+      {{ post.html|safe }}
+    </div>
+    <aside class="post-aside" aria-label="Post details">
+      <div class="post-aside__item">
+        <span class="post-aside__label">Published</span>
+        <span class="post-aside__value">{{ post.pub_date|date }}</span>
+      </div>
+      <div class="post-aside__item">
+        <span class="post-aside__label">Reading time</span>
+        <span class="post-aside__value">{{ post.reading_time }} min · {{ post.word_count }} words</span>
+      </div>
+      <div class="post-aside__item">
+        <span class="post-aside__label">Share</span>
+        <div class="post-share">
+          <button class="btn btn--small" type="button" data-copy-url>Copy link {{ icon('copy') }}</button>
+          <a class="btn btn--small" href="https://www.linkedin.com/sharing/share-offsite/?url={{ page.canonical|urlencode }}" target="_blank" rel="noopener noreferrer">LinkedIn {{ icon('external') }}</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="post-end">
+    <span>Thanks for reading.</span>
+    <a class="link-arrow" href="/blog/">All posts {{ icon('arrow-right') }}</a>
+  </footer>
+
+  {% if related %}
+  <section class="related">
+    <h2 class="section__title">Keep reading</h2>
+    <div class="related__list">
+      {% for item in related %}
+      <a class="related__item" href="/blog/{{ item.slug }}/">
+        <span class="related__title">{{ item.title }}</span>
+        <span class="related__meta">{{ item.pub_date|date }} · {{ item.reading_time }} min</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, link_arrow %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>{{ about.meta.title }}</h1>
+    <p class="page-head__sub">{{ about.meta.tagline }}</p>
+  </div>
+</header>
+
+<div class="about-layout">
+  <div class="about-copy">
+    <div class="prose">{{ body_html|safe }}</div>
+    <a class="link-arrow contact-line" href="{{ about.meta.contact.href }}" target="_blank" rel="noopener noreferrer">{{ about.meta.contact.label }} {{ icon('arrow-up-right') }}</a>
+    <section class="colophon" aria-labelledby="colophon-title">
+      <h2 class="section__title" id="colophon-title">How this site is built</h2>
+      {% for item in colophon %}
+      <div class="colophon__row">
+        <span class="colophon__label">{{ item.label }}</span>
+        <span>{{ item.value }}</span>
+      </div>
+      {% endfor %}
+    </section>
+  </div>
+  <figure class="about-figure">
+    <img src="{{ about_image }}" alt="A mountain ridge seen from a forested slope" width="900" height="1100">
+    <figcaption>Somewhere in the Cascades.</figcaption>
+  </figure>
+</div>
+{% endblock %}

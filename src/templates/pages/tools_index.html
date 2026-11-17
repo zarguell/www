@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, page_head %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+{{ page_head('Tools', 'Calculators and utilities for your digital life. Everything runs in your browser.', '<span class="mono">' ~ tools|length ~ ' tools</span>') }}
+
+<div class="search-bar">
+  <label class="sr-only" for="tool-search">Search tools</label>
+  <input class="input" id="tool-search" type="search" placeholder="Search tools..." data-tool-search>
+</div>
+<div class="filter-row" role="group" aria-label="Filter by category">
+  <button class="tag" type="button" data-tool-filter="all" aria-pressed="true">All</button>
+  {% for category in categories %}
+  <button class="tag" type="button" data-tool-filter="{{ category.id }}" aria-pressed="false">{{ category.name }}</button>
+  {% endfor %}
+</div>
+
+<div class="category-list" id="category-list">
+  {% for category in categories %}
+  <section class="category-block" data-tool-category="{{ category.id }}">
+    <div class="category-block__head">
+      <div>
+        <h2 class="category-block__title">{{ category.name }}</h2>
+        <p class="category-block__desc">{{ category.description }}</p>
+      </div>
+      <span class="mono faint">{{ category.tools|length }} tools</span>
+    </div>
+    <div class="tool-grid">
+      {% for tool in category.tools %}
+      <article class="tool-card" data-tool-card data-category="{{ category.id }}" data-title="{{ tool.title }}" data-description="{{ tool.description }}" data-features="{{ tool.features|join(' ') }}">
+        <div class="tool-card__head">
+          <h3 class="tool-card__title">{{ tool.title }}</h3>
+          <span class="badge">{{ tool.badge }}</span>
+        </div>
+        <p class="tool-card__desc">{{ tool.description }}</p>
+        <ul class="tool-card__features">
+          {% for feature in tool.features %}<li>{{ feature }}</li>{% endfor %}
+        </ul>
+        <div class="tool-card__foot">
+          <span>Updated {{ tool.lastModified|date }}</span>
+          {% if tool.url is defined and tool.url %}
+          <a class="tool-card__open" href="{{ tool.url }}" target="_blank" rel="noopener noreferrer">Open tool {{ icon('arrow-up-right') }}</a>
+          {% else %}
+          <a class="tool-card__open" href="/tools/{{ tool.slug }}/">Open tool {{ icon('arrow-right') }}</a>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+<p class="empty-state" data-tool-empty hidden>No tools match that search.</p>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ asset('js/tools.js') }}"></script>{% endblock %}

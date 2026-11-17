@@ -1,5 +1,7 @@
 name = "www"
-compatibility_date = "2025-01-06"
+compatibility_date = "2026-11-17"
 
-# Serve your built Astro site as static assets
-assets = { directory = "./dist" }
+# Cloudflare Workers static assets. The Python/Jinja build writes ./dist.
+# Workers Builds runs `npm run build` (see README); this file owns deploy-time
+# asset routing and the 404 fallback.
+assets = { directory = "./dist", not_found_handling = "404-page" }

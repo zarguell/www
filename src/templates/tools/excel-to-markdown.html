@@ -1,0 +1,86 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="x2m-container">
+		<div class="tool-hero">
+			<h1>Excel → Markdown</h1>
+			<p class="tool-subtitle">
+				Spreadsheets in, clean markdown tables out. Runs entirely in your browser — nothing
+				is uploaded.
+			</p>
+		</div>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Upload Spreadsheet</h2><span class="badge">CONVERT</span></div><div class="panel__body">
+			<div id="x2mDropZone" class="drop-zone">
+				<input
+					id="x2mFileInput"
+					type="file"
+					accept=".xlsx,.xls,.ods,.csv,.tsv,.txt"
+					aria-label="Choose a spreadsheet file"
+				/>
+				<p class="upload-hint">
+					Drag &amp; drop a spreadsheet here, or click to browse.
+					<span class="upload-formats">XLSX · XLS · ODS · CSV · TSV · TXT</span>
+				</p>
+			</div>
+			<div id="x2mStatus" class="parse-status" aria-live="polite">
+				Drop an xlsx/csv/tsv file above, or paste delimited text below. Everything runs locally.
+			</div>
+		</div></section>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Options</h2><span class="badge">TUNE</span></div><div class="panel__body">
+			<div class="option-row">
+				<label class="option">
+					<input id="x2mHeaderRow" type="checkbox" checked />
+					First row is a header
+				</label>
+				<label class="option">
+					<input id="x2mSkipEmpty" type="checkbox" checked />
+					Skip empty rows &amp; columns
+				</label>
+			</div>
+			<div class="sheet-row">
+				<label class="option" for="x2mSheetPicker">Sheet:</label>
+				<select id="x2mSheetPicker" class="sheet-picker is-hidden" aria-label="Choose sheet"></select>
+			</div>
+		</div></section>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Markdown Output</h2><span class="badge">RESULT</span></div><div class="panel__body">
+			<textarea
+				id="x2mOutput"
+				class="raw-text"
+				spellcheck="false"
+				readonly
+				aria-label="Markdown table output"
+				placeholder="Converted markdown will appear here."
+			></textarea>
+			<div class="btnrow">
+				<button class="btn btn--primary" id="x2mCopy" type="button">Copy Markdown</button>
+				<button class="btn" id="x2mDownload" type="button">Download .md</button>
+			</div>
+		</div></section>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Paste CSV / TSV</h2><span class="badge">NO FILE?</span></div><div class="panel__body">
+			<textarea
+				id="x2mPasteText"
+				class="raw-text raw-text--short"
+				spellcheck="false"
+				aria-label="Paste delimited text"
+				placeholder="Paste CSV/TSV text — quotes, embedded commas, and newlines are handled."
+			></textarea>
+			<div class="btnrow">
+				<button class="btn btn--primary" id="x2mConvertPasted" type="button">Convert Text</button>
+				<button class="btn" id="x2mSample" type="button">Load Tricky Sample</button>
+			</div>
+			<p class="hint">
+				The sample includes the cases that break naive converters: commas inside quotes,
+				escaped quote characters, and a newline inside a cell.
+			</p>
+		</div></section>
+	</div>
+
+	<!-- SheetJS is self-hosted: an integrity-pinned CDN tag proved flaky, and a
+	     same-origin asset removes the third-party runtime dependency entirely. -->
+{% endblock %}
+
+{% block tool_head_extra %}<script src="{{ asset('vendor/xlsx.full.min.js') }}" defer></script>{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/excel-to-markdown.js') }}"></script>{% endblock %}

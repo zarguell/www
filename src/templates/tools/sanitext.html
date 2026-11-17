@@ -1,0 +1,154 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="sanitext-hero">
+		<h1>Sanitext</h1>
+		<p class="tagline">Privacy-focused, client-side text sanitization</p>
+	</div>
+
+	<!-- Configuration Button -->
+	<div class="config-bar">
+		<button id="configBtn" class="btn">Configure Rules</button>
+		<button id="importBtn" class="btn">Import Config</button>
+		<button id="exportBtn" class="btn">Export Config</button>
+		<button id="resetBtn" class="btn">Reset to Defaults</button>
+	</div>
+
+	<!-- Main Text Areas -->
+	<div class="text-areas-container">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Input Text</h2><span class="badge">INPUT</span></div><div class="panel__body">
+			<div class="section-header">
+				<span class="char-count" id="inputCharCount">0 characters</span>
+			</div>
+			<textarea
+				id="inputText"
+				class="text-area"
+				placeholder="Paste your text here to sanitize..."
+				spellcheck="false"
+			></textarea>
+		</div></section>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Sanitized Text</h2><span class="badge">OUTPUT</span></div><div class="panel__body">
+			<div class="section-header">
+				<span class="char-count" id="outputCharCount">0 characters</span>
+				<button id="copyBtn" class="btn btn--primary" disabled>Copy to Clipboard</button>
+			</div>
+			<textarea
+				id="outputText"
+				class="text-area"
+				readonly
+				placeholder="Sanitized text will appear here..."
+			></textarea>
+		</div></section>
+	</div>
+
+	<!-- Configuration Modal -->
+	<div id="configModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="configModalTitle">Sanitization Rules Configuration</h3>
+				<button class="modal-close" id="closeModal">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+					</svg>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<div class="config-actions">
+					<button id="addRuleBtn" class="btn btn--primary">Add Rule</button>
+				</div>
+
+				<div class="rules-container">
+					<div class="rules-header">
+						<span>Rule Name</span>
+						<span>Pattern/Text</span>
+						<span>Replacement</span>
+						<span>Type</span>
+						<span>Category</span>
+						<span>Enabled</span>
+						<span>Actions</span>
+					</div>
+					<div id="rulesList" class="rules-list"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Add/Edit Rule Modal -->
+	<div id="ruleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="ruleModalTitle">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="ruleModalTitle">Add New Rule</h3>
+				<button class="modal-close" id="closeRuleModal">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+					</svg>
+				</button>
+			</div>
+
+			<form id="ruleForm" class="modal-body">
+				<div class="form-group">
+					<label class="form-label" for="ruleName">Rule Name</label>
+					<input type="text" id="ruleName" class="form-control" required>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="ruleType">Type</label>
+					<select id="ruleType" class="form-control" required>
+						<option value="string">String Match</option>
+						<option value="regex">Regular Expression</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="rulePattern">Pattern/Text to Match</label>
+					<textarea id="rulePattern" class="form-control" rows="2" required></textarea>
+					<small class="form-help">For regex type, enter a valid regular expression. For string type, enter exact text to match.</small>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="ruleReplacement">Replacement Text</label>
+					<input type="text" id="ruleReplacement" class="form-control" required>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label" for="ruleCategory">Category</label>
+					<select id="ruleCategory" class="form-control" required>
+						<option value="Personal Information">Personal Information</option>
+						<option value="Financial Information">Financial Information</option>
+						<option value="Network Information">Network Information</option>
+						<option value="Custom Company Rules">Custom Company Rules</option>
+					</select>
+				</div>
+
+				<div class="checkbox-group">
+					<label class="checkbox-label">
+						<input type="checkbox" id="ruleEnabled" checked>
+						<span class="checkmark"></span>
+						Enable this rule
+					</label>
+				</div>
+
+				<div class="form-actions">
+					<button type="button" class="btn" id="cancelRuleBtn">Cancel</button>
+					<button type="submit" class="btn btn--primary" id="saveRuleBtn">Save Rule</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Toast Notifications -->
+	<div id="toast" class="toast hidden" role="status" aria-live="polite">
+		<span id="toastMessage"></span>
+		<button class="toast-close" id="toastClose" aria-label="Dismiss notification">×</button>
+	</div>
+
+	<input type="file" id="importFile" accept=".json" hidden>
+
+	<div class="privacy-notice">
+		<p>100% Client-Side Processing - Your text never leaves your browser</p>
+	</div>
+{% endblock %}
+
+{% block tool_head_extra %}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/sanitext.js') }}"></script>{% endblock %}

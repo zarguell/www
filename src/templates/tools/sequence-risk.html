@@ -1,0 +1,61 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-header">
+		<h1>Sequence of Returns Risk Explorer</h1>
+		<p class="tool-subtitle">See how early retirement returns matter more than late returns</p>
+	</div>
+
+	<div class="tool-content">
+		<form data-no-submit id="simulationForm">
+
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Portfolio Parameters</h2><span class="badge">INPUTS</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="initialPortfolio">Initial Portfolio <small>($)</small></label>
+					<input type="number" id="initialPortfolio" min="10000" max="2000000" step="10000" value="100000" required />
+					<small>Starting portfolio value</small>
+				</div>
+
+				<div class="form-group">
+					<label for="annualContribution">Annual Contribution <small>($)</small></label>
+					<input type="number" id="annualContribution" min="0" max="50000" step="1000" value="10000" required />
+					<small>Amount invested each year</small>
+				</div>
+
+				<div class="form-group">
+					<label for="timeHorizon">Time Horizon <small>(years)</small></label>
+					<input type="number" id="timeHorizon" min="10" max="40" value="30" required />
+					<small>Years to simulate</small>
+				</div>
+
+				<div class="form-group">
+					<label for="targetReturn">Target Return <small>(decimal)</small></label>
+					<input type="number" id="targetReturn" min="0.02" max="0.12" step="0.005" value="0.07" required />
+					<small>Average annual return (2% - 12%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="volatility">Volatility <small>(decimal)</small></label>
+					<input type="number" id="volatility" min="0.05" max="0.25" step="0.01" value="0.15" required />
+					<small>Annual volatility (5% - 25%)</small>
+				</div>
+
+				<div class="button-group">
+					<button type="button" class="btn btn--primary" py-click="run_explorer">
+						Explore Sequences
+					</button>
+				</div>
+			</div></section>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+<script type="py" src="/tools/sequence-risk/main.py" config="/tools/sequence-risk/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript() }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}

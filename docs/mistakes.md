@@ -63,3 +63,20 @@ This document tracks mistakes encountered during development and their solutions
 - Diff-review the output of bulk regex/script edits before building — the broken markup was invisible in the build log
 - A green exit code is not proof the site built: wipe `dist` and `node_modules/.vite`, rebuild, and confirm `dist/<route>/index.html` exists for every touched page
 - Permanent guideline lives in AGENTS.md → "Build Verification (before pushing)"
+
+## [2026-11-17] Astro to Python/Jinja migration
+
+**Issue**: Porting tool pages from Astro kept inline `style` attributes and `hidden`
+attributes that scripts toggled with `style.display`.
+
+**Solution**: The converter turned `style="display:none"` into `class="is-hidden"`, and
+scripts clear the class or set `style.display`. Inline styles in Jinja templates are
+rejected by the build validator.
+
+**Key Lessons**:
+- Use `class="is-hidden"` for JS-controlled visibility; it is overridable by inline
+  `style.display` assignments and does not use `!important`.
+- The build validator checks generated HTML for inline scripts, styles, handlers, and
+  `style=` attributes. Run it before pushing.
+- Tesseract.js expects `tesseract-core-*.wasm.js` wrappers, not separate `.wasm` files.
+  Vendor the `.wasm.js` variants when self-hosting.

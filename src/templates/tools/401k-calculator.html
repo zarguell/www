@@ -1,0 +1,97 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="calculator-hero">
+		<h1>401k + Mega Backdoor Roth Calculator</h1>
+		<p class="calculator-subtitle">Tiered Match + Strategies</p>
+		<p class="last-updated" id="lastUpdated"></p>
+	</div>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Calculator</h2><span class="badge">ACTIVE</span></div><div class="panel__body">
+		<div class="calculator-form">
+			<div class="form-group">
+				<label for="salary">Annual base salary ($)</label>
+				<input type="number" id="salary" value="50000" step="100" />
+			</div>
+
+			<div class="form-group">
+				<label for="payPeriods">Pay periods per year</label>
+				<input type="number" id="payPeriods" value="26" step="1" />
+			</div>
+
+			<h3>Your elective deferral strategy</h3>
+			<div class="form-group">
+				<label for="strategy">Strategy</label>
+				<select id="strategy">
+					<option value="minTspMax401k">Minimum TSP (full match), Max 401k Schwab</option>
+					<option value="min401kMaxTsp">Minimum 401k (full match), Max TSP</option>
+					<option value="custom">Custom TSP / 401k %</option>
+				</select>
+			</div>
+
+			<div id="customInputs" class="is-hidden">
+				<div class="form-group">
+					<label for="employeeTspPct">Custom TSP contribution (% of salary)</label>
+					<input type="number" id="employeeTspPct" value="5" step="0.1" />
+				</div>
+
+				<div class="form-group">
+					<label for="employeeK401Pct">Custom 401k contribution (% of salary)</label>
+					<input type="number" id="employeeK401Pct" value="10" step="0.1" />
+				</div>
+			</div>
+
+			<h3>Employer contribution settings</h3>
+			<div class="form-group">
+				<label for="autoTspPct">Automatic TSP contribution (% of salary)</label>
+				<input type="number" id="autoTspPct" value="1" step="0.1" />
+			</div>
+
+			<div class="form-group">
+				<label for="autoK401Pct">Automatic 401k contribution (% of salary)</label>
+				<input type="number" id="autoK401Pct" value="4" step="0.1" />
+			</div>
+
+			<div class="form-group">
+				<label for="tspMatchTier1">TSP match: 1:1 up to (%)</label>
+				<input type="number" id="tspMatchTier1" value="3" step="0.1" />
+			</div>
+
+			<div class="form-group">
+				<label for="tspMatchTier2">TSP match: 50% for next (%)</label>
+				<input type="number" id="tspMatchTier2" value="2" step="0.1" />
+			</div>
+
+			<div class="form-group">
+				<label for="k401MatchTier">401k match: 1:1 up to (%)</label>
+				<input type="number" id="k401MatchTier" value="1" step="0.1" />
+			</div>
+
+			<hr />
+
+			<button type="button" data-action="calculate" class="btn btn--primary">Calculate Max Contributions</button>
+		</div>
+	</div></section>
+
+	<div id="results" class="results-section is-hidden">
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Results</h2><span class="badge">CALCULATED</span></div><div class="panel__body">
+			<div class="results-content">
+				<p><strong>Bi-weekly salary:</strong> <span id="biWeekly"></span></p>
+
+				<h3>Strategy & elective deferrals</h3>
+				<div id="electiveDetails"></div>
+
+				<h3>Employer contributions (auto + match)</h3>
+				<div id="employerBreakdown"></div>
+
+				<h3>After-tax (Mega Backdoor) space</h3>
+				<div id="afterTaxDetails"></div>
+
+				<h3>Annual totals</h3>
+				<div id="annualSummary"></div>
+			</div>
+		</div></section>
+	</div>
+{% endblock %}
+
+{% block tool_head_extra %}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/401k-calculator.js') }}"></script>{% endblock %}

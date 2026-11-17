@@ -1,0 +1,156 @@
+.les-container {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.tool-subtitle {
+		color: var(--muted);
+		font-size: 1.2rem;
+		margin: 0;
+	}
+
+	.btnrow {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.parse-status {
+		margin-top: 0.75rem;
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--muted);
+		font-size: 1.1rem;
+	}
+
+	:global(.parse-status--error) {
+		color: var(--danger);
+		background: var(--error-bg);
+		border-color: var(--danger);
+	}
+
+	.hint {
+		font-size: 1rem;
+		color: var(--muted);
+		margin: 0.75rem 0 0 0;
+	}
+
+	.hint-top {
+		margin: 0 0 0.5rem 0;
+	}
+
+	.hint code {
+		background: var(--bg);
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		padding: 0 0.3em;
+	}
+
+	.raw-text {
+		width: 100%;
+		min-height: 12rem;
+		margin-top: 0.5rem;
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+		color: var(--text);
+		font-family: var(--font-display);
+		font-size: 1.05rem;
+		resize: vertical;
+	}
+
+	.raw-text--short {
+		min-height: 10rem;
+	}
+
+	.raw-text:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	/* ── Parsed output (runtime-filled; value nodes are template elements,
+	     row internals are injected → :global where needed) ── */
+	.summary-head {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin-bottom: 0.75rem;
+	}
+
+	.balance-badge {
+		display: inline-block;
+		padding: 0.2em 0.7em;
+		border: 2px solid var(--border);
+		border-radius: 999px;
+		font-size: 1rem;
+		letter-spacing: 0.06em;
+	}
+
+	.diag {
+		color: var(--muted);
+		font-size: 1rem;
+	}
+
+	.meta-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	:global(.meta-item) {
+		padding: 0.75rem;
+		border: 2px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg);
+	}
+
+	:global(.meta-item .meta-label) {
+		display: block;
+		font-size: 0.9rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--muted);
+	}
+
+	:global(.meta-item strong) {
+		display: block;
+		font-size: 1.2rem;
+		word-break: break-word;
+	}
+
+	.les-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 1.05rem;
+	}
+
+	.les-table th {
+		text-align: left;
+		padding: 0.4rem 0.5rem;
+		border-bottom: 3px solid var(--border);
+		color: var(--muted);
+		text-transform: uppercase;
+		font-size: 0.9rem;
+		letter-spacing: 0.06em;
+	}
+
+	.les-table td {
+		padding: 0.4rem 0.5rem;
+		border-bottom: 2px solid var(--border);
+		word-break: break-word;
+	}
+
+	.les-table tr:last-child td {
+		border-bottom: none;
+	}
+
+	@media (max-width: 640px) {
+		.meta-grid {
+			grid-template-columns: 1fr;
+		}
+	}

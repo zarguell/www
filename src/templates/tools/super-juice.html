@@ -1,0 +1,62 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-hero">
+		<h1>Super Juice Calculator</h1>
+		<p class="tool-subtitle">Calculate citrus juice extraction with acid-infused peels</p>
+	</div>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Super Juice Calculator</h2><span class="badge">FOOD & DRINKS</span></div><div class="panel__body">
+		<div class="form-row">
+			<div class="form-group">
+				<label for="juiceType">Recipe</label>
+				<select id="juiceType">
+					<option value="lemon">Lemon (peel-based)</option>
+					<option value="lime">Lime (peel-based)</option>
+					<option value="orange">Orange (peel-based)</option>
+					<option value="grapefruit">Grapefruit (peel-based + MSG)</option>
+					<option value="kumquat">Kumquat (fruit-based)</option>
+				</select>
+				<div class="muted" id="recipeHint"></div>
+			</div>
+
+			<div class="form-group" id="baseWrap">
+				<label id="baseLabel" for="baseGrams">Peel weight (g)</label>
+				<input id="baseGrams" type="number" min="0" step="0.1" value="30.1" />
+			</div>
+
+			<div class="form-group is-hidden" id="targetWrap">
+				<label for="targetWeight">Target final weight (g / ml, approx)</label>
+				<input id="targetWeight" type="number" min="0" step="1" value="500" />
+				<div class="muted">
+					Approximated as "water added". Classic citrus will yield a little extra from fresh-juiced fruit.
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="invisible">&nbsp;</label>
+				<button id="swapBtn" type="button" class="btn">Swap Mode</button>
+			</div>
+
+			<div class="form-group">
+				<label class="invisible">&nbsp;</label>
+				<button id="calcBtn" type="button" class="btn btn--primary">Calculate</button>
+			</div>
+		</div>
+
+		<!-- Hidden input mode for state management -->
+		<input type="hidden" id="inputMode" value="base" />
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Calculated Ingredients</h2><span class="badge">RESULTS</span></div><div class="panel__body">
+		<div class="ingredients-table" id="results">
+			<p class="placeholder-text">(Click Calculate)</p>
+		</div>
+	</div></section>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Step by Step</h2><span class="badge">INSTRUCTIONS</span></div><div class="panel__body">
+		<ol id="steps" class="steps-list"></ol>
+	</div></section>
+{% endblock %}
+
+{% block tool_head_extra %}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/super-juice.js') }}"></script>{% endblock %}

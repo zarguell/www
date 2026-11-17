@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, tag, page_head %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Blog</h1>
+    <p class="page-head__sub">My random thoughts...</p>
+  </div>
+  <a class="link-arrow" href="/rss.xml">Subscribe via RSS {{ icon('rss') }}</a>
+</header>
+
+<div class="search-bar">
+  <label class="sr-only" for="blog-search">Search posts</label>
+  <input class="input" id="blog-search" type="search" placeholder="Search posts..." data-blog-search>
+  <div class="filter-row" role="group" aria-label="Filter by tag">
+    <button class="tag" type="button" data-blog-filter="all" aria-pressed="true">All</button>
+    {% for item in all_tags %}
+    <button class="tag" type="button" data-blog-filter="{{ item }}" aria-pressed="false">{{ item }}</button>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="post-list">
+  {% for post in posts %}
+  <article class="post-row" data-post-row data-tags="{{ post.tags|join('|') }}" data-title="{{ post.title }}" data-description="{{ post.description }}">
+    <a class="post-row__thumb" href="/blog/{{ post.slug }}/" tabindex="-1" aria-hidden="true">
+      <img src="{{ post.image or '/assets/images/hero.jpg' }}" alt="" loading="lazy" width="640" height="400">
+    </a>
+    <div>
+      <div class="post-row__meta">
+        <span>{{ post.pub_date|date }}</span>
+        <span>{{ post.reading_time }} min read</span>
+      </div>
+      <h2 class="post-row__title"><a href="/blog/{{ post.slug }}/">{{ post.title }}</a></h2>
+      <p class="post-row__desc">{{ post.description }}</p>
+      <div class="tag-row">
+        {% for item in post.tags %}{{ tag(item, '/blog/?tag=' ~ item|urlencode) }}{% endfor %}
+      </div>
+    </div>
+    <span class="post-row__arrow">{{ icon('arrow-right') }}</span>
+  </article>
+  {% endfor %}
+</div>
+<p class="empty-state" data-blog-empty hidden>No posts match that filter.</p>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ asset('js/blog.js') }}"></script>{% endblock %}

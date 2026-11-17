@@ -1,0 +1,94 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="calculator-hero">
+		<h1>Golden Rune Calculator</h1>
+		<p class="calculator-subtitle">Calculate Golden Runes needed in Elden Ring</p>
+	</div>
+
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Calculator</h2><span class="badge">ACTIVE</span></div><div class="panel__body">
+		<form id="rune-form" class="calculator-form">
+			<div class="form-row">
+				<div class="form-group">
+					<label for="runes-needed">Runes needed:</label>
+					<input type="number" id="runes-needed" min="0" required>
+				</div>
+				<div class="form-group">
+					<label for="runes-have">Current Runes:</label>
+					<input type="number" id="runes-have" min="0" required>
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-1"># Golden Rune 1:</label>
+					<input type="number" id="rune-1" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-2"># Golden Rune 2:</label>
+					<input type="number" id="rune-2" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-3"># Golden Rune 3:</label>
+					<input type="number" id="rune-3" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-4"># Golden Rune 4:</label>
+					<input type="number" id="rune-4" min="0">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-5"># Golden Rune 5:</label>
+					<input type="number" id="rune-5" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-6"># Golden Rune 6:</label>
+					<input type="number" id="rune-6" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-7"># Golden Rune 7:</label>
+					<input type="number" id="rune-7" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-8"># Golden Rune 8:</label>
+					<input type="number" id="rune-8" min="0">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-9"># Golden Rune 9:</label>
+					<input type="number" id="rune-9" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-10"># Golden Rune 10:</label>
+					<input type="number" id="rune-10" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-11"># Golden Rune 11:</label>
+					<input type="number" id="rune-11" min="0">
+				</div>
+				<div class="form-group">
+					<label for="rune-12"># Golden Rune 12:</label>
+					<input type="number" id="rune-12" min="0">
+				</div>
+			</div>
+
+			<div class="form-row">
+				<div class="form-group">
+					<label for="rune-13"># Golden Rune 13:</label>
+					<input type="number" id="rune-13" min="0">
+				</div>
+				<div class="form-group button-group">
+					<button type="submit" class="btn btn--primary">Calculate</button>
+				</div>
+			</div>
+		</form>
+	</div></section>
+
+	<div id="result" class="results-section"></div>
+{% endblock %}
+
+{% block tool_head_extra %}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/rune-calculator.js') }}"></script>{% endblock %}

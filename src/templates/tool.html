@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon %}
+{% block body_class %}tool-page{% endblock %}
+{% block main_class %}container{% endblock %}
+{% block head %}
+{% if has_tool_css %}<link rel="stylesheet" href="{{ asset('css/tools/' ~ tool.slug ~ '.css') }}">{% endif %}
+<link rel="stylesheet" href="{{ asset('css/tool-overrides.css') }}">
+{% block tool_head_extra %}{% endblock %}
+{% endblock %}
+{% block content %}
+{% block tool_head %}
+<div class="tool-topbar">
+  <a class="back-link" href="/tools/">← All tools</a>
+  <span class="tool-topbar__meta">{{ tool.badge }} · Updated {{ tool.lastModified|date }} · {{ tool.category }}</span>
+</div>
+{% endblock %}
+{% block tool_content %}{% endblock %}
+
+{% if related %}
+<section class="section">
+  <div class="section__head"><h2 class="section__title">More in {{ tool.category }}</h2></div>
+  <div class="related__list">
+    {% for item in related %}
+    <a class="related__item" href="/tools/{{ item.slug }}/">
+      <span class="related__title">{{ item.title }}</span>
+      <span class="related__meta">{{ item.badge }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% block tool_scripts %}{% endblock %}
+{% endblock %}

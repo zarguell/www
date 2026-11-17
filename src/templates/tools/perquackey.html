@@ -1,0 +1,239 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-hero">
+		<h1>PERQUACKEY TRACKER</h1>
+		<p>Word Game Score Tracker with Timer & Dictionary</p>
+	</div>
+
+	<div id="app">
+		<div id="setup-phase" class="phase">
+			<div class="dice-config">
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Game Mode & Dice Settings</h2></div><div class="panel__body">
+		<div class="form-group">
+			<label for="dice-mode">Game Mode</label>
+			<div class="radio-group">
+				<label class="radio-option">
+					<input type="radio" name="dice-mode" value="manual" id="mode-manual" checked />
+					<span>Manual Entry</span>
+				</label>
+				<label class="radio-option">
+					<input type="radio" name="dice-mode" value="virtual" id="mode-virtual" />
+					<span>Virtual Dice</span>
+				</label>
+			</div>
+		</div>
+
+		<div id="virtual-dice-settings" class="virtual-settings" class="is-hidden">
+			<div class="form-group">
+				<label for="dice-set">Dice Set</label>
+				<div class="radio-group">
+					<label class="radio-option">
+						<input type="radio" name="dice-set" value="classic" id="set-classic" checked />
+						<span>Classic (Pre-2004)</span>
+					</label>
+					<label class="radio-option">
+						<input type="radio" name="dice-set" value="modern" id="set-modern" />
+						<span>Modern (2004+)</span>
+					</label>
+				</div>
+			</div>
+
+			<div class="dice-info">
+				<p class="dice-info-title">Dice Sets:</p>
+				<div class="dice-info-content">
+					<div class="dice-set-info">
+						<strong>Classic:</strong> Original dice distribution with Q, S, S, V, W, Y red dice
+					</div>
+					<div class="dice-set-info">
+						<strong>Modern:</strong> Updated dice with B, F, P, Q, S, Y and H, L, N, S, V, W red dice
+					</div>
+				</div>
+			</div>
+		</div>
+	</div></section>
+</div>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Game Setup</h2></div><div class="panel__body">
+				<div class="form-group">
+					<label for="player-name">Add Player</label>
+					<input type="text" id="player-name" placeholder="Enter player name" maxlength="20" />
+					<button id="add-player-btn" class="btn">Add Player</button>
+				</div>
+
+				<div id="players-list"></div>
+
+				<div class="form-group">
+					<label for="round-time">Round Time (seconds)</label>
+					<input type="number" id="round-time" value="180" min="30" max="600" />
+					<small>Default: 180 seconds (3 minutes)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="score-limit">Game End Score</label>
+					<input type="number" id="score-limit" value="5000" min="1000" max="20000" step="500" />
+					<small>Default: 5000 points</small>
+				</div>
+
+				<div id="setup-actions">
+					<button id="start-game-btn" class="btn btn--primary" disabled>Start Game</button>
+				</div>
+			</div></section>
+		</div>
+
+		<div id="playing-phase" class="phase is-hidden">
+			<div class="timer-display" id="timer">3:00</div>
+			<div class="current-player" id="current-player-name"></div>
+
+			<div id="manual-word-entry">
+				<section class="panel"><div class="panel__head"><h2 class="panel__title">Word Entry</h2></div><div class="panel__body">
+					<div class="form-group">
+						<input type="text" id="word-input" placeholder="Enter word (3-8 letters)" maxlength="8" />
+						<div id="validation-message" class="validation-message"></div>
+						<button id="override-btn" class="override-btn is-hidden">Override Dictionary</button>
+					</div>
+				</div></section>
+			</div>
+
+			<div id="virtual-dice-entry" class="is-hidden">
+				<div id="dice-roller-container" class="dice-roller-container">
+	<section class="panel"><div class="panel__head"><h2 class="panel__title">Virtual Dice</h2></div><div class="panel__body">
+		<div id="dice-grid" class="dice-grid">
+			<!-- Dice will be rendered here by JavaScript -->
+		</div>
+
+		<div class="dice-controls">
+			<div class="dice-settings">
+				<label class="dice-sound-toggle">
+					<input type="checkbox" id="dice-sound-checkbox" />
+					<span>Dice Sounds</span>
+				</label>
+			</div>
+
+			<div class="selected-word-display">
+				<span class="selected-word-label">Selected Letters:</span>
+				<span id="selected-word" class="selected-word-value"></span>
+			</div>
+
+			<div class="dice-actions">
+				<button id="add-word-btn" class="btn btn--primary" disabled>Add Word</button>
+				<button id="roll-dice-btn" class="btn btn--primary">🎲 Roll Dice</button>
+				<button id="clear-all-btn" class="btn btn--danger">🗑 Clear All</button>
+				<button id="undo-last-die-btn" class="btn">⌫ Undo</button>
+			</div>
+		</div>
+	</div></section>
+</div>
+				<div id="dice-validation-message" class="validation-message"></div>
+			</div>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Current Words</h2></div><div class="panel__body">
+				<div id="current-words" class="words-list"></div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Controls</h2></div><div class="panel__body">
+				<div class="controls-row">
+					<button id="start-timer-btn" class="btn btn--primary">Start Timer</button>
+					<button id="pause-timer-btn" class="btn is-hidden">Pause Timer</button>
+				</div>
+				<div class="controls-row">
+					<button id="end-round-btn" class="btn">End Round</button>
+					<button id="restart-round-btn" class="btn">Restart Round</button>
+					<button id="forfeit-round-btn" class="btn btn--danger">Forfeit Round</button>
+				</div>
+				<div class="controls-row">
+					<button id="toggle-sound-btn" class="mute-btn">🔊 Sound On</button>
+					<button id="end-game-btn" class="btn btn--danger">End Game</button>
+				</div>
+			</div></section>
+		</div>
+
+		<div id="round-complete-phase" class="phase is-hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Round Summary</h2></div><div class="panel__body">
+				<div id="round-summary"></div>
+				<div class="form-group">
+					<label for="manual-adjustment">Manual Score Adjustment</label>
+					<input type="number" id="manual-adjustment" value="0" />
+					<button id="apply-adjustment-btn" class="btn">Apply</button>
+				</div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Actions</h2></div><div class="panel__body">
+				<div class="controls-row">
+					<button id="edit-words-btn" class="btn">Edit Words</button>
+					<button id="confirm-round-btn" class="btn btn--primary">Confirm & Next</button>
+				</div>
+			</div></section>
+		</div>
+
+		<div id="game-over-phase" class="phase is-hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Game Recap</h2></div><div class="panel__body">
+				<div id="game-recap-card" class="recap-card">
+					<div id="recap-winner" class="recap-section"></div>
+					<div id="recap-stats" class="recap-section"></div>
+					<div id="recap-scores" class="recap-section"></div>
+					<div id="recap-longest-word" class="recap-section"></div>
+					<div id="recap-best-round" class="recap-section"></div>
+				</div>
+				<div class="recap-actions">
+					<button id="share-recap-btn" class="btn btn--primary">📤 Share Results</button>
+					<button id="play-again-btn" class="btn">Play Again</button>
+					<button id="new-game-btn" class="btn">New Game</button>
+				</div>
+			</div></section>
+		</div>
+
+		<div id="rules-reference" class="rules-reference">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Perquackey Rules (Quick Reference)</h2></div><div class="panel__body">
+				<div class="rules-content">
+					<h4>Objective</h4>
+					<p>First player to reach the score limit wins!</p>
+
+					<h4>Gameplay</h4>
+					<ul>
+						<li>Create words using letter dice (3-8 letters long)</li>
+						<li>Maximum 5 words per letter length</li>
+						<li>3-letter words disabled when vulnerable (2000+ points)</li>
+					</ul>
+
+					<h4>Scoring</h4>
+					<div class="scoring-table">
+						<div class="score-row"><span>3-letter words:</span><span>60/70/80/90/100</span></div>
+						<div class="score-row"><span>4-letter words:</span><span>120/140/160/180/200</span></div>
+						<div class="score-row"><span>5-letter words:</span><span>200/250/300/350/400</span></div>
+						<div class="score-row"><span>6-letter words:</span><span>300/400/500/600/700</span></div>
+						<div class="score-row"><span>7-letter words:</span><span>500/650/800/950/1100</span></div>
+						<div class="score-row"><span>8-letter words:</span><span>750/1000/1250/1500/1750</span></div>
+					</div>
+
+					<h4>Bonuses</h4>
+					<ul>
+						<li>3+4 complete: +300</li>
+						<li>4+5 complete: +500</li>
+						<li>5+6 complete: +800</li>
+						<li>6+7 complete: +1200</li>
+						<li>7+8 complete: +1850</li>
+					</ul>
+
+					<h4>Vulnerability & Penalty</h4>
+					<ul>
+						<li>At 2000+ points: 3-letter words disabled (RED DICE active)</li>
+						<li>If round score &lt; 500 while vulnerable: -500 penalty</li>
+					</ul>
+				</div>
+			</div></section>
+		</div>
+
+		<div id="standings-window" class="standings-window is-hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Standings</h2><span class="badge">MINI</span></div><div class="panel__body">
+				<div class="standings-header">
+					<span class="standings-title">Player Standings</span>
+					<button id="toggle-standings-btn" class="toggle-btn">−</button>
+				</div>
+				<div id="standings-list" class="standings-list"></div>
+			</div></section>
+		</div>
+	</div>
+{% endblock %}
+
+{% block tool_head_extra %}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/perquackey.js') }}"></script>{% endblock %}

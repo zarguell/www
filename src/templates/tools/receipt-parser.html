@@ -1,0 +1,82 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="receipt-parser-container">
+		<div class="tool-hero">
+			<h1>Receipt Parser</h1>
+			<p class="tool-subtitle">
+				Upload a receipt photo, run OCR in the browser, and extract likely fields — nothing
+				leaves your device.
+			</p>
+		</div>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Upload Receipt</h2><span class="badge">OCR</span></div><div class="panel__body">
+			<div id="uploadZone" class="upload-zone">
+				<input id="fileInput" type="file" accept="image/*" aria-label="Choose a receipt image" />
+				<p class="upload-hint">
+					Drag &amp; drop a receipt photo here, or click to browse.
+					<span class="upload-formats">PNG · JPG · WEBP</span>
+				</p>
+			</div>
+			<div class="btnrow">
+				<button id="parseBtn" type="button" class="btn btn--primary">Parse Receipt</button>
+				<button id="sampleBtn" type="button" class="btn">Load Sample Text</button>
+				<button id="clearBtn" type="button" class="btn">Clear</button>
+			</div>
+			<div class="status-wrap">
+				<div id="statusBox" class="parse-status" aria-live="polite">
+					Select a receipt image to begin.
+				</div>
+				<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+			</div>
+			<p class="hint">
+				OCR runs locally with Tesseract.js. Sharp, high-contrast photos work best — crop out
+				the background first.
+			</p>
+		</div></section>
+
+		<div class="workspace">
+			<div class="stack">
+				<section class="panel"><div class="panel__head"><h2 class="panel__title">Image Preview</h2><span class="badge">INPUT</span></div><div class="panel__body">
+					<div id="previewBox" class="preview-box">
+						<div class="preview-placeholder">No image loaded yet.</div>
+					</div>
+				</div></section>
+
+				<section class="panel"><div class="panel__head"><h2 class="panel__title">Raw OCR Text</h2><span class="badge">EDITABLE</span></div><div class="panel__body">
+					<textarea
+						id="rawText"
+						class="raw-text"
+						spellcheck="false"
+						aria-label="Raw OCR text"
+						placeholder="OCR output will appear here. You can also paste receipt text directly."
+					></textarea>
+					<p class="hint">
+						Edit the text and click outside the box to re-run the parser on it.
+					</p>
+				</div></section>
+			</div>
+
+			<div class="stack">
+				<section class="panel"><div class="panel__head"><h2 class="panel__title">Parsed Fields</h2><span class="badge">PARSED</span></div><div class="panel__body">
+					<div id="metaGrid" class="meta-grid"></div>
+					<div id="itemsSection" class="hidden">
+						<h2 class="items-title">Likely items</h2>
+						<div id="itemsList" class="items"></div>
+					</div>
+				</div></section>
+
+				<section class="panel"><div class="panel__head"><h2 class="panel__title">How It Works</h2><span class="badge">INFO</span></div><div class="panel__body">
+					<p class="hint">
+						Tesseract reads the image into raw text, then simple heuristics rank a merchant
+						line, pull dates, and infer subtotal/tax/tip/total from keywords and amounts.
+						Best for common retail and restaurant receipts — always check the raw OCR text
+						when a field looks off.
+					</p>
+				</div></section>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block tool_head_extra %}<script src="{{ asset('vendor/tesseract/tesseract.min.js') }}" defer></script>{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/receipt-parser.js') }}"></script>{% endblock %}

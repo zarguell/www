@@ -1,0 +1,149 @@
+.tool-hero {
+		text-align: center;
+		padding: 2rem 0;
+	}
+
+	.tool-hero h1 {
+		font-size: 3rem;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.tool-subtitle {
+		font-size: 1.3rem;
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.form-row {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		align-items: flex-end;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		flex: 1;
+		min-width: 150px;
+	}
+
+	label {
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--text);
+	}
+
+	input,
+	select {
+		font-family: var(--font-body);
+		font-size: 1rem;
+		padding: 0.5rem;
+		border: 2px solid var(--border);
+		background: var(--panel);
+		color: var(--text);
+		border-radius: 4px;
+		min-width: 120px;
+	}
+
+	input:focus,
+	select:focus {
+		outline: none;
+		border-color: var(--accent);
+		box-shadow: 0 0 0 2px var(--accent);
+	}
+
+	.muted {
+		color: var(--muted);
+		font-size: 0.9rem;
+		max-width: 30ch;
+		margin-top: 0.25rem;
+	}
+
+	.invisible {
+		visibility: hidden;
+	}
+
+	.ingredients-table {
+		font-family: var(--font-display);
+		background: var(--panel);
+		padding: 1rem;
+		border: 2px solid var(--border);
+		border-radius: 4px;
+		font-size: 1.1rem;
+		line-height: 1.8;
+	}
+
+	.ingredients-table table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.ingredients-table th {
+		text-align: left;
+		padding: 0.5rem;
+		border-bottom: 2px solid var(--border);
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.ingredients-table td {
+		padding: 0.5rem;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.ingredients-table tr:last-child td {
+		border-bottom: none;
+	}
+
+	.ingredients-table .quantity {
+		text-align: right;
+		font-weight: 600;
+		color: var(--accent);
+	}
+
+	.ingredients-table .unit {
+		color: var(--muted);
+		padding-left: 0.25rem;
+	}
+
+	.placeholder-text {
+		color: var(--muted);
+		font-style: italic;
+	}
+
+	.steps-list {
+		padding-left: 1.5rem;
+		line-height: 1.8;
+	}
+
+	.steps-list li {
+		margin: 0.75rem 0;
+		color: var(--text);
+		font-size: 1.05rem;
+	}
+
+	.steps-list strong {
+		font-weight: 700;
+		color: var(--accent);
+	}
+
+	@media (max-width: 768px) {
+		.form-row {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.form-group {
+			min-width: 100%;
+		}
+
+		.tool-hero h1 {
+			font-size: 2.5rem;
+		}
+
+		.tool-subtitle {
+			font-size: 1.1rem;
+		}
+	}

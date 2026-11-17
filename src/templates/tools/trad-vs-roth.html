@@ -1,0 +1,73 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-header">
+		<h1>Traditional vs Roth Analyzer</h1>
+		<p class="tool-subtitle">Compare Traditional and Roth IRA outcomes across different future tax rates</p>
+	</div>
+
+	<div class="tool-content">
+		<form data-no-submit id="simulationForm">
+
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Account Parameters</h2><span class="badge">INPUTS</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="currentAge">Current Age <small>(years)</small></label>
+					<input type="number" id="currentAge" min="25" max="65" value="30" required />
+					<small>Your current age</small>
+				</div>
+
+				<div class="form-group">
+					<label for="retirementAge">Retirement Age <small>(years)</small></label>
+					<input type="number" id="retirementAge" min="40" max="70" value="58" required />
+					<small>When you'll retire</small>
+				</div>
+
+				<div class="form-group">
+					<label for="annualContribution">Annual Contribution <small>($)</small></label>
+					<input type="number" id="annualContribution" min="0" max="30000" step="1000" value="7000" required />
+					<small>Annual contribution amount</small>
+				</div>
+
+				<div class="form-group">
+					<label for="currentRate">Current Marginal Tax Rate <small>(decimal)</small></label>
+					<input type="number" id="currentRate" min="0.10" max="0.50" step="0.01" value="0.24" required />
+					<small>Your current tax rate (10% - 50%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="retirementRate">Expected Retirement Tax Rate <small>(decimal)</small></label>
+					<input type="number" id="retirementRate" min="0.10" max="0.50" step="0.01" value="0.22" required />
+					<small>Expected tax rate in retirement</small>
+				</div>
+
+				<div class="form-group">
+					<label for="expectedReturn">Expected Return <small>(decimal)</small></label>
+					<input type="number" id="expectedReturn" min="0.02" max="0.12" step="0.005" value="0.07" required />
+					<small>Expected annual return (2% - 12%)</small>
+				</div>
+
+				<div class="button-group">
+					<button type="button" class="btn btn--primary" py-click="run_analysis">
+						Compare Accounts
+					</button>
+				</div>
+			</div></section>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<h3>Static Image (Click to Zoom)</h3>
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="plotly-container" class="chart-container">
+			<h3>Interactive Chart (Hover for Exact Values)</h3>
+			<div id="plotlyChart"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+<script type="py" src="/tools/trad-vs-roth/main.py" config="/tools/trad-vs-roth/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript(plotly=true) }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}

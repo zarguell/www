@@ -1,0 +1,119 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="splitcheck-container">
+		<div class="topbar">
+			<div>
+				<h1>SplitCheck</h1>
+				<div class="badge" aria-live="polite">
+					<strong>Status:</strong>
+					<span id="modeValue">View-only</span>
+				</div>
+			</div>
+			<div class="btnrow" id="topActions">
+				<button id="copyLinkBtn" class="btn smallbtn" type="button">Copy link</button>
+			</div>
+		</div>
+
+		<div id="modeNotice" class="notice hidden" role="note"></div>
+
+		<!-- Manage-only UI -->
+		<div id="manageUI" class="hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Share</h2><span class="badge">LINKS</span></div><div class="panel__body">
+				<p class="muted">Send the view link to friends. Keep the manage link private.</p>
+				<div class="primaryShare">
+					<button id="copyViewBtn" class="btn" type="button">Copy view link</button>
+					<button id="copyManageBtn" class="btn" type="button">Copy manage link</button>
+				</div>
+				<div class="hint" id="shareStatus" aria-live="polite"></div>
+				<textarea id="urlBox" class="form-control mono" rows="3" readonly aria-label="Link"></textarea>
+				<div class="hint muted" id="urlLen"></div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">People</h2><span class="badge">MANAGE</span></div><div class="panel__body">
+				<div class="row">
+					<div>
+						<label class="form-label" for="personName">Add person</label>
+						<input id="personName" class="form-control" type="text" placeholder="Name" maxlength="50" autocomplete="off" />
+						<button id="addPersonBtn" class="btn btn--primary" type="button">Add Person</button>
+					</div>
+					<div>
+						<label class="form-label">Keyboard shortcuts</label>
+						<div class="shortcuts-card">
+							<div class="muted">Enter: Add person (name box)</div>
+							<div class="muted">Ctrl/Cmd+K: Copy view link</div>
+							<div class="muted">Ctrl/Cmd+Shift+K: Copy manage link</div>
+						</div>
+					</div>
+				</div>
+
+				<h2>People List</h2>
+				<div id="peopleList" class="chips" aria-live="polite"></div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Add Expense</h2><span class="badge">ADD</span></div><div class="panel__body">
+				<div class="row">
+					<div>
+						<label class="form-label" for="expenseDesc">Description</label>
+						<input id="expenseDesc" class="form-control" type="text" placeholder="Dinner, Uber, Groceries…" maxlength="100" autocomplete="off" />
+					</div>
+					<div>
+						<label class="form-label" for="expenseAmount">Amount</label>
+						<input id="expenseAmount" class="form-control" type="number" placeholder="0.00" step="0.01" min="0.01" inputmode="decimal" />
+					</div>
+				</div>
+
+				<div class="row">
+					<div>
+						<label class="form-label" for="expensePayer">Paid by</label>
+						<select id="expensePayer" class="form-control" aria-label="Expense payer"></select>
+					</div>
+					<div>
+						<label class="form-label" for="splitType">Split type</label>
+						<select id="splitType" class="form-control" aria-label="Split type">
+							<option value="even">Even split</option>
+							<option value="custom">Custom amounts</option>
+						</select>
+					</div>
+				</div>
+
+				<div id="customSplitInputs" class="hidden" aria-label="Custom split inputs"></div>
+				<div class="hint" id="customHint"></div>
+
+				<button id="addExpenseBtn" class="btn btn--primary" type="button">Add Expense</button>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Export / Import</h2><span class="badge">DATA</span></div><div class="panel__body">
+				<div class="twocols">
+					<button id="exportBtn" class="btn" type="button">Copy JSON</button>
+					<button id="importBtn" class="btn" type="button">Import JSON</button>
+				</div>
+				<button id="resetBtn" class="btn btn--danger" type="button">Reset</button>
+				<div class="hint" id="ioStatus" aria-live="polite"></div>
+			</div></section>
+		</div>
+
+		<!-- View-only UI -->
+		<div id="viewUI" class="card hidden">
+			<h2>View-only</h2>
+			<div class="muted">This page is read-only.</div>
+		</div>
+
+		<!-- Always-visible results -->
+		<div id="resultsUI">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Expenses</h2><span class="badge">LIST</span></div><div class="panel__body">
+				<div id="expensesList" aria-live="polite"></div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Balances</h2><span class="badge">CALCULATED</span></div><div class="panel__body">
+				<div id="balancesList" aria-live="polite"></div>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Who owes who</h2><span class="badge">SETTLEMENTS</span></div><div class="panel__body">
+				<div id="settlementsList" aria-live="polite"></div>
+			</div></section>
+		</div>
+	</div>
+{% endblock %}
+
+{% block tool_head_extra %}<script src="{{ asset('vendor/lz-string.min.js') }}" defer></script>{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/splitcheck.js') }}"></script>{% endblock %}

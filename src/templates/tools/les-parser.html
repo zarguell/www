@@ -1,0 +1,108 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="les-container">
+		<div class="tool-hero">
+			<h1>NFC LES Parser</h1>
+			<p class="tool-subtitle">
+				Turn USDA NFC Earnings &amp; Leave Statements (AD-334) into structured JSON/CSV —
+				parsed entirely in your browser.
+			</p>
+		</div>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Upload Statement</h2><span class="badge">PYTHON</span></div><div class="panel__body">
+			<div class="form-group">
+				<label for="pdfInput">AD-334 PDF statements (from NFC EPP)</label>
+				<input id="pdfInput" type="file" accept=".pdf,application/pdf" multiple />
+			</div>
+			<div class="btnrow">
+				<button class="btn btn--primary" id="lesParseFiles" type="button" py-click="parse_files">Parse PDF(s)</button>
+			</div>
+			<div id="lesStatus" class="parse-status" aria-live="polite">
+				Upload an AD-334 PDF, or paste statement text. Parsing happens entirely in your browser.
+			</div>
+			<p class="hint">
+				Text-based PDFs only (EPP downloads are). Scanned copies need OCR — not supported.
+				First parse loads the pypdf engine (~300 kB). Your statement never leaves this page.
+			</p>
+		</div></section>
+
+		<section class="panel"><div class="panel__head"><h2 class="panel__title">Paste Statement Text</h2><span class="badge">FALLBACK</span></div><div class="panel__body">
+			<p class="hint hint-top">
+				Prefer raw text? Paste the output of <code>pdfplumber</code>'s <code>extract_text()</code>
+				(or any text extraction) and parse it without the PDF engine.
+			</p>
+			<textarea
+				id="lesRawText"
+				class="raw-text"
+				spellcheck="false"
+				aria-label="Statement text"
+				placeholder="Paste AD-334 statement text here…"
+			></textarea>
+			<div class="btnrow">
+				<button class="btn btn--primary" id="lesParsePasted" type="button" py-click="parse_pasted">Parse Text</button>
+				<button class="btn" id="lesSample" type="button" py-click="load_sample">Load Sample (synthetic)</button>
+			</div>
+		</div></section>
+
+		<div id="lesResults" class="is-hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Pay Summary</h2><span class="badge">PARSED</span></div><div class="panel__body">
+				<div class="summary-head">
+					<span id="lesBalance" class="balance-badge">UNVERIFIABLE</span>
+					<span id="lesDiag" class="diag"></span>
+				</div>
+				<div class="meta-grid">
+					<div class="meta-item" id="lesPayPeriod"><span class="meta-label">Pay period</span><strong></strong></div>
+					<div class="meta-item" id="lesPayDate"><span class="meta-label">Official pay date</span><strong></strong></div>
+					<div class="meta-item" id="lesSalary"><span class="meta-label">Salary / rate</span><strong></strong></div>
+					<div class="meta-item" id="lesGrossPp"><span class="meta-label">Gross pay (PP)</span><strong></strong></div>
+					<div class="meta-item" id="lesNetPp"><span class="meta-label">Net pay (PP)</span><strong></strong></div>
+					<div class="meta-item" id="lesDedsPp"><span class="meta-label">Total deductions (PP)</span><strong></strong></div>
+					<div class="meta-item" id="lesGrossYtd"><span class="meta-label">Gross pay (YTD)</span><strong></strong></div>
+					<div class="meta-item" id="lesNetYtd"><span class="meta-label">Net pay (YTD)</span><strong></strong></div>
+				</div>
+			</div></section>
+		</div>
+
+		<div id="lesResults2" class="is-hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Deductions</h2><span class="badge">ITEMS</span></div><div class="panel__body">
+				<table class="les-table">
+					<thead>
+						<tr><th>Description</th><th>Item</th><th>PP</th><th>YTD</th></tr>
+					</thead>
+					<tbody id="lesDeductionsBody"></tbody>
+				</table>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Leave &amp; Earnings</h2><span class="badge">ITEMS</span></div><div class="panel__body">
+				<table class="les-table">
+					<thead>
+						<tr><th>Code</th><th>Description</th><th>Hours</th><th>Amount</th></tr>
+					</thead>
+					<tbody id="lesLeaveBody"></tbody>
+				</table>
+			</div></section>
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">YTD Leave Status</h2><span class="badge">LEAVE</span></div><div class="panel__body">
+				<table class="les-table">
+					<thead>
+						<tr><th>Type</th><th>Accrued</th><th>Used</th><th>Balance</th></tr>
+					</thead>
+					<tbody id="lesYtdBody"></tbody>
+				</table>
+			</div></section>
+		</div>
+
+		<div id="lesJsonWindow" class="is-hidden">
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Raw JSON</h2><span class="badge">EXPORT</span></div><div class="panel__body">
+				<textarea id="lesJson" class="raw-text raw-text--short" readonly aria-label="Parsed JSON output"></textarea>
+				<div id="lesDownloadRow" class="btnrow">
+					<button class="btn btn--primary" id="lesDownloadJson" type="button" py-click="download_json">Download JSON</button>
+					<button class="btn" id="lesDownloadCsv" type="button" py-click="download_csv">Download CSV</button>
+				</div>
+			</div></section>
+		</div>
+	<script type="py" src="/tools/les-parser/main.py" config="/tools/les-parser/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript() }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}

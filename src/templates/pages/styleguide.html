@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import icon, page_head %}
+{% block main_class %}container{% endblock %}
+{% block content %}
+{{ page_head('Styleguide', 'The type, color, and component system behind this site.') }}
+
+<section class="panel section">
+  <div class="panel__head"><h2 class="panel__title">Color</h2><span class="badge">Tokens</span></div>
+  <div class="panel__body">
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch__chip swatch__chip--bg"></div>--bg</div>
+      <div class="swatch"><div class="swatch__chip swatch__chip--surface"></div>--surface</div>
+      <div class="swatch"><div class="swatch__chip swatch__chip--text"></div>--text</div>
+      <div class="swatch"><div class="swatch__chip swatch__chip--muted"></div>--muted</div>
+      <div class="swatch"><div class="swatch__chip swatch__chip--border"></div>--border</div>
+      <div class="swatch"><div class="swatch__chip swatch__chip--accent"></div>--accent</div>
+    </div>
+  </div>
+</section>
+
+<section class="panel section">
+  <div class="panel__head"><h2 class="panel__title">Typography</h2><span class="badge">Type</span></div>
+  <div class="panel__body">
+    <div class="type-row"><span class="type-row__label">Display / 38</span><span class="type-display">Build. Write. Iterate.</span></div>
+    <div class="type-row"><span class="type-row__label">Body / 15</span><span class="type-body">Software engineer, writer, and systems thinker.</span></div>
+    <div class="type-row"><span class="type-row__label">Mono / 12</span><span class="type-mono">Aug 12, 2025 · 5 min read</span></div>
+  </div>
+</section>
+
+<section class="panel section">
+  <div class="panel__head"><h2 class="panel__title">Components</h2><span class="badge">UI</span></div>
+  <div class="panel__body">
+    <div class="component-row">
+      <button class="btn btn--primary" type="button">Primary button</button>
+      <button class="btn" type="button">Secondary button</button>
+      <a class="link-arrow" href="/styleguide/">Text link {{ icon('arrow-right') }}</a>
+    </div>
+    <div class="component-row">
+      <span class="badge">Default</span>
+      <span class="badge badge--accent">Accent</span>
+      <span class="tag">design</span>
+      <span class="tag">systems</span>
+      <span class="tag">tech</span>
+    </div>
+    <div class="component-row">
+      <div class="alert" data-dismissable>
+        <span class="alert__dot"></span>
+        <span class="alert__body">This is an informational note.</span>
+        <button class="alert__close" type="button" data-dismiss aria-label="Dismiss">×</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel section">
+  <div class="panel__head"><h2 class="panel__title">Code block</h2><span class="badge">Snippet</span></div>
+  <div class="panel__body">
+    <div class="code-block">
+      <div class="code-block__bar"><span class="code-block__lang">javascript</span><button class="code-block__copy" type="button" data-copy-code>Copy</button></div>
+      <pre class="code-block__pre"><code>{% for line in code_sample.split('\n') %}<span class="code-line">{{ line }}</span>{% endfor %}</code></pre>
+    </div>
+  </div>
+</section>
+{% endblock %}

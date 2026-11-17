@@ -1,0 +1,73 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-header">
+		<h1>Expense Ratio Impact Visualizer</h1>
+		<p class="tool-subtitle">See the long-term cost of high expense ratios on your wealth</p>
+	</div>
+
+	<div class="tool-content">
+		<form data-no-submit id="simulationForm">
+
+
+			<section class="panel"><div class="panel__head"><h2 class="panel__title">Investment Parameters</h2><span class="badge">INPUTS</span></div><div class="panel__body">
+				<div class="form-group">
+					<label for="startingBalance">Starting Balance <small>($)</small></label>
+					<input type="number" id="startingBalance" min="0" max="5000000" step="10000" value="100000" required />
+					<small>Initial investment amount</small>
+				</div>
+
+				<div class="form-group">
+					<label for="annualContribution">Annual Contribution <small>($)</small></label>
+					<input type="number" id="annualContribution" min="0" max="50000" step="1000" value="10000" required />
+					<small>Amount you'll add each year</small>
+				</div>
+
+				<div class="form-group">
+					<label for="timeHorizon">Time Horizon <small>(years)</small></label>
+					<input type="number" id="timeHorizon" min="1" max="50" value="30" required />
+					<small>Investment timeframe (1-50 years)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="grossReturn">Gross Return <small>(decimal)</small></label>
+					<input type="number" id="grossReturn" min="0.02" max="0.12" step="0.005" value="0.07" required />
+					<small>Expected return before fees (2% - 12%)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="fundAer">Fund A Expense Ratio <small>(decimal)</small></label>
+					<input type="number" id="fundAer" min="0.0003" max="0.02" step="0.0001" value="0.001" required />
+					<small>Low-cost fund (e.g., 0.10% = 0.001)</small>
+				</div>
+
+				<div class="form-group">
+					<label for="fundBer">Fund B Expense Ratio <small>(decimal)</small></label>
+					<input type="number" id="fundBer" min="0.0003" max="0.02" step="0.0001" value="0.007" required />
+					<small>Higher-cost fund (e.g., 0.70% = 0.007)</small>
+				</div>
+
+				<div class="button-group">
+					<button type="button" class="btn btn--primary" py-click="calculate_impact">
+						Compare Funds
+					</button>
+				</div>
+			</div></section>
+		</form>
+
+		<div id="chart-container" class="chart-container">
+			<h3>Static Image (Click to Zoom)</h3>
+			<div id="chart" class="click-zoom"></div>
+		</div>
+
+		<div id="plotly-container" class="chart-container">
+			<h3>Interactive Charts (Hover for Exact Values)</h3>
+			<div id="plotlyChart"></div>
+		</div>
+
+		<div id="summary"></div>
+	</div>
+<script type="py" src="/tools/expense-ratio/main.py" config="/tools/expense-ratio/config.json"></script>
+{% endblock %}
+
+{% block tool_head_extra %}{% from "partials/macros.html" import pyscript %}{{ pyscript(plotly=true) }}{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/py-tools.js') }}"></script>{% endblock %}
