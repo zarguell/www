@@ -1,4 +1,5 @@
 import { parseVector, type CvssParseResult } from '../lib/cvss';
+import { buildCvssCard, type CvssCard } from '../lib/cvss-card';
 import { escapeHtml } from '../lib/escape-html';
 
 const input = document.getElementById('cvssInput') as HTMLTextAreaElement;
@@ -61,6 +62,63 @@ function metricCard(metric: CvssParseResult['metrics'][number]): string {
     </article>`;
 }
 
+function exportPanel(result: CvssParseResult): string {
+  const card = buildCvssCard(result);
+  if (!card) return '';
+  return `<section class="panel cvss-export">
+      <div class="panel__head">
+        <h2 class="panel__title">Export card</h2>
+        <span class="badge">PNG · SVG</span>
+      </div>
+      <div class="panel__body">
+        <div class="cvss-card-preview" id="cvssCardPreview">${card.svg}</div>
+        <div class="btn-row">
+          <button class="btn btn--primary" type="button" id="cvssDownloadPng">Download PNG</button>
+          <button class="btn" type="button" id="cvssDownloadSvg">Download SVG</button>
+          <button class="btn" type="button" id="cvssCopySummary">Copy summary</button>
+        </div>
+        <p class="cvss-export__hint">A compact card with the vector and base metrics for reports, tickets, and chat.</p>
+      </div>
+    </section>`;
+}
+
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadSvg(card: CvssCard): void {
+  downloadBlob(new Blob([card.svg], { type: 'image/svg+xml;charset=utf-8' }), 'cvss-card.svg');
+}
+
+function downloadPng(card: CvssCard): void {
+  const url = URL.createObjectURL(new Blob([card.svg], { type: 'image/svg+xml;charset=utf-8' }));
+  const image = new Image();
+  image.onload = () => {
+    const scale = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = card.width * scale;
+    canvas.height = card.height * scale;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      URL.revokeObjectURL(url);
+      return;
+    }
+    context.scale(scale, scale);
+    context.drawImage(image, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) downloadBlob(blob, 'cvss-card.png');
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  image.onerror = () => URL.revokeObjectURL(url);
+  image.src = url;
+}
+
 function groups(result: CvssParseResult): string {
   return result.groups
     .map(
@@ -79,8 +137,25 @@ function groups(result: CvssParseResult): string {
 
 function render(): void {
   const result = parseVector(input.value);
+  const card = buildCvssCard(result);
   results.classList.remove('is-hidden');
-  results.innerHTML = summary(result) + groups(result);
+  results.innerHTML = summary(result) + exportPanel(result) + groups(result);
+  if (card) {
+    document.getElementById('cvssDownloadPng')?.addEventListener('click', () => downloadPng(card));
+    document.getElementById('cvssDownloadSvg')?.addEventListener('click', () => downloadSvg(card));
+    const copySummary = document.getElementById('cvssCopySummary');
+    copySummary?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(card.summary);
+        copySummary.textContent = 'Copied';
+        window.setTimeout(() => {
+          copySummary.textContent = 'Copy summary';
+        }, 1200);
+      } catch {
+        copySummary.textContent = 'Copy failed';
+      }
+    });
+  }
   status.textContent = result.version
     ? `${result.metrics.length} metric${result.metrics.length === 1 ? '' : 's'} · ${result.versionLabel}`
     : 'Waiting for a valid vector';

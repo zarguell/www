@@ -153,3 +153,30 @@
     flex-basis: 100%;
   }
 }
+
+.cvss-export .panel__body {
+  display: grid;
+  gap: 14px;
+}
+
+.cvss-card-preview {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0b0b0b;
+}
+
+.cvss-card-preview svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cvss-export__hint {
+  margin: 0;
+  color: var(--faint);
+  font-size: 11.5px;
+}
+
+.cvss-export .btn-row {
+  margin-top: 0;
+}

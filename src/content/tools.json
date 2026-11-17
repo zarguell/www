@@ -383,12 +383,13 @@
       {
         "title": "CVSS Vector Parser",
         "slug": "cvss-parser",
-        "description": "Parse CVSS v2, v3.x, and v4.0 vector strings. See every metric, value, and what it means, with warnings for unknown or missing components.",
+        "description": "Parse CVSS v2, v3.x, and v4.0 vector strings. See every metric, value, and what it means, then export a compact PNG or SVG card for reports.",
         "badge": "CVSS",
         "features": [
           "CVSS v2, v3.x, and v4.0 detection",
           "Every metric and value explained",
           "Unknown, duplicate, and missing metric warnings",
+          "Compact PNG/SVG card export",
           "Live parsing, no upload"
         ],
         "lastModified": "2026-11-17"
