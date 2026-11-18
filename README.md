@@ -54,7 +54,7 @@ src/
 ## Content and templates
 
 - Blog posts are Markdown with YAML front matter (`title`, `description`, `pubDate`,
-  `tags`, optional `image`, optional `draft`).
+  optional `pubTime` for same-day ordering, `tags`, optional `image`, optional `draft`).
 - Custom fenced components (`mermaid`, `timeline`) are documented in
   [`docs/markdown-components.md`](docs/markdown-components.md).
 - `content/tools.json` is the source of truth for the tools index. A local tool also

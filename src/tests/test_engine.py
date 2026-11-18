@@ -240,3 +240,18 @@ def test_llms_links_resolve_to_emitted_files(site: Path) -> None:
         path = urlparse(url).path.lstrip("/")
         candidate = site / path
         assert candidate.exists() or (site / path / "index.html").exists(), url
+
+
+def test_pub_time_breaks_same_day_order(tmp_path: Path) -> None:
+    blog = tmp_path / "content" / "blog"
+    blog.mkdir(parents=True)
+    (blog / "a.md").write_text(
+        "---\ntitle: A\ndescription: A\npubDate: 2026-11-17\ntags: []\n---\nBody\n",
+        encoding="utf-8",
+    )
+    (blog / "b.md").write_text(
+        "---\ntitle: B\ndescription: B\npubDate: 2026-11-17\npubTime: \"22:01\"\ntags: []\n---\nBody\n",
+        encoding="utf-8",
+    )
+    posts = load_posts(Paths.from_root(tmp_path))
+    assert [post.slug for post in posts] == ["b", "a"]

@@ -66,7 +66,8 @@ in `assets/js/`.
 ## Adding a blog post
 
 1. Add `src/content/blog/<slug>.md` with YAML front matter:
-   `title`, `description`, `pubDate`, `tags`, optional `image`, optional `draft`.
+   `title`, `description`, `pubDate`, optional `pubTime`, `tags`, optional `image`,
+   optional `draft`.
 2. Run the build. The index and RSS are generated automatically.
 
 ## Adding a tool

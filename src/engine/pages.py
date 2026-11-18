@@ -357,7 +357,8 @@ class SiteBuilder:
                 f"url: {base}/blog/{post.slug}/\n"
                 f"markdown: {base}/blog/{post.slug}/index.md\n"
                 f"pubDate: {post.pub_date.isoformat()}\n"
-                f"tags: {json.dumps(post.tags, ensure_ascii=False)}\n"
+                + (f"pubTime: {json.dumps(post.pub_time, ensure_ascii=False)}\n" if post.pub_time else "")
+                + f"tags: {json.dumps(post.tags, ensure_ascii=False)}\n"
                 + (f"image: {json.dumps(base + post.image, ensure_ascii=False)}\n" if post.image else "")
                 + "---\n\n"
                 f"# {post.title}\n\n"

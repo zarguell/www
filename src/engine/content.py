@@ -30,6 +30,7 @@ class Post:
     title: str
     description: str
     pub_date: dt.date
+    pub_time: str | None
     updated_date: dt.date | None
     tags: list[str]
     image: str | None
@@ -84,6 +85,7 @@ def load_posts(paths: Paths) -> list[Post]:
                 title=str(meta["title"]),
                 description=str(meta["description"]),
                 pub_date=_as_date(meta["pubDate"], source, "pubDate"),
+                pub_time=str(meta["pubTime"]) if meta.get("pubTime") else None,
                 updated_date=(
                     _as_date(meta["updatedDate"], source, "updatedDate")
                     if meta.get("updatedDate")
@@ -95,7 +97,7 @@ def load_posts(paths: Paths) -> list[Post]:
                 source=source,
             )
         )
-    posts.sort(key=lambda post: post.pub_date, reverse=True)
+    posts.sort(key=lambda post: (post.pub_date, post.pub_time or "00:00"), reverse=True)
     return posts
 
 
