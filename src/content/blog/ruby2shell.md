@@ -2,7 +2,7 @@
 title: "Ruby2Shell: the one-byte overflow that runs before Rails authentication"
 description: "Reproducing the one-byte heap overflow in Ruby's string case conversion (CVE-2026-132825) through Rack::MethodOverride, before authentication, and checking the patched build."
 pubDate: 2026-11-19
-pubTime: "09:30"
+pubTime: "09:06"
 tags: ["security", "ruby", "cve", "rails", "exploitability"]
 draft: false
 image: "/assets/images/post-ruby2shell.jpg"
