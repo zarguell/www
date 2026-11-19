@@ -23,7 +23,7 @@ from .content import (
     reading_minutes,
     word_count,
 )
-from .render import make_env, make_markdown
+from .render import clean_markdown_html, make_env, make_markdown
 
 
 class SiteBuilder:
@@ -40,7 +40,7 @@ class SiteBuilder:
         self.routes: list[str] = []
 
         for post in self.posts:
-            post.html = self.md.render(post.body)
+            post.html = clean_markdown_html(self.md.render(post.body))
             # The page title is the only h1; demote headings written in the post body.
             post.html = re.sub(
                 r"<h1(\s[^>]*)?>(.*?)</h1>",
@@ -143,7 +143,7 @@ class SiteBuilder:
 
     def build_home(self) -> None:
         page = load_page(self.paths, "home")
-        body_html = self.md.render(page.body)
+        body_html = clean_markdown_html(self.md.render(page.body))
         latest = latest_post(self.posts)
         newest = newest_tool(self.tools)
         ctx = self.context(
@@ -186,7 +186,7 @@ class SiteBuilder:
 
     def build_about(self) -> None:
         page = load_page(self.paths, "about")
-        body_html = self.md.render(page.body)
+        body_html = clean_markdown_html(self.md.render(page.body))
         ctx = self.context(
             "/about/",
             f"About — {self.site['name']}",

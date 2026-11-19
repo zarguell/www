@@ -201,6 +201,14 @@ def make_markdown() -> MarkdownIt:
     return md
 
 
+TABLE_ALIGNMENT = re.compile(r'\sstyle="text-align:(left|right|center)"')
+
+
+def clean_markdown_html(html: str) -> str:
+    """Replace markdown-it's inline table alignment styles with classes."""
+    return TABLE_ALIGNMENT.sub(lambda match: f' class="table-{match.group(1)}"', html)
+
+
 def make_env(templates: Path, site: dict[str, Any], asset_map: dict[str, str]) -> jinja2.Environment:
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates),

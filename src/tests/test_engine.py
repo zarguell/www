@@ -255,3 +255,12 @@ def test_pub_time_breaks_same_day_order(tmp_path: Path) -> None:
     )
     posts = load_posts(Paths.from_root(tmp_path))
     assert [post.slug for post in posts] == ["b", "a"]
+
+
+def test_markdown_tables_use_classes_not_inline_styles() -> None:
+    from engine.render import clean_markdown_html, make_markdown
+
+    html = make_markdown().render("| a | b |\n|---|---:|\n| 1 | 2 |\n")
+    cleaned = clean_markdown_html(html)
+    assert 'style="text-align:right"' not in cleaned
+    assert 'class="table-right"' in cleaned
