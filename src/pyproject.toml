@@ -3,6 +3,13 @@ target-version = "py312"
 line-length = 100
 exclude = [".venv", "dist", "node_modules"]
 
+[tool.ruff.lint]
+# Pin the rule set explicitly instead of relying on ruff's defaults: ruff 0.15
+# expanded the default set from ~59 to ~400 rules, which would otherwise turn a
+# routine version bump into a repo-wide rewrite. Adopting the wider set is a
+# separate, deliberate cleanup.
+select = ["E4", "E7", "E9", "F"]
+
 [tool.ruff.lint.per-file-ignores]
 # PyScript entry scripts run at module scope and intentionally use top-level await
 # to install the vendored plotly wheel before the remaining imports.
