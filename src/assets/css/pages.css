@@ -59,7 +59,9 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 55%, transparent) 42%, transparent 78%),
+    /* Copy ends at ~17% of the media width, so the solid-to-clear ramp only has
+       to cover that. A longer ramp washed out the middle of the portrait. */
+    linear-gradient(90deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 35%, transparent) 26%, transparent 52%),
     linear-gradient(0deg, var(--surface) 0%, transparent 38%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface) 35%, transparent) 0%, transparent 35%);
 }

@@ -154,7 +154,7 @@ class SiteBuilder:
             body_html=body_html,
             latest_post=latest,
             newest_tool=newest,
-            hero_image="/assets/images/hero.jpg",
+            hero_image="/assets/images/hero-portrait.jpg",
         )
         self.write("/", self.render("pages/home.html", ctx))
 
