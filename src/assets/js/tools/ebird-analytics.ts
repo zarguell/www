@@ -301,6 +301,13 @@ async function importFromLink(): Promise<void> {
 		});
 
 		if (!response.ok) {
+			// A Cloudflare rate-limit block is answered before the Worker runs, so
+			// the body is the edge's plain-text `error code: 1015`, not our JSON.
+			if (response.status === 429) {
+				throw new Error(
+					'Too many import attempts from this connection. Wait about ten seconds and try again.'
+				);
+			}
 			const payload: unknown = await response.json().catch(() => null);
 			const message =
 				payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string'
