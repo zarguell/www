@@ -1,0 +1,487 @@
+/* eBird Field Analytics: steps, tabs, stat grid, heatmap, stickers, charts. */
+
+.ebird-steps {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ebird-steps strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.ebird-steps a {
+  color: var(--text);
+}
+
+.ebird-file-input {
+  display: none;
+}
+
+.ebird-intake--done .ebird-steps {
+  display: none;
+}
+
+/* Summary grid sits above the tabs so the headline numbers never scroll away. */
+.ebird-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ebird-stat__note {
+  display: block;
+  margin-top: 4px;
+  color: var(--faint);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+/* ---- tabs ---- */
+
+.ebird-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ebird-tab {
+  padding: 9px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ebird-tab:hover {
+  color: var(--text);
+}
+
+.ebird-tab.is-active {
+  border-bottom-color: var(--accent);
+  color: var(--text-strong);
+}
+
+.ebird-tab:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ebird-panel {
+  display: grid;
+  gap: 20px;
+  /* Grid items default to min-width:auto, which lets the wide phenology table
+     push the page sideways instead of scrolling inside its wrapper. */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ebird-panel > * {
+  min-width: 0;
+}
+
+.ebird-grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.ebird-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* ---- charts ---- */
+
+.ebird-chart {
+  width: 100%;
+}
+
+.ebird-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ebird-svg__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.ebird-svg__axis {
+  fill: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.ebird-svg__bar {
+  fill: var(--border-strong);
+}
+
+.ebird-svg__bar--lifer {
+  fill: var(--accent);
+}
+
+/* ---- tables ---- */
+
+.ebird-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* The phenology matrix is 14 columns; keep it scrolling rather than squeezing. */
+.ebird-phenology {
+  min-width: 620px;
+}
+
+.ebird-life__sci {
+  display: block;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.ebird-phenology th.num,
+.ebird-phenology td.num {
+  text-align: center;
+  padding: 4px 3px;
+}
+
+.ebird-phenology__cell {
+  white-space: nowrap;
+}
+
+/* ---- heatmap chips ---- */
+
+.ebird-heat {
+  display: inline-block;
+  min-width: 34px;
+  padding: 3px 4px;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-align: center;
+}
+
+.ebird-heat--scarce {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--muted);
+}
+
+.ebird-heat--fair {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--text);
+}
+
+.ebird-heat--common {
+  background: color-mix(in srgb, var(--accent) 52%, transparent);
+  color: #0a0a0a;
+}
+
+.ebird-heat--peak {
+  background: var(--accent);
+  color: #0a0a0a;
+  font-weight: 500;
+}
+
+.ebird-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+  color: var(--faint);
+  font-size: 10.5px;
+}
+
+.ebird-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ebird-legend .ebird-heat {
+  min-width: 22px;
+  height: 12px;
+  padding: 0;
+}
+
+/* ---- migrants ---- */
+
+.ebird-migrants {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ebird-migrant {
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.ebird-migrant__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ebird-migrant__head strong {
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ebird-migrant__spike {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ebird-migrant__detail {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.ebird-migrant__sci {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: italic;
+}
+
+/* ---- sticker collage ---- */
+
+/* Absolutely placed children: the packer owns every position. The hole in the
+   middle holds the species count, which is the thing the collage is about. */
+.ebird-collage {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.ebird-collage__sticker {
+  position: absolute;
+  object-fit: contain;
+  pointer-events: auto;
+}
+
+.ebird-collage__hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  gap: 0;
+  min-width: 108px;
+  min-height: 108px;
+  padding: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--bg) 58%, transparent 72%);
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  text-align: center;
+  pointer-events: none;
+}
+
+.ebird-collage__hole strong {
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.ebird-collage__hole span {
+  color: var(--faint);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---- saved copy + data row ---- */
+
+.ebird-saved {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  background: var(--surface-2);
+}
+
+.ebird-saved__line {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.ebird-data-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.ebird-autosave {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ---- export poster ---- */
+
+/* Mounted off-screen while the capture runs, then removed. Absolutely
+   positioned so it never disturbs the reader's scroll position. */
+.ebird-poster-holder {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 1080px;
+  height: 0;
+  overflow: hidden;
+}
+
+.ebird-poster {
+  position: relative;
+  width: 1080px;
+  height: 1350px;
+  padding: 56px 56px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background: #0a0a0a;
+  color: #ededed;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.ebird-poster__head {
+  display: grid;
+  gap: 4px;
+}
+
+.ebird-poster__kicker {
+  margin: 0;
+  color: #7ee2a8;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ebird-poster__title {
+  margin: 0;
+  color: #ffffff;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 54px;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.ebird-poster__stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  padding: 18px 0;
+  border-top: 1px solid #262626;
+  border-bottom: 1px solid #262626;
+}
+
+.ebird-poster__stat {
+  display: grid;
+  gap: 2px;
+}
+
+.ebird-poster__stat strong {
+  color: #ffffff;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.ebird-poster__stat span {
+  color: #7a7a7a;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ebird-poster__collage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ebird-poster__sticker {
+  position: absolute;
+  object-fit: contain;
+}
+
+.ebird-poster__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #a3a3a3;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+}
+
+.ebird-poster__credits {
+  margin: 0;
+  color: #5f5f5f;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* ---- status ---- */
+
+.status-line[data-tone="error"] {
+  color: var(--error);
+}
+
+@media (max-width: 640px) {
+  .ebird-summary {
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  }
+
+  .ebird-grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .ebird-collage__hole {
+    min-width: 84px;
+    min-height: 84px;
+  }
+
+  .ebird-collage__hole strong {
+    font-size: 22px;
+  }
+}

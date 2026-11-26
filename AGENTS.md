@@ -28,6 +28,7 @@ npm run dev       # builds and serves on http://127.0.0.1:4321
 | JavaScript | `src/assets/js/` (TypeScript, esbuild-compiled) |
 | Static passthrough | `src/static/` |
 | Tests | `src/tests/` (pytest) and `src/tests/js/` (Vitest) |
+| Worker script | `src/worker/index.ts` (`/api/*` only) |
 | Deployment | `src/wrangler.toml` |
 
 ## Hard rules
@@ -45,8 +46,15 @@ npm run dev       # builds and serves on http://127.0.0.1:4321
   introduce a second convention.
 - **Content is data.** Do not hardcode blog posts, links, or tool registry entries in
   templates. Put them in `content/`.
+- **The Worker script stays a relay.** `src/worker/index.ts` forwards bytes for
+  `/api/ebird-import` and nothing else. Never parse or buffer an export there: the free
+  plan allows 10 ms of CPU per invocation, and parsing pushes large accounts past it.
+  `run_worker_first` is limited to `/api/*` so asset serving stays free and unmetered.
 - **Every local tool needs all three pieces:** a template, a JS entrypoint (or the shared
   PyScript entrypoint), and a registry entry in `content/tools.json`.
+- **Baked data is generated, not hand-edited.** `static/data/*.json` comes from
+  `scripts/build-taxonomy.py`; `--check` fails when it is stale. Never add a third-party
+  image or font origin to `static/_headers` without also listing it in the page's credits.
 
 ## Agent files
 

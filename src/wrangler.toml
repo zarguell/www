@@ -1,7 +1,15 @@
 name = "www"
+main = "./worker/index.ts"
 compatibility_date = "2026-11-17"
 
 # Cloudflare Workers static assets. The Python/Jinja build writes ./dist.
 # Workers Builds runs `npm run build` (see README); this file owns deploy-time
 # asset routing and the 404 fallback.
-assets = { directory = "./dist", not_found_handling = "404-page" }
+#
+# The Worker script does two things: relay /api/ebird-import (eBird's export
+# bucket sends no CORS headers) and rewrite the head of a shared-list page so
+# chat clients preview it. Both are scoped here rather than with
+# run_worker_first = true, so ordinary page and asset requests stay on the free
+# static-asset path and a burst of API traffic cannot make the site itself
+# start returning 429s.
+assets = { directory = "./dist", binding = "ASSETS", not_found_handling = "404-page", run_worker_first = ["/api/*", "/tools/ebird-analytics/*"] }

@@ -10,5 +10,5 @@
     "allowImportingTsExtensions": true,
     "types": ["vitest/globals", "node"]
   },
-  "include": ["assets/js/**/*.ts", "tests/js/**/*.ts"]
+  "include": ["assets/js/**/*.ts", "worker/**/*.ts", "tests/js/**/*.ts"]
 }

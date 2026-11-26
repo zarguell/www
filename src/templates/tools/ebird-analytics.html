@@ -1,0 +1,411 @@
+{% extends "tool.html" %}
+{% block tool_content %}
+<div class="tool-hero">
+  <h1>eBird Field Analytics</h1>
+  <p class="tool-subtitle">
+    Your eBird export as a fieldwork dashboard: migration waves, species phenology,
+    effort, hotspots, and your life list. Parsing runs in your browser.
+  </p>
+</div>
+
+<section class="panel" id="ebirdIntake">
+  <div class="panel__head">
+    <h2 class="panel__title">Load your data</h2>
+    <span class="badge">STEP 1</span>
+  </div>
+  <div class="panel__body">
+    <ol class="ebird-steps">
+      <li>
+        Open <a href="https://ebird.org/downloadMyData" target="_blank" rel="noopener noreferrer">Download My Data</a>
+        on eBird and sign in.
+      </li>
+      <li>Click <strong>Request My Observations</strong>. eBird emails you a download link.</li>
+      <li>Paste that link below. You do not need to open the zip.</li>
+    </ol>
+    <div class="form-group">
+      <label for="ebirdLink">Export link from the eBird email</label>
+      <input
+        id="ebirdLink"
+        type="url"
+        inputmode="url"
+        spellcheck="false"
+        autocomplete="off"
+        placeholder="https://is-ebird-datadownload-projects-prod.s3.amazonaws.com/download_my_data/ebird_…zip"
+      >
+      <small>
+        Fetched through this site because eBird's storage sends no CORS headers, then unzipped locally.
+        The link is a private credential and is never stored.
+      </small>
+    </div>
+    <div class="btn-row">
+      <button id="ebirdFetch" class="btn btn--primary" type="button">Import from link</button>
+      <button id="ebirdPick" class="btn" type="button">Choose file instead</button>
+    </div>
+    <input id="ebirdFile" class="ebird-file-input" type="file" accept=".zip,.csv" aria-label="Choose a MyEBirdData zip or csv">
+    <p id="ebirdStatus" class="status-line" aria-live="polite">
+      Nothing loaded yet. Paste a link, or drop a zip from a previous export.
+    </p>
+    <div id="ebirdSavedPanel" class="ebird-saved is-hidden">
+      <p class="ebird-saved__line" id="ebirdSavedLine"></p>
+      <div class="btn-row">
+        <button id="ebirdSavedOpen" class="btn btn--small btn--primary" type="button">Open saved birds</button>
+        <button id="ebirdSavedForget" class="btn btn--small" type="button">Forget</button>
+      </div>
+    </div>
+    <div class="ebird-data-row">
+      <button id="ebirdSaveData" class="btn btn--small" type="button" disabled>Save data file</button>
+      <button id="ebirdLoadData" class="btn btn--small" type="button">Load data file</button>
+      <input id="ebirdDataFile" class="ebird-file-input" type="file" accept=".json,.csv" aria-label="Choose a saved data file">
+      <label class="ebird-autosave">
+        <input id="ebirdAutoSave" type="checkbox" checked>
+        Remember my birds on this device
+      </label>
+    </div>
+    <p class="panel-note" id="ebirdStorageNote">
+      Nothing leaves your browser. A saved copy keeps your dashboard here so you do not need to
+      request a new export from eBird; refresh it when you want this year's birds.
+    </p>
+  </div>
+</section>
+
+<div id="ebirdResults" class="is-hidden">
+  <div class="ebird-summary" id="ebirdStats"></div>
+
+  <nav class="ebird-tabs" role="tablist" aria-label="Dashboard views">
+    <button class="ebird-tab" role="tab" type="button" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button class="ebird-tab" role="tab" type="button" id="tab-migrants" aria-controls="panel-migrants" aria-selected="false">Migrants</button>
+    <button class="ebird-tab" role="tab" type="button" id="tab-phenology" aria-controls="panel-phenology" aria-selected="false">Phenology</button>
+    <button class="ebird-tab" role="tab" type="button" id="tab-effort" aria-controls="panel-effort" aria-selected="false">Effort</button>
+    <button class="ebird-tab" role="tab" type="button" id="tab-places" aria-controls="panel-places" aria-selected="false">Places</button>
+    <button class="ebird-tab" role="tab" type="button" id="tab-life" aria-controls="panel-life" aria-selected="false">Life list</button>
+  </nav>
+
+  <section class="ebird-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="ebird-grid2">
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Species by year</h2>
+          <span class="badge">CHART</span>
+        </div>
+        <div class="panel__body">
+          <div id="ebirdYearChart" class="ebird-chart"></div>
+          <p class="panel-note">Full bar is every species recorded that year; the accent overlay is new lifers.</p>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Top families</h2>
+          <span class="badge">TOP 12</span>
+        </div>
+        <div class="panel__body panel__body--flush">
+          <div class="ebird-table-wrap">
+            <table class="data-table" id="ebirdFamilies">
+              <thead>
+                <tr><th>Family</th><th class="num">Species</th><th class="num">Records</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Sticker collage</h2>
+        <span class="badge" id="ebirdStickerCount">0</span>
+      </div>
+      <div class="panel__body">
+        <div id="ebirdCollage" class="ebird-collage">
+          <p class="ebird-collage__hole">0<br><span>species</span></p>
+        </div>
+        <p class="panel-note">
+          Packed by body mass, biggest at the centre. Illustrated stickers from
+          <a href="https://github.com/alchaincyf/huashu-bird-sticker" target="_blank" rel="noopener noreferrer">huashu-bird-sticker</a>
+          by Huashu (CC BY 4.0), via <a href="https://everybird.yusuftaleb.com/" target="_blank" rel="noopener noreferrer">Everybird</a> by Yusuf Taleb.
+        </p>
+      </div>
+    </section>
+  </section>
+
+  <section class="ebird-panel is-hidden" id="panel-migrants" role="tabpanel" aria-labelledby="tab-migrants">
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Migrants by month</h2>
+        <span class="badge">SURGE</span>
+      </div>
+      <div class="panel__body">
+        <p class="panel-note" id="ebirdMigrantCaption"></p>
+        <div class="ebird-controls">
+          <div class="form-group">
+            <label for="ebirdMigrantMonth">Month</label>
+            <select id="ebirdMigrantMonth"></select>
+          </div>
+          <div class="form-group">
+            <label for="ebirdMigrantMin">Minimum checklists</label>
+            <select id="ebirdMigrantMin">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div id="ebirdMigrants" class="ebird-migrants"></div>
+      </div>
+    </section>
+  </section>
+
+  <section class="ebird-panel is-hidden" id="panel-phenology" role="tabpanel" aria-labelledby="tab-phenology">
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Species phenology</h2>
+        <span class="badge">JAN–DEC</span>
+      </div>
+      <div class="panel__body">
+        <p class="panel-note">
+          Detection rate: the share of that month's checklists on which the species appeared.
+          Peak is the darkest cell in each row.
+        </p>
+        <div class="form-group">
+          <label for="ebirdPhenologyFilter">Filter by name</label>
+          <input id="ebirdPhenologyFilter" type="search" placeholder="e.g. warbler">
+        </div>
+        <div class="ebird-legend">
+          <span class="ebird-legend__item"><i class="ebird-heat ebird-heat--peak"></i>≥55%</span>
+          <span class="ebird-legend__item"><i class="ebird-heat ebird-heat--common"></i>25–54%</span>
+          <span class="ebird-legend__item"><i class="ebird-heat ebird-heat--fair"></i>10–24%</span>
+          <span class="ebird-legend__item"><i class="ebird-heat ebird-heat--scarce"></i>1–9%</span>
+          <span class="ebird-legend__item"><i class="ebird-heat"></i>absent</span>
+        </div>
+        <div class="ebird-table-wrap">
+          <table class="data-table ebird-phenology" id="ebirdPhenology">
+            <thead>
+              <tr>
+                <th>Species</th>
+                <th class="num">Peak</th>
+                <th class="num">Jan</th><th class="num">Feb</th><th class="num">Mar</th>
+                <th class="num">Apr</th><th class="num">May</th><th class="num">Jun</th>
+                <th class="num">Jul</th><th class="num">Aug</th><th class="num">Sep</th>
+                <th class="num">Oct</th><th class="num">Nov</th><th class="num">Dec</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p id="ebirdPhenologyEmpty" class="empty-state is-hidden">No species match that filter.</p>
+      </div>
+    </section>
+  </section>
+
+  <section class="ebird-panel is-hidden" id="panel-effort" role="tabpanel" aria-labelledby="tab-effort">
+    <div class="ebird-grid2">
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Effort by year</h2>
+          <span class="badge">CHART</span>
+        </div>
+        <div class="panel__body">
+          <div id="ebirdEffortChart" class="ebird-chart"></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Effort by month</h2>
+          <span class="badge">CHART</span>
+        </div>
+        <div class="panel__body">
+          <div id="ebirdMonthChart" class="ebird-chart"></div>
+        </div>
+      </section>
+    </div>
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Year detail</h2>
+        <span class="badge">TABLE</span>
+      </div>
+      <div class="panel__body panel__body--flush">
+        <div class="ebird-table-wrap">
+          <table class="data-table" id="ebirdEffortTable">
+            <thead>
+              <tr>
+                <th>Year</th><th class="num">Checklists</th><th class="num">Hours</th>
+                <th class="num">Distance</th><th class="num">Species</th><th class="num">Lifers</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="ebird-panel is-hidden" id="panel-places" role="tabpanel" aria-labelledby="tab-places">
+    <div class="ebird-grid2">
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Top hotspots</h2>
+          <span class="badge">SPECIES</span>
+        </div>
+        <div class="panel__body panel__body--flush">
+          <div class="ebird-table-wrap">
+            <table class="data-table" id="ebirdHotspots">
+              <thead>
+                <tr><th>Location</th><th class="num">Species</th><th class="num">Lists</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">By region</h2>
+          <span class="badge">STATES</span>
+        </div>
+        <div class="panel__body panel__body--flush">
+          <div class="ebird-table-wrap">
+            <table class="data-table" id="ebirdRegions">
+              <thead>
+                <tr><th>Region</th><th class="num">Species</th><th class="num">Lists</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="ebird-panel is-hidden" id="panel-life" role="tabpanel" aria-labelledby="tab-life">
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Life list</h2>
+        <span class="badge" id="ebirdLifeCount">0</span>
+      </div>
+      <div class="panel__body">
+        <div class="ebird-controls">
+          <div class="form-group">
+            <label for="ebirdLifeFilter">Filter</label>
+            <input id="ebirdLifeFilter" type="search" placeholder="e.g. warbler, 2019, New World Warblers">
+          </div>
+          <div class="form-group">
+            <label for="ebirdLifeSort">Sort</label>
+            <select id="ebirdLifeSort">
+              <option value="first">First seen</option>
+              <option value="name">Name</option>
+              <option value="family">Family</option>
+              <option value="checklists">Most checklists</option>
+              <option value="mass">Heaviest first</option>
+            </select>
+          </div>
+        </div>
+        <div class="ebird-table-wrap">
+          <table class="data-table" id="ebirdLifeList">
+            <thead>
+              <tr>
+                <th>Species</th><th>Family</th><th class="num">First seen</th>
+                <th class="num">Checklists</th><th class="num">Mass</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p id="ebirdLifeEmpty" class="empty-state is-hidden">No species match that filter.</p>
+        <p class="panel-note" id="ebirdLifeNote"></p>
+      </div>
+    </section>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">Share</h2>
+      <span class="badge">LINK</span>
+    </div>
+    <div class="panel__body">
+      <p class="panel-note">
+        A share link carries the species list inside the URL, so there is no account and nothing stored.
+        Links open the read-only view of your list.
+      </p>
+      <div class="ebird-controls">
+        <div class="form-group">
+          <label for="ebirdShareName">Name on the link</label>
+          <input id="ebirdShareName" type="text" maxlength="40" placeholder="Your name">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="ebirdShareLink" class="btn btn--primary" type="button">Create share link</button>
+        <button id="ebirdCopyLink" class="btn" type="button" disabled>Copy link</button>
+      </div>
+      <p id="ebirdShareStatus" class="status-line" aria-live="polite"></p>
+      <label class="ebird-share-out-wrap is-hidden" id="ebirdShareOutWrap" for="ebirdShareOut">
+        Share URL
+      </label>
+      <input id="ebirdShareOut" class="ebird-share-out is-hidden" type="text" readonly aria-label="Share URL">
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">Compare lists</h2>
+      <span class="badge">VS</span>
+    </div>
+    <div class="panel__body">
+      <p class="panel-note">
+        Paste two share links to see the birds you both have and the ones only one of you has.
+        Leave one empty to compare against your own list.
+      </p>
+      <div class="ebird-controls">
+        <div class="form-group">
+          <label for="ebirdCompareA">First share link</label>
+          <input id="ebirdCompareA" type="url" spellcheck="false" placeholder="https://www.arguelles.me/…?s=…">
+        </div>
+        <div class="form-group">
+          <label for="ebirdCompareB">Second share link</label>
+          <input id="ebirdCompareB" type="url" spellcheck="false" placeholder="https://www.arguelles.me/…?s=…">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="ebirdCompareRun" class="btn btn--primary" type="button">Compare</button>
+        <button id="ebirdCompareLink" class="btn" type="button" disabled>Create comparison link</button>
+      </div>
+      <p id="ebirdCompareStatus" class="status-line" aria-live="polite"></p>
+      <div id="ebirdCompareOut" class="ebird-compare is-hidden"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">Export</h2>
+      <span class="badge">SHARE</span>
+    </div>
+    <div class="panel__body">
+      <p class="panel-note">
+        The poster is a 1080 × 1350 card: headline numbers, your collage, and a credit line.
+        Stickers download as a zip of the 384 px images, one folder per family.
+      </p>
+      <div class="btn-row">
+        <button id="ebirdPng" class="btn btn--primary" type="button">Download PNG poster</button>
+        <button id="ebirdPdf" class="btn" type="button">Download PDF poster</button>
+        <button id="ebirdStickerZip" class="btn" type="button">Download sticker pack (.zip)</button>
+      </div>
+      <p id="ebirdExportStatus" class="status-line" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">Excluded taxa</h2>
+      <span class="badge" id="ebirdSkippedCount">0</span>
+    </div>
+    <div class="panel__body">
+      <p class="panel-note" id="ebirdSkipped"></p>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block tool_head_extra %}
+<script src="{{ asset('vendor/html-to-image.js') }}" defer></script>
+<script src="{{ asset('vendor/jszip.min.js') }}" defer></script>
+{% endblock %}
+{% block tool_scripts %}<script type="module" src="{{ asset('js/tools/ebird-analytics.js') }}"></script>{% endblock %}

@@ -10,3 +10,6 @@ coverage/
 
 # Build-vendored Python wheels
 static/assets/python/
+
+# Wrangler local dev state
+.wrangler/

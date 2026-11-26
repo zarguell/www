@@ -167,14 +167,14 @@
       {
         "title": "NFC LES Parser",
         "slug": "les-parser",
-        "description": "Parse USDA NFC Earnings & Leave Statements (AD-334 PDFs) into structured JSON and CSV. Runs entirely in your browser with Python (PyScript) \u2014 pay dates, gross/net, deductions, leave balances. Your statement never leaves your device.",
+        "description": "Parse USDA NFC Earnings & Leave Statements (AD-334 PDFs) into structured JSON and CSV. Runs entirely in your browser with Python (PyScript) — pay dates, gross/net, deductions, leave balances. Your statement never leaves your device.",
         "badge": "PYTHON",
         "features": [
           "Extracts pay dates, salary, gross/net pay (PP & YTD)",
-          "14 standard deduction line items (TSP, taxes, FEHBA\u2026)",
+          "14 standard deduction line items (TSP, taxes, FEHBA…)",
           "Leave earnings and YTD leave balances",
           "Validates gross == net + deductions",
-          "JSON & CSV export \u2014 100% client-side parsing"
+          "JSON & CSV export — 100% client-side parsing"
         ],
         "lastModified": "2026-09-03"
       }
@@ -183,7 +183,7 @@
   {
     "name": "Visualization",
     "id": "visualization",
-    "description": "Create visual representations of your financial flows and understand where your money goes.",
+    "description": "Turn structured data into charts and diagrams, from cash flow Sankey maps to birding history.",
     "tools": [
       {
         "title": "Cash Flow Sankey Builder",
@@ -198,6 +198,22 @@
           "Savings rate calculation"
         ],
         "lastModified": "2025-11-28"
+      },
+      {
+        "title": "eBird Field Analytics",
+        "slug": "ebird-analytics",
+        "description": "Your eBird export as a fieldwork dashboard: migration waves by month, species phenology heatmap, effort and hotspots, and your life list with illustrated stickers.",
+        "badge": "BIRDS",
+        "features": [
+          "Imports from the emailed export link",
+          "Migrants: monthly surge vs. rest of year",
+          "Phenology heatmap, Jan–Dec detection rate",
+          "Effort by year and month, hours and distance",
+          "Top hotspots and regions",
+          "Life list with body masses and stickers",
+          "Parsing stays in your browser"
+        ],
+        "lastModified": "2026-11-26"
       }
     ]
   },
@@ -209,7 +225,7 @@
       {
         "title": "Excel to Markdown Converter",
         "slug": "excel-to-markdown",
-        "description": "Convert xlsx, xls, ods, csv, and tsv files into clean, aligned markdown tables \u2014 entirely in your browser. Multi-sheet support, RFC 4180-safe CSV parsing, pipe escaping, and one-click copy or download.",
+        "description": "Convert xlsx, xls, ods, csv, and tsv files into clean, aligned markdown tables — entirely in your browser. Multi-sheet support, RFC 4180-safe CSV parsing, pipe escaping, and one-click copy or download.",
         "badge": "TEXT TOOL",
         "features": [
           "XLSX, XLS, ODS, CSV, and TSV input",
@@ -280,7 +296,7 @@
         "description": "Upload a receipt photo and parse it entirely in your browser. Local OCR reads the image, then heuristics infer merchant, date, totals, and likely line items.",
         "badge": "OCR",
         "features": [
-          "In-browser OCR \u2014 images never leave your device",
+          "In-browser OCR — images never leave your device",
           "Inferred merchant, date, subtotal, tax, tip, and total",
           "Likely line items with amounts",
           "Editable raw OCR text with instant re-parse",
@@ -362,7 +378,7 @@
       {
         "title": "Randy Danger",
         "slug": "randy-danger",
-        "description": "A retro wave-survival FPS that runs entirely in your browser. Fight off escalating waves in a green-CRT arena with WASD and mouse look \u2014 raycast rendering, procedural sound effects, no installs.",
+        "description": "A retro wave-survival FPS that runs entirely in your browser. Fight off escalating waves in a green-CRT arena with WASD and mouse look — raycast rendering, procedural sound effects, no installs.",
         "badge": "GAME",
         "features": [
           "Raycast 3D arena, playable in the browser",
