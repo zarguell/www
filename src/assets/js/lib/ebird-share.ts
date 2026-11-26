@@ -398,6 +398,20 @@ export function compareLists(first: string[], second: string[]): CompareResult {
 
 /* ---------- display helpers ---------- */
 
+/**
+ * An ISO date to months since 1900-01, the unit the share format stores.
+ * Returns 0 for an unparseable or pre-1900 date, which the encoder treats as
+ * "no date" rather than a January 1900 sighting.
+ */
+export function monthsSince1900(iso: string): number | undefined {
+	if (!iso || iso.length < 7) return undefined;
+	const year = Number(iso.slice(0, 4));
+	const month = Number(iso.slice(5, 7));
+	if (!Number.isFinite(year) || !Number.isFinite(month)) return undefined;
+	if (year < 1900 || month < 1 || month > 12) return undefined;
+	return (year - 1900) * 12 + (month - 1);
+}
+
 export function ymToIso(ym: number): string {
 	const year = 1900 + Math.floor(ym / 12);
 	const month = (ym % 12) + 1;

@@ -141,6 +141,20 @@ describe('life list and summary', () => {
 		expect(mallard?.checklists).toBe(2);
 	});
 
+	it('keeps the latest place and the best single count for the hover card', () => {
+		const life = buildLifeList(parsed.observations, TAXONOMY);
+		const mallard = life.find((entry) => entry.sciName === 'Anas platyrhynchos');
+		// The sticker card names the most recent spot and the highest count,
+		// both of which come from rows the last-date branch already walks.
+		expect(mallard?.lastPlace).toBe('Rio Park, Gaithersburg');
+		expect(mallard?.bestCount).toBe(7);
+
+		// A species seen once keeps that row's place and count.
+		const goose = life.find((entry) => entry.sciName === 'Branta canadensis');
+		expect(goose?.lastPlace).toBeTruthy();
+		expect(goose?.bestCount).toBeGreaterThan(0);
+	});
+
 	it('collapses rows into checklists without summing effort', () => {
 		const checklists = buildChecklists(parsed.observations);
 		expect(checklists).toHaveLength(3);

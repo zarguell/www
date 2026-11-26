@@ -52,6 +52,10 @@ export interface LifeListEntry {
 	firstDate: string;
 	lastDate: string;
 	checklists: number;
+	/** most recent place the species was recorded, for the hover card */
+	lastPlace: string;
+	/** highest count on any single checklist, 0 when never counted */
+	bestCount: number;
 }
 
 export interface FamilyStat {
@@ -363,7 +367,9 @@ export function buildLifeList(
 			if (obs.date > existing.lastDate) {
 				existing.lastDate = obs.date;
 				existing.comName = obs.comName;
+				existing.lastPlace = obs.locName;
 			}
+			if ((obs.count ?? 0) > existing.bestCount) existing.bestCount = obs.count ?? 0;
 			existing.ids.add(obs.submissionId);
 			continue;
 		}
@@ -373,6 +379,8 @@ export function buildLifeList(
 			firstDate: obs.date,
 			lastDate: obs.date,
 			checklists: 0,
+			lastPlace: obs.locName,
+			bestCount: obs.count ?? 0,
 			ids: new Set([obs.submissionId])
 		});
 	}
@@ -383,7 +391,9 @@ export function buildLifeList(
 			comName: entry.comName,
 			firstDate: entry.firstDate,
 			lastDate: entry.lastDate,
-			checklists: entry.ids.size
+			checklists: entry.ids.size,
+			lastPlace: entry.lastPlace,
+			bestCount: entry.bestCount
 		}))
 		.sort((a, b) => a.firstDate.localeCompare(b.firstDate));
 }

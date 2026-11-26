@@ -30,6 +30,7 @@ import {
 	type EffortSummary,
 	type PhenologyRow
 } from '../lib/ebird-stats';
+import { StickerCard, type StickerDetail } from '../lib/ebird-card';
 import { barChart } from '../lib/ebird-chart';
 import { packCollage, type CollageItem } from '../lib/ebird-collage';
 import {
@@ -58,7 +59,9 @@ import {
 	decodeShare,
 	encodeCompare,
 	encodeShare,
+	monthsSince1900,
 	shareUrl,
+	ymToIso,
 	URL_BUDGET,
 	type CompareList,
 	type ShareBird
@@ -66,6 +69,13 @@ import {
 import { findCsvEntry, isZip, readZipEntries, readZipEntryText } from '../lib/zip';
 
 const TAXONOMY_URL = '/data/ebird-taxonomy.json';
+/**
+ * Common names by binomial, fetched only when a share link needs them: a full
+ * export writes the name on every row, so only the shared view has to look it
+ * up, and it costs nothing for visitors who import their own data.
+ */
+const NAMES_URL = '/data/ebird-names.json';
+let commonNames: Record<string, string> | null = null;
 const MAX_LOCAL_BYTES = 96 * 1024 * 1024;
 const COLLAGE_MAX = 400;
 
@@ -97,6 +107,8 @@ const pngButton = el<HTMLButtonElement>('ebirdPng');
 const pdfButton = el<HTMLButtonElement>('ebirdPdf');
 const zipButton = el<HTMLButtonElement>('ebirdStickerZip');
 const exportStatus = el<HTMLParagraphElement>('ebirdExportStatus');
+const loadingBox = el<HTMLDivElement>('ebirdLoading');
+const loadingText = el<HTMLSpanElement>('ebirdLoadingText');
 const savedPanel = el<HTMLDivElement>('ebirdSavedPanel');
 const savedLine = el<HTMLParagraphElement>('ebirdSavedLine');
 const savedOpen = el<HTMLButtonElement>('ebirdSavedOpen');
@@ -140,6 +152,7 @@ const effortBody = tableBody('ebirdEffortTable');
 const hotspotsBody = tableBody('ebirdHotspots');
 const regionsBody = tableBody('ebirdRegions');
 const lifeBody = tableBody('ebirdLifeList');
+const lifeTable = el<HTMLTableElement>('ebirdLifeList');
 const phenologyBody = tableBody('ebirdPhenology');
 
 interface Loaded {
@@ -172,10 +185,32 @@ function setStatus(message: string, tone: 'info' | 'error' = 'info'): void {
 	statusLine.dataset.tone = tone;
 }
 
+/**
+ * Show the spinner for one step. The steps are sequential and the whole import
+ * runs on the main thread, so the yield after each label is what lets the
+ * browser paint it before the next blocking chunk.
+ */
+function setLoading(label: string | null): void {
+	if (label === null) {
+		loadingBox.classList.add('is-hidden');
+		return;
+	}
+	loadingText.textContent = label;
+	loadingBox.classList.remove('is-hidden');
+}
+
 function setBusy(busy: boolean): void {
 	fetchButton.disabled = busy;
 	pickButton.disabled = busy;
 	fetchButton.textContent = busy ? 'Working…' : 'Import from link';
+}
+
+async function loadCommonNames(): Promise<Record<string, string>> {
+	if (commonNames) return commonNames;
+	const response = await fetch(NAMES_URL);
+	if (!response.ok) throw new Error('Could not load the species name table.');
+	commonNames = (await response.json()) as Record<string, string>;
+	return commonNames;
 }
 
 async function loadTaxonomy(): Promise<Taxonomy> {
@@ -187,12 +222,20 @@ async function loadTaxonomy(): Promise<Taxonomy> {
 	return taxonomy;
 }
 
-function formatDate(iso: string): string {
+/**
+ * A shared list stores months, not days, so calling its dates "Jun 1, 2024"
+ * would invent a day. `monthOnly` keeps those views to what was stored.
+ */
+function formatDate(iso: string, monthOnly = false): string {
 	if (!iso) return '—';
 	const date = new Date(`${iso}T00:00:00`);
 	return Number.isNaN(date.getTime())
 		? iso
-		: date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+		: date.toLocaleDateString(undefined, {
+				year: 'numeric',
+				month: 'short',
+				...(monthOnly ? {} : { day: 'numeric' })
+			});
 }
 
 function formatMass(grams: number): string {
@@ -200,22 +243,39 @@ function formatMass(grams: number): string {
 	return grams >= 1000 ? `${(grams / 1000).toFixed(1)} kg` : `${Math.round(grams)} g`;
 }
 
+/**
+ * Let the browser paint a frame before starting the next blocking step.
+ *
+ * Unzipping a multi-megabyte export and summing tens of thousands of rows both
+ * run on the main thread. Without this the spinner text set just before them
+ * never appears, so the page looks frozen for exactly the seconds it needs to
+ * explain itself.
+ */
+function nextFrame(): Promise<void> {
+	return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+}
+
 async function ingest(bytes: Uint8Array): Promise<void> {
+	setLoading('Loading the bird taxonomy…');
 	const tax = await loadTaxonomy();
 	let csv: string;
 
 	if (isZip(bytes)) {
-		setStatus('Unzipping…');
+		setLoading('Unzipping your export…');
+		await nextFrame();
 		const entry = findCsvEntry(readZipEntries(bytes));
 		csv = await readZipEntryText(bytes, entry);
 	} else {
 		csv = new TextDecoder('utf-8').decode(bytes);
 	}
 
-	setStatus('Parsing observations…');
+	setLoading(`Parsing ${formatBytes(csv.length)} of observations…`);
+	await nextFrame();
 	const parsed = parseEbirdCsv(csv, tax);
 	if (parsed.observations.length === 0) throw new Error('No observations found in that file.');
 
+	setLoading(`Crunching ${parsed.observations.length.toLocaleString()} records…`);
+	await nextFrame();
 	const summary = summarize(parsed.observations, tax);
 	summary.skippedTaxa = parsed.skippedTaxa;
 	state = { taxonomy: tax, summary, observations: parsed.observations };
@@ -229,7 +289,10 @@ async function ingest(bytes: Uint8Array): Promise<void> {
 	effort = summarizeEffort(parsed.observations, isCountable, speciesBase);
 	stickers = stickerRefs(summary, tax);
 
+	setLoading('Building your collage…');
+	await nextFrame();
 	renderAll();
+	setLoading(null);
 	results.classList.remove('is-hidden');
 	el('ebirdIntake').classList.add('ebird-intake--done');
 	saveDataButton.disabled = false;
@@ -249,7 +312,7 @@ async function ingest(bytes: Uint8Array): Promise<void> {
 }
 
 /** Rebuild every view from rows already in memory, skipping the file path. */
-function activate(observations: EbirdObservation[], source: string): void {
+async function activate(observations: EbirdObservation[], source: string): Promise<void> {
 	const tax = taxonomy;
 	if (!tax) return;
 
@@ -261,7 +324,10 @@ function activate(observations: EbirdObservation[], source: string): void {
 	effort = summarizeEffort(observations, isCountable, speciesBase);
 	stickers = stickerRefs(summary, tax);
 
+	setLoading('Building your collage…');
+	await nextFrame();
 	renderAll();
+	setLoading(null);
 	results.classList.remove('is-hidden');
 	el('ebirdIntake').classList.add('ebird-intake--done');
 	saveDataButton.disabled = false;
@@ -322,6 +388,7 @@ async function importFromLink(): Promise<void> {
 	} catch (error) {
 		setStatus(error instanceof Error ? error.message : 'Import failed.', 'error');
 	} finally {
+		setLoading(null);
 		setBusy(false);
 	}
 }
@@ -338,6 +405,7 @@ async function importFromFile(file: File): Promise<void> {
 	} catch (error) {
 		setStatus(error instanceof Error ? error.message : 'Could not read that file.', 'error');
 	} finally {
+		setLoading(null);
 		setBusy(false);
 	}
 }
@@ -370,7 +438,32 @@ function statCard(label: string, value: string, note?: string): HTMLElement {
 function renderStats(target: EbirdSummary): void {
 	const { stats } = target;
 	const peak = effort?.totals.peakMonth;
-	statsBox.replaceChildren(
+
+	// A share link rebuilds one synthetic observation per species, so the
+	// checklist count it would report is the species count wearing a different
+	// label. Show only what the payload actually knows.
+	if (sparseView) {
+		const cards = [
+			statCard('Species', stats.species.toLocaleString()),
+			statCard('Families', stats.families.toLocaleString()),
+			statCard('Orders', stats.orders.toLocaleString())
+		];
+		// A comparison link stores no dates at all, so a span card there would
+		// read "— → —" on a list that plainly has history.
+		if (stats.firstDate) {
+			cards.push(
+				statCard(
+					'Span',
+					`${formatDate(stats.firstDate, sparseView)} →`,
+					formatDate(stats.lastDate, sparseView)
+				)
+			);
+		}
+		statsBox.replaceChildren(...cards);
+		return;
+	}
+
+	const cards: HTMLElement[] = [
 		statCard('Species', stats.species.toLocaleString()),
 		statCard('Checklists', stats.checklists.toLocaleString()),
 		statCard('Families', stats.families.toLocaleString()),
@@ -387,7 +480,9 @@ function renderStats(target: EbirdSummary): void {
 		),
 		statCard('Peak month', peak ? `${MONTHS[peak.month - 1]} · ${peak.hours.toFixed(1)} h` : '—', `${peak?.checklists ?? 0} lists`),
 		statCard('Span', `${formatDate(stats.firstDate)} →`, formatDate(stats.lastDate))
-	);
+	];
+
+	statsBox.replaceChildren(...cards);
 }
 
 /* ---------- charts ---------- */
@@ -465,14 +560,13 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 	collageBox.style.height = `${Math.round(best.height * scale)}px`;
 
 	const byId = new Map(shown.map((ref) => [ref.sciName, ref]));
+	const entryById = new Map(target.lifeList.map((entry) => [entry.sciName, entry]));
 	const nodes: HTMLElement[] = [];
 	for (const box of best.boxes) {
 		const ref = byId.get(box.id);
 		if (!ref) continue;
 		const img = document.createElement('img');
 		img.src = ref.url;
-		img.alt = ref.comName;
-		img.title = `${ref.comName} · ${ref.mass ? `${Math.round(ref.mass)} g` : 'mass unknown'}`;
 		img.loading = 'lazy';
 		img.decoding = 'async';
 		img.className = 'ebird-collage__sticker';
@@ -481,6 +575,28 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 		img.style.width = `${(box.width * scale).toFixed(1)}px`;
 		img.style.height = `${(box.height * scale).toFixed(1)}px`;
 		img.addEventListener('error', () => img.remove(), { once: true });
+
+		// Hover detail. A shared list has no place, so those rows drop out on
+		// their own; the card renders whatever the payload actually supports.
+		const entry = entryById.get(ref.sciName);
+		const taxonomyEntry = taxonomyFor(ref.sciName, tax);
+
+		StickerCard.annotate(img, {
+			comName: ref.comName,
+			sciName: ref.sciName,
+			family: taxonomyEntry.family,
+			order: taxonomyEntry.order,
+			mass: ref.mass,
+			firstDate: entry?.firstDate ?? '',
+			lastDate: entry?.lastDate ?? '',
+			// A shared list has one synthetic checklist per species and no
+			// places at all; those rows would be the format talking.
+			checklists: sparseView ? 0 : (entry?.checklists ?? 0),
+			lastPlace: sparseView ? '' : (entry?.lastPlace ?? ''),
+			bestCount: sparseView ? 0 : (entry?.bestCount ?? 0),
+			monthOnly: sparseView
+		} satisfies StickerDetail);
+
 		nodes.push(img);
 	}
 
@@ -857,6 +973,12 @@ function renderLifeList(): void {
 	const query = lifeFilter.value.trim().toLowerCase();
 	const sortKey = lifeSort.value;
 
+	// A sparse payload hides the checklists column (it would be the synthetic
+	// row count); one with no dates at all also hides "First seen", which would
+	// otherwise be a column of dashes.
+	const undated = sparseView && !summary.stats.firstDate;
+	lifeTable.classList.toggle('is-sparse', sparseView);
+	lifeTable.classList.toggle('is-undated', undated);
 	lifeCount.textContent = `${summary.lifeList.length} species`;
 
 	const massOf = (sciName: string): number => taxonomyFor(sciName, tax).mass;
@@ -902,17 +1024,25 @@ function renderLifeList(): void {
 
 			const first = document.createElement('td');
 			first.className = 'num';
-			first.textContent = formatDate(entry.firstDate);
-
-			const checklists = document.createElement('td');
-			checklists.className = 'num';
-			checklists.textContent = entry.checklists.toLocaleString();
+			first.textContent = formatDate(entry.firstDate, sparseView);
 
 			const mass = document.createElement('td');
 			mass.className = 'num';
 			mass.textContent = formatMass(massOf(entry.sciName));
 
-			tr.append(name, family, first, checklists, mass);
+			// "Checklists: 1" on every row would be the share format talking,
+			// not the birder's history, so the column is dropped in that view.
+			// A comparison link has no dates either, so that cell goes too.
+			if (sparseView && undated) {
+				tr.append(name, family, mass);
+			} else if (sparseView) {
+				tr.append(name, family, first, mass);
+			} else {
+				const checklists = document.createElement('td');
+				checklists.className = 'num';
+				checklists.textContent = entry.checklists.toLocaleString();
+				tr.append(name, family, first, checklists, mass);
+			}
 			return tr;
 		})
 	);
@@ -938,6 +1068,16 @@ function renderSkipped(target: EbirdSummary): void {
 
 const TABS = ['overview', 'migrants', 'phenology', 'effort', 'places', 'life'] as const;
 
+/**
+ * True when the data came from a share link, which carries species and
+ * first-seen months but no checklists, effort or places. Stat cards that a
+ * sparse payload cannot fill are dropped instead of printed as zero.
+ */
+let sparseView = false;
+
+/** Tabs a share link cannot fill, hidden together so the list stays in one place. */
+const SPARSE_HIDDEN_TABS = ['migrants', 'phenology', 'effort', 'places'] as const;
+
 function selectTab(name: (typeof TABS)[number]): void {
 	for (const tab of TABS) {
 		const button = el<HTMLButtonElement>(`tab-${tab}`);
@@ -960,8 +1100,11 @@ function renderAll(): void {
 	renderEffortTable();
 	renderHotspots(summary, tax);
 	renderRegions(summary, tax);
-	renderMigrants();
-	renderPhenology();
+	// Their panels are hidden in a sparse view, so skip the work entirely.
+	if (!sparseView) {
+		renderMigrants();
+		renderPhenology();
+	}
 	renderLifeList();
 	renderSkipped(summary);
 }
@@ -1015,11 +1158,17 @@ async function createShareLink(): Promise<void> {
 	if (!state || !taxonomy) return;
 	shareButton.disabled = true;
 	try {
-		const species = state.summary.lifeList.map((entry) => entry.sciName);
+		// Dates ride along: they cost ~400 characters for a 300-species list and
+		// keep the shared page's year chart and life list truthful. The encoder
+		// drops them by itself if the token would bust the budget.
+		const species = state.summary.lifeList.map((entry) => ({
+			sciName: entry.sciName,
+			ym: monthsSince1900(entry.firstDate)
+		}));
 		const index = new Map(Object.keys(taxonomy.m).sort().map((code, at) => [code, at]));
 		const payload = {
 			name: shareName.value.trim() || undefined,
-			birds: species.map((sciName) => ({ sciName }))
+			birds: species
 		};
 		const { token, level, dropped } = await encodeShare(payload, index, URL_BUDGET - 48);
 
@@ -1180,6 +1329,8 @@ compareLinkButton.addEventListener('click', () => {
 					const decoded = await decodeShare(token, codes).catch(() => null);
 					if (decoded) lists.push({ name: decoded.name ?? label, birds: decoded.birds });
 				} else if (state) {
+					// The comparison format stores species only, so the dates
+					// the single-list format carries have nowhere to go here.
 					lists.push({
 						name: 'Mine',
 						birds: state.summary.lifeList.map((entry) => ({ sciName: entry.sciName }))
@@ -1212,7 +1363,7 @@ async function openSaved(): Promise<void> {
 	try {
 		sourceLabel = saved.source;
 		await loadTaxonomy();
-		activate(saved.observations, `saved copy, ${describeAge(saved.savedAt)}`);
+		await activate(saved.observations, `saved copy, ${describeAge(saved.savedAt)}`);
 	} catch (error) {
 		setStatus(error instanceof Error ? error.message : 'Could not open the saved copy.', 'error');
 	} finally {
@@ -1250,7 +1401,7 @@ dataFileInput.addEventListener('change', () => {
 			}
 			await loadTaxonomy();
 			sourceLabel = delivered.source;
-			activate(delivered.observations, delivered.source);
+			await activate(delivered.observations, delivered.source);
 			if (autoSaveToggle.checked) {
 				const outcome = saveObservations(delivered.observations, delivered.source);
 				storageNote.textContent = outcome.ok
@@ -1285,6 +1436,7 @@ lifeSort.addEventListener('change', renderLifeList);
 fillMonths();
 selectTab('overview');
 refreshSavedPanel();
+new StickerCard(collageBox);
 
 /**
  * A share link opens a read-only view of someone else's list. Render it from
@@ -1298,13 +1450,17 @@ async function openFromLink(): Promise<void> {
 
 	const tax = await loadTaxonomy();
 	const codes = Object.keys(tax.m).sort();
+	// Only the shared views need the name table; every other path skips it.
+	const names = await loadCommonNames();
 
 	if (single) {
 		const payload = await decodeShare(single, codes);
-		const observations = payload.birds.map((bird, at) => syntheticObservation(bird, at));
+		const observations = payload.birds.map((bird, at) => syntheticObservation(bird, at, names));
 		sourceLabel = payload.name ? `${payload.name}'s shared list` : 'a shared list';
-		activate(observations, sourceLabel);
-		enterViewerMode(payload.name ?? 'Shared list');
+		// Set before activate: renderStats reads it while rendering.
+		sparseView = true;
+		await activate(observations, sourceLabel);
+		enterViewerMode(payload.name ?? 'Shared list', payload.birds.some((bird) => bird.ym !== undefined));
 		return;
 	}
 
@@ -1313,10 +1469,11 @@ async function openFromLink(): Promise<void> {
 		// The comparison itself lives in the compare panel; the first list is
 		// what the dashboard shows, so the numbers are not blank.
 		const first = payload.lists[0];
-		const observations = first.birds.map((bird, at) => syntheticObservation(bird, at));
+		const observations = first.birds.map((bird, at) => syntheticObservation(bird, at, names));
 		sourceLabel = first.name ? `${first.name}'s list` : 'a shared list';
-		activate(observations, sourceLabel);
-		enterViewerMode(first.name ?? 'Shared list');
+		sparseView = true;
+		await activate(observations, sourceLabel);
+		enterViewerMode(first.name ?? 'Shared list', false);
 		compareA.value = '';
 		compareB.value = '';
 		if (payload.lists.length >= 2) {
@@ -1329,14 +1486,19 @@ async function openFromLink(): Promise<void> {
 }
 
 /**
- * Share links carry species only, so the dashboard is rebuilt from one
- * synthetic checklist per century. Every view works on species, year and mass;
- * effort and hotspot panels honestly show nothing rather than inventing numbers.
+ * A share link carries each species and the month it was first seen — not the
+ * checklists, effort, or places. Rebuild one synthetic observation per species
+ * so the species, year, family and mass views are exact, and mark the payload
+ * sparse so the views that need checklist data are hidden rather than showing
+ * zeroes that read as real.
  */
-function syntheticObservation(bird: ShareBird, at: number): EbirdObservation {
+function syntheticObservation(bird: ShareBird, at: number, names: Record<string, string>): EbirdObservation {
+	const date = bird.ym !== undefined ? `${ymToIso(bird.ym)}-01` : '';
 	return {
 		submissionId: `share-${at}`,
-		comName: bird.sciName,
+		// Share links carry the scientific name only; the name table turns it
+		// back into a common name so the page reads like a bird list.
+		comName: names[speciesBase(bird.sciName)] ?? bird.sciName,
 		sciName: bird.sciName,
 		taxonOrder: at,
 		count: null,
@@ -1345,7 +1507,7 @@ function syntheticObservation(bird: ShareBird, at: number): EbirdObservation {
 		county: '',
 		locId: '',
 		locName: '',
-		date: '2020-01-01',
+		date,
 		time: '',
 		protocol: '',
 		durationMin: null,
@@ -1357,13 +1519,53 @@ function syntheticObservation(bird: ShareBird, at: number): EbirdObservation {
 	};
 }
 
-function enterViewerMode(title: string): void {
+/**
+ * A shared list has species and first-seen months, nothing else.
+ *
+ * Hiding the panels beats showing zeroes: an "Effort: 0 h" card or an empty
+ * hotspot table reads as real data to a visitor who was sent the link. The
+ * tabs that survive are the ones the payload can actually answer.
+ */
+const importLink = (text: string): HTMLAnchorElement => {
+	const link = document.createElement('a');
+	link.href = '/tools/ebird-analytics/';
+	link.textContent = text;
+	return link;
+};
+
+function enterViewerMode(title: string, hasDates: boolean): void {
 	el('ebirdIntake').classList.add('is-hidden');
-	const exportPanel = document.getElementById('ebirdPng');
-	exportPanel?.closest('section')?.classList.add('is-hidden');
+	document.getElementById('ebirdPng')?.closest('section')?.classList.add('is-hidden');
 	saveDataButton.disabled = true;
+
 	const heading = document.querySelector('.tool-hero h1');
 	if (heading) heading.textContent = title;
+
+	// Effort, places, migrants and phenology all need the checklist history.
+	// Migrants ranks this month against the rest of the year; phenology needs
+	// every sighting, not the first one per species.
+	for (const tab of SPARSE_HIDDEN_TABS) {
+		el<HTMLButtonElement>(`tab-${tab}`).classList.add('is-hidden');
+		el<HTMLElement>(`panel-${tab}`).classList.add('is-hidden');
+	}
+
+	const notice = document.getElementById('ebirdViewerNote');
+	if (notice) {
+		// A single-list link carries first-seen months; a comparison link
+		// carries species only. Say which one the visitor is looking at.
+		notice.replaceChildren(
+			hasDates
+				? 'This is a shared list, so it carries each species and the month it was first seen. ' +
+						'Checklists, effort, hotspots and monthly migration need a full export, so those views are not shown. '
+				: 'This is a comparison of shared lists, which carry species only — no dates, checklists or places. ',
+			importLink('Import your own data'),
+			' for the rest.'
+		);
+	}
+	if (notice) notice.classList.remove('is-hidden');
+
+	// Occupied tabs are gone; land on one that exists.
+	selectTab('overview');
 }
 
 if (new URLSearchParams(window.location.search).has('s') || new URLSearchParams(window.location.search).has('c')) {

@@ -485,3 +485,126 @@
     font-size: 22px;
   }
 }
+
+/* ---- sticker hover card ---- */
+
+/* Fixed, not absolute: the collage clips overflow, so a card anchored inside it
+   would be cut off for stickers near an edge. Pointer-events stay off so the
+   card can never steal the hover and flicker. */
+.ebird-card {
+  position: fixed;
+  z-index: 60;
+  max-width: 280px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-3);
+  color: var(--text);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.ebird-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ebird-card__title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.ebird-card__sci {
+  margin: 2px 0 8px;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: italic;
+}
+
+.ebird-card__meta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 3px 10px;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ebird-card__meta dt {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ebird-card__meta dd {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* Stickers accept focus so the card works without a mouse. */
+.ebird-collage__sticker:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---- loading state ---- */
+
+/* Shown while an export is fetched, unzipped and parsed. The work is CPU- and
+   network-bound in the browser, so the only honest feedback is "something is
+   happening" plus the current step. */
+.ebird-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.ebird-spinner {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: ebird-spin 0.7s linear infinite;
+}
+
+@keyframes ebird-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ebird-spinner {
+    animation-duration: 2.4s;
+  }
+
+  .ebird-card {
+    transition: none;
+  }
+}
+
+/* ---- sparse share views ---- */
+
+/* Both rules drop a column the payload cannot honestly fill. They live here,
+   next to the table they target, and are toggled from the renderer. */
+.data-table.is-sparse thead th:nth-child(4) {
+  display: none;
+}
+
+/* A comparison link carries no dates, so first-seen would be all dashes. */
+.data-table.is-undated thead th:nth-child(3) {
+  display: none;
+}

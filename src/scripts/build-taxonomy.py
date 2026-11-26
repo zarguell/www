@@ -40,6 +40,10 @@ EVERYBIRD_REGIONS = (
     "https://raw.githubusercontent.com/yusuftaleb/everybird/main/public/data/regions.v1.json"
 )
 OUTPUT = pathlib.Path(__file__).resolve().parent.parent / "static" / "data" / "ebird-taxonomy.json"
+# Common names by binomial. Kept out of the main taxonomy because only a share
+# link needs them — a full export carries the name in every row — and folding
+# them in would add ~90 KB gzipped to the fetch every visitor pays for.
+NAMES_OUTPUT = OUTPUT.parent / "ebird-names.json"
 
 USER_AGENT = "arguelles.me taxonomy builder (+https://www.arguelles.me)"
 
@@ -94,6 +98,7 @@ def build() -> dict[str, object]:
     order_index = {name: index for index, name in enumerate(orders)}
 
     entries: dict[str, list[object]] = {}
+    common_by_key: dict[str, str] = {}
     for entry in taxonomy:
         family = entry.get("familyComName")
         order = entry.get("order")
@@ -104,6 +109,9 @@ def build() -> dict[str, object]:
             order_index.get(order, -1),
             mass_by_code.get(code, 0),
         ]
+        common = entry.get("comName")
+        if common:
+            common_by_key.setdefault(key, common)
 
     # Display names for the state/province codes eBird writes into the export
     # ("US-MD") and for country codes ("US", "CR").
@@ -111,7 +119,16 @@ def build() -> dict[str, object]:
     sub1 = regions.get("sub1", {}) if isinstance(regions, dict) else {}
     countries = regions.get("countries", {}) if isinstance(regions, dict) else {}
 
-    return {"f": families, "o": orders, "m": entries, "s": sub1, "c": countries}
+    return (
+        {
+            "f": families,
+            "o": orders,
+            "m": entries,
+            "s": sub1,
+            "c": countries,
+        },
+        common_by_key,
+    )
 
 
 def serialise(data: dict[str, object]) -> str:
@@ -123,24 +140,32 @@ def main() -> None:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="fail if the committed file differs from what the sources produce",
+        help="fail if the committed files differ from what the sources produce",
     )
     args = parser.parse_args()
 
-    payload = serialise(build())
+    taxonomy, names = build()
+    payload = serialise(taxonomy)
+    names_payload = serialise(names)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
+    outputs = ((OUTPUT, payload), (NAMES_OUTPUT, names_payload))
+
     if args.check:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.exists() else ""
-        if current != payload:
-            print(f"{OUTPUT} is stale; run scripts/build-taxonomy.py", file=sys.stderr)
+        stale = [path for path, text in outputs if not path.exists() or path.read_text(encoding="utf-8") != text]
+        if stale:
+            for path in stale:
+                print(f"{path} is stale; run scripts/build-taxonomy.py", file=sys.stderr)
             raise SystemExit(1)
-        print(f"{OUTPUT} is up to date")
+        print("taxonomy files are up to date")
         return
 
-    OUTPUT.write_text(payload, encoding="utf-8")
-    species = len(json.loads(payload)["m"])
+    for path, text in outputs:
+        path.write_text(text, encoding="utf-8")
+
+    species = len(taxonomy["m"])
     print(f"wrote {OUTPUT} ({len(payload) / 1024:.0f} KB, {species} species)")
+    print(f"wrote {NAMES_OUTPUT} ({len(names_payload) / 1024:.0f} KB, {len(names)} names)")
 
 
 if __name__ == "__main__":

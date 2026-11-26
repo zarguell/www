@@ -45,6 +45,10 @@
     <p id="ebirdStatus" class="status-line" aria-live="polite">
       Nothing loaded yet. Paste a link, or drop a zip from a previous export.
     </p>
+    <div id="ebirdLoading" class="ebird-loading is-hidden" role="status" aria-live="polite">
+      <span class="ebird-spinner" aria-hidden="true"></span>
+      <span id="ebirdLoadingText">Working…</span>
+    </div>
     <div id="ebirdSavedPanel" class="ebird-saved is-hidden">
       <p class="ebird-saved__line" id="ebirdSavedLine"></p>
       <div class="btn-row">
@@ -69,6 +73,11 @@
 </section>
 
 <div id="ebirdResults" class="is-hidden">
+  <p id="ebirdViewerNote" class="notice is-hidden">
+    This is a shared list, so it carries each species and the month it was first seen.
+    Checklists, effort, hotspots and monthly migration need a full export, so those views
+    are not shown. <a href="/tools/ebird-analytics/">Import your own data</a> for the rest.
+  </p>
   <div class="ebird-summary" id="ebirdStats"></div>
 
   <nav class="ebird-tabs" role="tablist" aria-label="Dashboard views">
@@ -115,7 +124,7 @@
         <span class="badge" id="ebirdStickerCount">0</span>
       </div>
       <div class="panel__body">
-        <div id="ebirdCollage" class="ebird-collage">
+        <div id="ebirdCollage" class="ebird-collage" role="group" aria-label="Sticker collage of every species">
           <p class="ebird-collage__hole">0<br><span>species</span></p>
         </div>
         <p class="panel-note">

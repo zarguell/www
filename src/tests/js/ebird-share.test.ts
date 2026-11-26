@@ -7,6 +7,7 @@ import {
 	decodeShare,
 	encodeCompare,
 	encodeShare,
+	monthsSince1900,
 	ymToIso
 } from '../../assets/js/lib/ebird-share';
 
@@ -118,6 +119,45 @@ describe('share links', () => {
 		const other = codeTable([...SPECIES, 'Zzzz zzzz', 'Zzzz yyyy', 'Zzzz xxxx']);
 		const { token } = await encodeShare({ birds: birds('Zzzz xxxx') }, other.index);
 		await expect(decodeShare(token, codes)).rejects.toThrow(/unknown species/);
+	});
+});
+
+describe('date budget', () => {
+	it('keeps a full-size list with dates inside the URL budget', async () => {
+		// Dates add two bytes per bird before deflate. A 300-species list must
+		// still produce a link a chat client will linkify, so this guards the
+		// size assumption behind sending dates at all.
+		const many = Array.from({ length: 300 }, (_, at) => ({
+			sciName: `Genus${at} species${at}`,
+			ym: 1200 + at
+		}));
+		const { codes: manyCodes, index: manyIndex } = codeTable(many.map((b) => b.sciName));
+		expect(manyCodes).toHaveLength(300);
+
+		const { token, level } = await encodeShare({ name: 'Zach', birds: many }, manyIndex);
+		expect(level).toBe('dates');
+		// The tool page path plus "?s=" is what the token rides behind.
+		expect(token.length + '/tools/ebird-analytics/?s='.length).toBeLessThan(2000);
+	});
+});
+
+describe('monthsSince1900', () => {
+	it('converts an ISO date to months since January 1900', () => {
+		expect(monthsSince1900('1900-01-01')).toBe(0);
+		expect(monthsSince1900('2024-06-08')).toBe(1493);
+	});
+
+	it('rejects dates the format cannot store', () => {
+		// A pre-1900 or malformed date must read as "unknown", not January 1900,
+		// or an old record lands on the year chart as a sighting.
+		expect(monthsSince1900('')).toBeUndefined();
+		expect(monthsSince1900('1899-12-31')).toBeUndefined();
+		expect(monthsSince1900('2024-13-01')).toBeUndefined();
+		expect(monthsSince1900('nope')).toBeUndefined();
+	});
+
+	it('round-trips through ymToIso', () => {
+		expect(ymToIso(monthsSince1900('2025-03-02') as number)).toBe('2025-03');
 	});
 });
 
