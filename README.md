@@ -106,13 +106,17 @@ This is a Cloudflare **Workers** static-assets project, not Cloudflare Pages.
 - `src/wrangler.toml` points `assets.directory` at `./dist` and serves `404.html` for
   missing paths.
 
-The Worker script (`src/worker/index.ts`) exists for one route: `/api/ebird-import`.
-It relays eBird's export bucket, which sends no CORS headers, so the browser cannot
-fetch it directly. `assets.run_worker_first = ["/api/*"]` keeps every other request on
-the static-asset path, where requests are free and unmetered; only API calls count
-against the Workers free tier. The function never reads the body — parsing happens in
-the browser — which keeps it inside the free plan's 10 ms CPU budget for exports of any
-size.
+The Worker script (`src/worker/index.ts`) serves `/api/ebird-import` and rewrites
+the head of shared-list pages so chat clients preview them. A zone-level rate limit on
+the import endpoint is documented in `docs/ebird-rate-limit.md`; it lives outside this
+repo because it is zone state, not build output.
+
+`/api/ebird-import` relays eBird's export bucket, which sends no CORS headers, so the
+browser cannot fetch it directly. `assets.run_worker_first` covers only `/api/*` and
+`/tools/ebird-analytics/*`; every other request stays on the static-asset path, where
+requests are free and unmetered. The relay never reads the body — parsing happens in
+the browser — which keeps it inside the free plan's 10 ms CPU budget for exports of
+any size.
 
 The build is self-contained: `npm run build` installs Python dependencies, compiles
 TypeScript, vendors libraries, renders every route, copies static assets, and validates

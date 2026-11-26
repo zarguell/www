@@ -4,6 +4,11 @@ Scope: `src/worker/index.ts`, `src/wrangler.toml`. This is the repo's first
 non-static surface, so every category below was tested against the running
 Worker rather than reasoned about.
 
+Status: the three findings that warranted code changes are fixed in the same
+commit that added this file; the zone-level rate limit is applied and
+documented in `docs/ebird-rate-limit.md`. Each finding keeps its original
+wording beneath a **Status** line so the evidence trail stays intact.
+
 ## Findings
 
 ### 1. `Access-Control-Allow-Origin: *` is broader than the product needs — LOW
@@ -24,6 +29,9 @@ Fix: the only caller is the same origin, so drop CORS entirely. Same-origin
 requests need no `Access-Control-*` header. If a future cross-origin caller
 appears, allowlist that one origin instead of `*`.
 
+**Status: fixed.** No `access-control-*` header is emitted. Verified live:
+`curl -H 'Origin: https://evil.example'` returns a 200 with no CORS headers.
+
 ### 2. No rate limiting — MEDIUM (denial of wallet)
 
 `handleImport` has no per-IP or global throttle. Each call is one subrequest to
@@ -42,6 +50,20 @@ Fix: add a Cloudflare Rate Limiting rule (dashboard, no code) on
 because `run_worker_first` is scoped to `/api/*`, so the site itself keeps
 serving — that part of the design is already correct.
 
+**Status: fixed, at the zone rather than in this repo.** The applied rule is
+3 requests / 10 s / IP on `/api/ebird-import`, which caps one IP at roughly
+8,600 requests/day against the 100,000/day free quota. The first attempt used
+20/10 s; that permits ~57,600/day per IP with mitigation, so a single client
+could still exhaust the day's allowance. Verified live: three requests return
+`200`, the fourth returns `429`, and the block clears after ten seconds.
+See `docs/ebird-rate-limit.md` for the config and the free-plan constraints
+that shaped it.
+
+Note for the client: a rate-limit block is answered by Cloudflare's edge
+*before* the Worker runs, so the response body is the plain-text
+`error code: 1015`, not this Worker's JSON. `ebird-analytics.ts` checks for
+`429` first for that reason; without it the UI reported a missing URL.
+
 ### 3. `Content-Length` is forwarded only when upstream sends it — INFO
 
 `worker/index.ts:101` writes `'content-length': upstream.headers.get('content-length') ?? ''`.
@@ -50,6 +72,8 @@ runtime tolerated in testing (curl reported the real length) but is malformed.
 
 Fix: build the headers object conditionally, and only set `content-length` when
 upstream provided a number.
+
+**Status: fixed.** The header is now set only when upstream sent one.
 
 ### 4. Response is always served as `application/zip` with `nosniff` — SAFE
 
@@ -106,12 +130,22 @@ upstream body cancelled (`:90-93`).
 
 ## Residual risk
 
-CORS `*` (finding 1) and the absence of rate limiting (finding 2) are the only
-items worth acting on. Neither exposes user data; both are cheap to close.
+All three actionable findings are closed: CORS removed, rate limit applied at
+the zone, `content-length` set conditionally.
 
-- CORS: remove it — the caller is same-origin.
-- Rate limit: one dashboard rule on `/api/ebird-import`.
+What remains is inherent rather than a defect:
 
-The privacy property that matters is unchanged either way: nothing is stored
+- **One rate-limiting rule is all the Free plan allows**, and it is now spent on
+  this endpoint, so there is no spare rule for a future dynamic surface.
+- **The rule's 10 s period and 10 s mitigation are the only Free-plan values**,
+  so the design cannot lengthen the memory of an abusive client.
+- **Custom 429 responses are a paid feature**, so the block body is Cloudflare's
+  default text. The client therefore keys off the status code, not the body.
+- **The share-preview rewrite inflates a token server-side** (see below), the one
+  place the Worker parses input. It is bounded by `MAX_SHARE_TOKEN` (4,000
+  characters) and a 64 KB inflate ceiling, and a failure returns the untouched
+  page.
+
+The privacy property that matters is unchanged: nothing is stored
 server-side, there are no sessions or secrets, and the export link is supplied
 explicitly by the person who owns it.
