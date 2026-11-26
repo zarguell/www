@@ -68,6 +68,12 @@ export class StickerCard {
 	private card: HTMLElement;
 	/** The sticker the card currently describes, so scroll can re-anchor it. */
 	private active: HTMLImageElement | null = null;
+	/** True while a pointer is over the collage, so focus churn cannot close it. */
+	private pointerInside = false;
+	/** Kind of the last pointer that touched the page; a mouse can hover away. */
+	private pointerType = 'mouse';
+	/** True once a key is pressed, so focus means tabbing rather than a tap. */
+	private keyboard = false;
 
 	constructor(host: HTMLElement) {
 		const existing = document.getElementById(CARD_ID);
@@ -92,12 +98,61 @@ export class StickerCard {
 			const target = event.target;
 			if (target instanceof HTMLImageElement) this.hide();
 		});
-		// Keyboard reach: stickers are focusable, so the card follows focus.
+		// Keyboard reach: stickers are focusable, so tabbing to one shows its card.
+		// Only keyboard focus opens it — a tap focuses the sticker too, and
+		// opening on that focus would fight the click that opens it, so the same
+		// tap would show and immediately toggle the card shut.
 		host.addEventListener('focusin', (event) => {
 			const target = event.target;
-			if (target instanceof HTMLImageElement) this.show(target);
+			if (!(target instanceof HTMLImageElement)) return;
+			if (!this.keyboard) return;
+			this.show(target);
 		});
-		host.addEventListener('focusout', () => this.hide());
+		// A tap focuses the sticker and a mouse click focuses it too, so
+		// focusout cannot be trusted to mean "the reader moved on": on touch it
+		// fires between the pointerdown and the click of the same tap. Only a
+		// pointer or key that actually leaves closes the card.
+		host.addEventListener('focusout', (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLImageElement)) return;
+			// Touch focus is not a decision. The same tap that opens the card
+			// also moves focus, so a touch-driven focusout leaving the sticker
+			// means nothing; the tap, pointerdown or tap-elsewhere closes it.
+			if (this.pointerInside || this.pointerType === 'touch') return;
+			this.hide();
+		});
+
+		// Touch has no hover, so tapping a sticker opens its card. `click` is
+		// the right event, not `touchstart`: a tap that turns into a swipe never
+		// produces one, so panning the collage does not open cards by accident.
+		// Tapping the same sticker again closes it; the card is not a toggle
+		// driven by focus, which would fight the browser's own tap sequence.
+		host.addEventListener('click', (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLImageElement) || !target.dataset.detail) return;
+			if (this.active === target && this.card.classList.contains('is-visible')) {
+				this.hide();
+				return;
+			}
+			this.show(target);
+		});
+		window.addEventListener('keydown', () => {
+			this.keyboard = true;
+		});
+		host.addEventListener('pointerenter', () => {
+			this.pointerInside = true;
+		});
+		host.addEventListener('pointerleave', () => {
+			this.pointerInside = false;
+			if (this.pointerType === 'mouse') this.hide();
+		});
+		document.addEventListener('pointerdown', (event) => {
+			const target = event.target;
+			this.keyboard = false;
+			this.pointerType = event.pointerType;
+			if (target instanceof Node && host.contains(target)) return;
+			this.hide();
+		}, { passive: true });
 
 		// The card is fixed to the viewport, so a scroll leaves it stranded next
 		// to a sticker that moved. Re-anchor instead of hiding: hiding on scroll

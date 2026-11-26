@@ -279,6 +279,35 @@
   overflow: hidden;
 }
 
+/* When the pack is wider than the screen it scrolls sideways instead of being
+   clipped, so no sticker is lost on a phone. `-webkit-overflow-scrolling` is
+   skipped deliberately: momentum scrolling is the default on modern iOS.
+   `touch-action: pan-x pan-y` keeps vertical page scrolling working when a
+   swipe starts on the collage, and `overscroll-behavior-x: contain` stops a
+   horizontal fling from triggering the browser's back gesture. */
+.ebird-collage.is-scrollable {
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.ebird-collage.is-scrollable::-webkit-scrollbar {
+  height: 8px;
+}
+
+.ebird-collage.is-scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+}
+
+.ebird-collage.is-scrollable .ebird-collage__hole {
+  /* The count sits at the stage's centre, set inline by the renderer; this
+     stops the translate from re-centring it on the viewport. */
+  transform: translate(0, -50%);
+}
+
 .ebird-collage__sticker {
   position: absolute;
   object-fit: contain;

@@ -10,7 +10,7 @@
 import type { EbirdSummary, Taxonomy } from './ebird';
 import { taxonomyFor } from './ebird';
 import { barChart } from './ebird-chart';
-import { packCollage, type CollageItem } from './ebird-collage';
+import { packCollage, type CollageBox, type CollageItem } from './ebird-collage';
 
 export const STICKER_CDN = 'https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main';
 
@@ -52,6 +52,56 @@ export function stickerRefs(summary: EbirdSummary, taxonomy: Taxonomy): StickerR
 }
 
 /* ---------- poster ---------- */
+
+/**
+ * The poster is a fixed 1080x1350 with 56px side padding, and the collage is
+ * the flex-1 band between the stats row and the footer. These are the numbers
+ * `buildPoster` packs against; they must match the poster CSS.
+ */
+const POSTER_COLLAGE_WIDTH = 1080 - 56 * 2;
+const POSTER_COLLAGE_HEIGHT = 940;
+
+/**
+ * Largest median tile size whose pack fits the box in both directions.
+ *
+ * `packCollage` only grows the stage to fit its tiles, so a caller has to
+ * choose `base` itself. Fixed values silently overflow, and overflow here is
+ * invisible: the collage clips, so the export just loses birds.
+ */
+function packToFit(
+	items: CollageItem[],
+	maxWidth: number,
+	maxHeight: number
+): { boxes: CollageBox[]; width: number; height: number } {
+	const gapFor = (base: number): number => Math.max(4, Math.round(base * 0.12));
+
+	let best = packCollage(items, { base: MIN_POSTER_TILE, gap: gapFor(MIN_POSTER_TILE) });
+	for (let base = 60; base >= MIN_POSTER_TILE; base -= 2) {
+		const candidate = packCollage(items, { base, gap: gapFor(base) });
+		if (candidate.width <= maxWidth && candidate.height <= maxHeight) return candidate;
+		best = candidate;
+	}
+
+	// Nothing fits even at the floor. Every bird still has to appear, so shrink
+	// the whole stage to the box rather than clip it: at this size the gaps
+	// close but the stickers stay whole.
+	const scale = Math.min(maxWidth / best.width, maxHeight / best.height);
+	return {
+		boxes: best.boxes.map((box) => ({
+			...box,
+			x: box.x * scale,
+			y: box.y * scale,
+			size: box.size * scale,
+			width: box.width * scale,
+			height: box.height * scale
+		})),
+		width: best.width * scale,
+		height: best.height * scale
+	};
+}
+
+/** Smallest poster tile worth packing before falling back to a uniform scale. */
+const MIN_POSTER_TILE = 8;
 
 function posterEl<K extends keyof HTMLElementTagNameMap>(
 	tag: K,
@@ -99,15 +149,17 @@ export function buildPoster(context: ExportContext): HTMLElement {
 	}
 	poster.append(numbers);
 
-	// Collage: the same spiral packer the page uses, sized to the poster's
-	// inner width so the birds fill the band edge to edge.
+	// Collage: every sticker that resolved, packed to fit the band the poster
+	// actually gives it. The old code fixed base at 54 and sliced to 120, which
+	// packed a 5000px-wide stage into a 968px box and let `overflow: hidden`
+	// throw most of the birds away without a word.
 	const collage = posterEl('div', 'ebird-poster__collage');
-	const items: CollageItem[] = stickers.slice(0, 120).map((ref) => ({
+	const items: CollageItem[] = stickers.map((ref) => ({
 		id: ref.sciName,
 		mass: ref.mass,
 		aspect: 1
 	}));
-	const layout = packCollage(items, { base: 54, gap: 7 });
+	const layout = packToFit(items, POSTER_COLLAGE_WIDTH, POSTER_COLLAGE_HEIGHT);
 	collage.style.height = `${Math.round(layout.height)}px`;
 
 	const byId = new Map(stickers.map((ref) => [ref.sciName, ref]));
@@ -154,15 +206,22 @@ function formatRange(first: string, last: string): string {
 }
 
 /** Mount off-screen, capture, unmount. Keeps the reader's layout untouched. */
+export interface PosterCapture {
+	dataUrl: string;
+	/** stickers the CDN could not supply, removed before capture */
+	missingStickers: number;
+}
+
 export async function capturePoster(
 	poster: HTMLElement,
 	render: (node: HTMLElement) => Promise<string>
-): Promise<string> {
+): Promise<PosterCapture> {
 	const holder = document.createElement('div');
 	holder.className = 'ebird-poster-holder';
 	holder.append(poster);
 	document.body.append(holder);
 
+	let broken = 0;
 	try {
 		// Give the browser a frame to lay the collage out and start image loads.
 		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -170,18 +229,30 @@ export async function capturePoster(
 		// html-to-image rejects with an Event when any image in the tree failed
 		// to load, which would otherwise kill the whole export over a single
 		// missing sticker. Drop the failures and render what did arrive.
-		dropBrokenImages(poster);
-		return await render(poster);
+		broken = dropBrokenImages(poster);
+		return { dataUrl: await render(poster), missingStickers: broken };
 	} finally {
 		holder.remove();
 	}
 }
 
-/** Remove images the CDN could not supply, so one gap cannot fail the capture. */
-function dropBrokenImages(node: HTMLElement): void {
+/**
+ * Remove images the CDN could not supply, so one gap cannot fail the capture.
+ *
+ * The sticker set does not cover every eBird species — extinct and very rare
+ * ones 404, and a few answer 403 — so this returns the count it dropped. The
+ * caller reports it: a poster missing birds says so instead of quietly looking
+ * complete.
+ */
+function dropBrokenImages(node: HTMLElement): number {
+	let dropped = 0;
 	for (const img of [...node.querySelectorAll('img')]) {
-		if (img.complete && img.naturalWidth === 0) img.remove();
+		if (img.complete && img.naturalWidth === 0) {
+			img.remove();
+			dropped += 1;
+		}
 	}
+	return dropped;
 }
 
 /** Resolve once every image under `node` has loaded or failed. */

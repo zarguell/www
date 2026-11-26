@@ -78,6 +78,13 @@ const NAMES_URL = '/data/ebird-names.json';
 let commonNames: Record<string, string> | null = null;
 const MAX_LOCAL_BYTES = 96 * 1024 * 1024;
 const COLLAGE_MAX = 400;
+/** Smallest tile the fit search will try before giving up on fitting at all. */
+const SMALLEST_TILE = 24;
+/**
+ * Tile size used when no pack fits the container. Small enough to keep a long
+ * list navigable, large enough that a bird is still recognisable.
+ */
+const SCROLL_TILE = 40;
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG = [
@@ -103,6 +110,7 @@ const effortChart = el<HTMLDivElement>('ebirdEffortChart');
 const monthChart = el<HTMLDivElement>('ebirdMonthChart');
 const collageBox = el<HTMLDivElement>('ebirdCollage');
 const stickerCount = el<HTMLSpanElement>('ebirdStickerCount');
+const stickerHint = document.getElementById('ebirdCollageHint');
 const pngButton = el<HTMLButtonElement>('ebirdPng');
 const pdfButton = el<HTMLButtonElement>('ebirdPdf');
 const zipButton = el<HTMLButtonElement>('ebirdStickerZip');
@@ -552,18 +560,29 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 	const items: CollageItem[] = shown.map((ref) => ({ id: ref.sciName, mass: ref.mass, aspect: 1 }));
 	const width = collageBox.clientWidth || 720;
 
-	// Search for the largest tile size whose pack still fits the container.
-	// Scaling a packed stage down afterwards is what turns a collage into dust:
-	// it shrinks the gaps with the tiles, so neighbours collide at 8px.
+	// Search for the largest tile size whose pack fits the container. Scaling a
+	// packed stage down afterwards turns a collage into dust: it shrinks the
+	// gaps with the tiles, so neighbours collide.
 	const gapFor = (base: number): number => Math.max(5, Math.round(base * 0.12));
-	let best = packCollage(items, { base: 24, gap: gapFor(24) });
-	for (let base = 140; base >= 24; base -= 4) {
+	let best = packCollage(items, { base: SMALLEST_TILE, gap: gapFor(SMALLEST_TILE) });
+	let fitted = false;
+	for (let base = 140; base >= SMALLEST_TILE; base -= 4) {
 		const candidate = packCollage(items, { base, gap: gapFor(base) });
 		if (candidate.width <= width) {
 			best = candidate;
+			fitted = true;
 			break;
 		}
 	}
+
+	// Nothing fits, which is every phone width for a real list. Packing smaller
+	// than this only yields confetti, so keep a readable tile and let the stage
+	// scroll: the old CSS clipped the excess, silently hiding stickers.
+	if (!fitted) best = packCollage(items, { base: SCROLL_TILE, gap: gapFor(SCROLL_TILE) });
+
+	const scrolls = best.width > width + 1;
+	collageBox.classList.toggle('is-scrollable', scrolls);
+	stickerHint?.classList.toggle('is-hidden', !scrolls);
 
 	// No upscale: the base search already picked the largest pack that fits, and
 	// scaling the result moves positions and sizes together, which quietly eats
@@ -613,9 +632,15 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 	}
 
 	// The species count sits in the hole the packer left at the centre.
-	const hole = collageBox.querySelector('.ebird-collage__hole');
+	const hole = collageBox.querySelector<HTMLElement>('.ebird-collage__hole');
 	collageBox.replaceChildren(...nodes);
 	if (hole) {
+		// A percentage `left` resolves against the container, which is the wrong
+		// origin once the stage is wider than it. Pinning to the stage centre
+		// keeps the count in the hole the packer left, wherever the user pans.
+		hole.style.left = scrolls
+			? `${Math.round(best.width / 2 - (hole.offsetWidth || 108) / 2)}px`
+			: '';
 		hole.textContent = '';
 		const strong = document.createElement('strong');
 		strong.textContent = String(target.lifeList.length);
@@ -674,11 +699,15 @@ async function exportPng(): Promise<void> {
 	setExportBusy(true);
 	try {
 		setExportStatus('Rendering poster…');
-		const dataUrl = await capturePoster(buildPoster(context), (node) =>
+		const { dataUrl, missingStickers } = await capturePoster(buildPoster(context), (node) =>
 			lib.toPng(node, { pixelRatio: 1, cacheBust: true, backgroundColor: '#0a0a0a' })
 		);
 		downloadDataUrl(dataUrl, `ebird-field-${timestamp()}.png`);
-		setExportStatus('Poster downloaded.');
+		setExportStatus(
+			missingStickers
+				? `Poster downloaded. ${missingStickers} species have no sticker available and are not shown.`
+				: 'Poster downloaded.'
+		);
 	} catch (error) {
 		const detail =
 			error instanceof Error
@@ -707,14 +736,17 @@ async function exportPdf(): Promise<void> {
 		// JPEG rather than PNG: the PDF writer embeds it with /DCTDecode, which
 		// takes JPEG bytes as-is. Feeding it PNG bytes produces a file readers
 		// refuse, which is exactly what an earlier version did.
-		const dataUrl = await capturePoster(buildPoster(context), (node) =>
+		const { dataUrl, missingStickers } = await capturePoster(buildPoster(context), (node) =>
 			lib.toJpeg(node, { pixelRatio: 2, quality: 0.92, cacheBust: true, backgroundColor: '#0a0a0a' })
 		);
 		const binary = atob(dataUrl.split(',')[1]);
 		const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
 		const pdf = jpegToPdf(bytes, 1080, 1350);
 		downloadBlob(new Blob([pdf.buffer as ArrayBuffer], { type: 'application/pdf' }), `ebird-field-${timestamp()}.pdf`);
-		setExportStatus(`PDF downloaded (${Math.round(pdf.length / 1024)} KB).`);
+		setExportStatus(
+			`PDF downloaded (${Math.round(pdf.length / 1024)} KB).` +
+				(missingStickers ? ` ${missingStickers} species have no sticker and are not shown.` : '')
+		);
 	} catch (error) {
 		setExportStatus(error instanceof Error ? error.message : 'PDF render failed.', 'error');
 	} finally {
