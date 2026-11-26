@@ -31,6 +31,7 @@ import {
 	type PhenologyRow
 } from '../lib/ebird-stats';
 import { StickerCard, type StickerDetail } from '../lib/ebird-card';
+import { CollageZoom } from '../lib/ebird-zoom';
 import { barChart } from '../lib/ebird-chart';
 import { packCollage, type CollageItem } from '../lib/ebird-collage';
 import {
@@ -109,8 +110,10 @@ const yearChart = el<HTMLDivElement>('ebirdYearChart');
 const effortChart = el<HTMLDivElement>('ebirdEffortChart');
 const monthChart = el<HTMLDivElement>('ebirdMonthChart');
 const collageBox = el<HTMLDivElement>('ebirdCollage');
+const collageStage = el<HTMLDivElement>('ebirdCollageStage');
 const stickerCount = el<HTMLSpanElement>('ebirdStickerCount');
 const stickerHint = document.getElementById('ebirdCollageHint');
+let collageZoom: CollageZoom | null = null;
 const pngButton = el<HTMLButtonElement>('ebirdPng');
 const pdfButton = el<HTMLButtonElement>('ebirdPdf');
 const zipButton = el<HTMLButtonElement>('ebirdStickerZip');
@@ -583,12 +586,20 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 	const scrolls = best.width > width + 1;
 	collageBox.classList.toggle('is-scrollable', scrolls);
 	stickerHint?.classList.toggle('is-hidden', !scrolls);
+	// Only a stage wider than its box can be zoomed into. Rebuilt every render
+	// because the stage element is replaced with new stickers.
+	collageZoom?.destroy();
+	collageZoom = null;
 
 	// No upscale: the base search already picked the largest pack that fits, and
 	// scaling the result moves positions and sizes together, which quietly eats
 	// the gap between neighbours. Leftover width becomes honest margin.
 	const scale = 1;
 	collageBox.style.height = `${Math.round(best.height * scale)}px`;
+	// The stage is what gets transformed and scrolled: it owns the packed pixel
+	// size, while the container owns the viewport and the scrollbar.
+	collageStage.style.width = `${Math.round(best.width)}px`;
+	collageStage.style.height = `${Math.round(best.height * scale)}px`;
 
 	const byId = new Map(shown.map((ref) => [ref.sciName, ref]));
 	const entryById = new Map(target.lifeList.map((entry) => [entry.sciName, entry]));
@@ -632,8 +643,8 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 	}
 
 	// The species count sits in the hole the packer left at the centre.
-	const hole = collageBox.querySelector<HTMLElement>('.ebird-collage__hole');
-	collageBox.replaceChildren(...nodes);
+	const hole = collageStage.querySelector<HTMLElement>('.ebird-collage__hole');
+	collageStage.replaceChildren(...nodes);
 	if (hole) {
 		// A percentage `left` resolves against the container, which is the wrong
 		// origin once the stage is wider than it. Pinning to the stage centre
@@ -647,7 +658,14 @@ function renderCollage(target: EbirdSummary, tax: Taxonomy): void {
 		const span = document.createElement('span');
 		span.textContent = 'species';
 		hole.append(strong, span);
-		collageBox.append(hole);
+		collageStage.append(hole);
+	}
+
+	if (scrolls) {
+		collageZoom = new CollageZoom({ viewport: collageBox, stage: collageStage });
+		document.getElementById('ebirdCollageZoom')?.classList.remove('is-hidden');
+	} else {
+		document.getElementById('ebirdCollageZoom')?.classList.add('is-hidden');
 	}
 }
 

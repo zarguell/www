@@ -280,18 +280,35 @@
 }
 
 /* When the pack is wider than the screen it scrolls sideways instead of being
-   clipped, so no sticker is lost on a phone. `-webkit-overflow-scrolling` is
-   skipped deliberately: momentum scrolling is the default on modern iOS.
-   `touch-action: pan-x pan-y` keeps vertical page scrolling working when a
-   swipe starts on the collage, and `overscroll-behavior-x: contain` stops a
-   horizontal fling from triggering the browser's back gesture. */
+   clipped, so no sticker is lost on a phone. `overscroll-behavior-x: contain`
+   stops a horizontal fling from triggering the browser's back gesture.
+   `-webkit-overflow-scrolling` is skipped: momentum scrolling is the default on
+   modern iOS.
+
+   Deliberately NO `touch-action` here. An explicit value such as `pan-x pan-y`
+   reads as "pan only", which turns pinch-zoom off over the collage — the one
+   place a reader most wants it, since the tiles are small. Pinch is handled by
+   `CollageZoom`, which scales the stage instead of the page so the wall stays
+   under the fingers. */
 .ebird-collage.is-scrollable {
   overflow-x: auto;
   overflow-y: hidden;
-  touch-action: pan-x pan-y;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
+}
+
+/* The packed stage. It owns the pixel size the packer produced; the container
+   above owns the viewport, the scrollbar, and the zoom transform origin. */
+.ebird-collage__stage {
+  position: relative;
+}
+
+/* Zoomed: the stage is larger than the layout box, so the container has to
+   accept dragging in both axes without the page scrolling underneath. */
+.ebird-collage.is-zoomed {
+  overflow: auto;
+  touch-action: none;
 }
 
 .ebird-collage.is-scrollable::-webkit-scrollbar {
