@@ -194,7 +194,7 @@ class SiteBuilder:
             about=page,
             body_html=body_html,
             colophon=self.colophon,
-            about_image="/assets/images/about.jpg",
+            about_image="/assets/images/about-portrait.jpg",
         )
         self.write("/about/", self.render("pages/about.html", ctx))
 
