@@ -252,7 +252,19 @@ function formatMass(grams: number): string {
  * explain itself.
  */
 function nextFrame(): Promise<void> {
-	return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+	return new Promise((resolve) => {
+		let settled = false;
+		const finish = (): void => {
+			if (settled) return;
+			settled = true;
+			resolve();
+		};
+		requestAnimationFrame(finish);
+		// rAF stops firing in a background tab and in views that never composite.
+		// Without this fallback the import would wait forever for a frame that
+		// will not arrive, leaving the spinner up and the data unloaded.
+		setTimeout(finish, 50);
+	});
 }
 
 async function ingest(bytes: Uint8Array): Promise<void> {
