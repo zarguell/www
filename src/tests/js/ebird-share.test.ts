@@ -57,27 +57,30 @@ describe('share links', () => {
 	});
 
 	it('drops dates before species when the token is too long', async () => {
-		// A budget that fits the species-only body but not species plus dates.
 		const payload = {
 			birds: [
 				{ sciName: 'Branta canadensis', ym: 1400 },
 				{ sciName: 'Cardinalis cardinalis', ym: 1500 }
 			]
 		};
-		const spacious = await encodeShare(payload, index, 100_000);
-		expect(spacious.level).toBe('dates');
 
-		// A budget that the date-bearing token exceeds but the species-only
-		// token fits, so the encoder has to drop dates rather than fail.
-		const speciesOnly = await encodeShare({ birds: payload.birds }, index, 100_000);
-		const noDatesLength = (await encodeShare({ birds: payload.birds.map((b) => ({ sciName: b.sciName })) }, index)).token.length;
-		void speciesOnly;
-		const degraded = await encodeShare(payload, index, noDatesLength);
+		// Measure the date-bearing token once, then demand one character less.
+		// Deriving the budget from the token itself keeps this independent of
+		// whatever the deflate implementation emits.
+		const withDates = await encodeShare(payload, index, 100_000);
+		expect(withDates.level).toBe('dates');
+
+		const degraded = await encodeShare(payload, index, withDates.token.length - 1);
 		expect(degraded.level).toBe('species');
-		expect(degraded.token.length).toBeLessThanOrEqual(noDatesLength);
-		expect(await decodeShare(degraded.token, codes)).toMatchObject({
-			birds: [{ sciName: 'Branta canadensis' }, { sciName: 'Cardinalis cardinalis' }]
-		});
+		expect(degraded.token.length).toBeLessThanOrEqual(withDates.token.length - 1);
+
+		// Species survive; only the dates are gone.
+		const decoded = await decodeShare(degraded.token, codes);
+		expect(decoded.birds.map((bird) => bird.sciName)).toEqual([
+			'Branta canadensis',
+			'Cardinalis cardinalis'
+		]);
+		expect(decoded.birds.every((bird) => bird.ym === undefined)).toBe(true);
 	});
 
 	it('refuses a list that cannot fit even without dates', async () => {
